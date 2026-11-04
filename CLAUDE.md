@@ -1,7 +1,7 @@
 # Arabia 3D — Geology × Topography of the Arabian Peninsula
 
 ## Goal
-A static, interactive 3D web map of the Arabian Peninsula, hosted on GitHub Pages, that anyone can open from a link. Regional-scale geology is coloured and draped over 3D terrain, with city and road overlays. The point of the map is to let a viewer **see how geology correlates with topography**: the Arabian Shield vs. the cover sequence, escarpments, volcanic fields, sand seas and the Oman mountains.
+A static, interactive 3D web map of the GCC states of the Arabian Peninsula (Saudi Arabia, Kuwait, Bahrain, Qatar, UAE, Oman), hosted on GitHub Pages, that anyone can open from a link. Regional-scale geology is coloured and draped over 3D terrain, with city and road overlays. The point of the map is to let a viewer **see how geology correlates with topography**: the Arabian Shield vs. the cover sequence, escarpments, volcanic fields, sand seas and the Oman mountains.
 
 Owner: geoscientist (petrology/geochemistry, Python). Communicate in English. Keep explanations short and technical.
 
@@ -12,63 +12,64 @@ Owner: geoscientist (petrology/geochemistry, Python). Communicate in English. Ke
 - **Overlays:** major cities (labels) and major roads.
 - **No country borders or admin boundaries anywhere.** That includes not using any third-party basemap that draws them. The coastline is fine.
 - **Legend in a side panel.** Each class can be toggled on and off. Clicking a polygon shows a popup with the unit name, age, lithology and source.
-- **Regional scale.** Generalise the geology to about 10–15 classes. Fine detail is not wanted; contrasts that line up with relief are.
+- **Regional scale.** Generalise the geology to the eight Level 1 classes below. Fine detail is not wanted; contrasts that line up with relief are.
 - Works on desktop and is usable on a phone.
 
 ## Stack (defaults — change only with a stated reason)
 - **Viewer:** MapLibre GL JS (from cdnjs/unpkg), plain HTML/CSS/JS, no framework, no bundler.
 - **Terrain:** AWS Open Data "Terrain Tiles" in Terrarium encoding (`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png`). They are public and need no key. Use them as a `raster-dem` source for both `terrain` and a `hillshade` layer. Include the attribution the dataset requires.
 - **Geology:** USGS Open-File Report 97-470B, "Bedrock geology of the Arabian Peninsula and selected adjacent areas" (geo2bg), DOI 10.3133/ofr97470B. This is public domain, derived from the USGS–Aramco 1963 1:2,000,000 map. Find the data release (USGS ScienceBase or pubs.usgs.gov) and download the shapefile.
-- **Cities and roads:** Natural Earth 1:10m `populated_places` and `roads` (public domain). Do NOT use the admin layers.
+- **Cities and roads:** Natural Earth 1:10m `populated_places` and `roads` (public domain). The only use of an admin layer is `admin_0_countries`, as an internal GCC clip mask; never display or export it.
 - **Label glyphs:** a public glyph endpoint, for example `https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf`. If that is unreliable, self-host the glyph PBFs in the repo.
 - **Processing:** Python 3.11+, with geopandas, shapely, pyproj, rasterio, numpy, requests. Put the scripts in `scripts/`, numbered in run order. Add an optional exploratory notebook in `notebooks/`, since the owner works in JupyterLab.
 
 ## Repository layout
 ```
-scripts/        01_download.py, 02_geology.py, 03_overlays.py, 04_elevation_stats.py
-data/raw/       downloaded sources (gitignored if > 50 MB total)
+scripts/        01_download.py, 02_geology.py, 03_overlays.py, 04_elevation_stats.py,
+                geology_classes.csv, polygon_overrides.csv
+data/raw/       sources (geo2bg committed; Natural Earth zips gitignored)
+data/interim/   clipped layers (gitignored)
+data/geology_polygons.csv   per-polygon table: pid + labels (committed)
 docs/           the published site (GitHub Pages serves /docs from main)
   index.html  app.js  style.css  data/*.geojson
 notebooks/      optional exploration
 README.md       what it is, the live link, how to rebuild, sources and licences
 ```
 
-## Geology generalisation (two-level scheme)
-geo2bg has a single age attribute, `GLG` (28 codes in the bbox). Each code is mapped to two levels in one editable CSV, `scripts/geology_classes.csv`, with columns `source_unit, source_description, level1_class, level1_colour, level2_class, level2_colour, notes`. Any assignment that is ambiguous is flagged `AMBIGUOUS:` in `notes` for owner review. `H2O` and `U` are `EXCLUDE` and are dropped.
+## Geology classification (owner decisions, 2026-11-04)
+geo2bg has a single age attribute, `GLG`. In the GCC area it contains 25 codes. Classification uses two files in `scripts/`:
+- **`geology_classes.csv`**: maps each `GLG` code to `level1_class`, `level1_colour` and an optional `level2_label`, plus `notes`. `H2O` and `U` are `EXCLUDE`.
+- **`polygon_overrides.csv`**: per-polygon corrections, with columns `pid, level1_class, level2_label, notes`. A non-empty field replaces the unit-based value. Example: `AG01234,Triassic,,owner: Khuff outcrop`. This is how a request like "polygon X should be Triassic" is applied, and how polygon-only labels such as "Semail ophiolite" are added.
 
-**Level 1, "Generalized".** This follows the legend of a published generalized geologic map of the Arabian Peninsula:
+**Level 1 is the only fill scheme.** Eight classes, colours from the reference generalized map:
 
-| # | Class | Colour |
+| Class | Colour | geo2bg units |
 |---|---|---|
-| 1 | Precambrian basement (Arabian Shield) | #E8456B |
-| 2 | Paleozoic | #9DBF95 |
-| 3 | Triassic | #8B3A9A |
-| 4 | Jurassic | #2BA6C9 |
-| 5 | Cretaceous | #6DBE45 |
-| 6 | Paleocene and Eocene | #EE8E4A |
-| 7 | Oligocene | #F8C88A |
-| 8 | Miocene and Pliocene | #F2E35C |
-| 9 | Volcanic rocks, Tertiary and Quaternary (harrats, Yemen traps) | #C79A00 (darkened from the reference #D9B400; ΔE vs class 8 was only ~15 under hillshade) |
-| 10 | Eolian sand and gravel, mainly Quaternary | #F5EFAA |
-| 11 | Ophiolite (Semail Nappe) and Hawasina allochthon | #3B5BA9 |
+| Precambrian basement (Arabian Shield) | #E8456B | pC, PzpC |
+| Paleozoic | #9DBF95 | Cm, OCm, DSO, D, P, Pz, MzPz |
+| Triassic | #8B3A9A | Tr, TrP |
+| Jurassic | #2BA6C9 | J, JTr |
+| Cretaceous | #6DBE45 | K, KJ, TK |
+| Tertiary sedimentary | #EE8E4A | T (Paleocene–Eocene / Oligocene / Miocene–Pliocene are not separable in geo2bg) |
+| Cenozoic volcanics | #D9B400 | QTv, Qv, TKi, Czi |
+| Cenozoic eolian sand and gravel | #F5EFAA | Qe, Qf, Q, Qsk, QT |
 
-Known data limits (M1 inspection):
-- **Classes 6 and 7 have no source units.** geo2bg `T` (Tertiary, about 708k km²) is undivided. Until the owner decides, it goes to a provisional L1 class "Tertiary sedimentary, undivided (PROVISIONAL)" (#F2A65A). Options are to map it all to class 6, to split it spatially from another source in M2, or to keep the provisional class.
-- **Class 11 has no source units.** geo2bg does not separate the Semail ophiolite or the Hawasina allochthon. They are very likely inside `K` in Oman/UAE (about 44k km²).
-- Class 8 holds only `QT` (Oman interior gravel fans), which is flagged as a possible class 10.
+**Level 2 is an optional label, not a fill.** It records either a finer age range from the source code (Cambrian-Ordovician, Ordovician-Devonian, Carboniferous-Permian, Permian-Triassic, Triassic-Jurassic, Jurassic-Cretaceous, Cretaceous-Tertiary, Paleozoic-Mesozoic) or a special feature (Harrats, Sabkha, Eolian sand, Alluvium and gravel, Neogene-Quaternary gravels, Cenozoic intrusives, and later Semail ophiolite via overrides). Polygons with no label have it blank.
 
-**Level 2, "Detailed".** These are the meaningful geo2bg subdivisions nested inside each L1 class, coloured as lighter or darker shades of the parent. There are 19 units, which is the most geo2bg supports; anything under about 1–2k km² is merged. Examples: Cambrian–Ordovician / Ordovician–Devonian / Carboniferous–Permian / Paleozoic undivided; Cretaceous vs. Upper Cretaceous–Paleogene; Yemen-trap Tertiary volcanics vs. harrats vs. Quaternary volcanics vs. Cenozoic intrusives; eolian sand vs. alluvium and gravel vs. Quaternary undivided vs. sabkha.
+**Polygon IDs.** Every polygon has a stable `pid` = `AG` + 5-digit `GEO2BG_ID`. Where the GCC clip splits a source polygon, the parts get `-a`, `-b`, … (largest first). `01_download.py` writes the committed table `data/geology_polygons.csv` (pid, GEO2BG_ID, GLG, level1_class, level1_colour, level2_label, label_source, area_km2, lon, lat) for review. **pids must survive every later step:** M2 does not dissolve.
 
-Simplify the geometry so that `docs/data/geology.geojson` is **under 8 MB**. Dissolve by L2 class (which also carries L1), then apply topology-preserving simplification. Every feature carries `l1`, `l1_colour`, `l2` and `l2_colour`.
+**Extent.** Only the GCC states: Saudi Arabia, Kuwait, Bahrain, Qatar, UAE and Oman. The clip mask is (Natural Earth 10m admin-0 GCC polygons buffered 0.2° seaward) minus all other countries, so geo2bg's own coastline is kept. The admin-0 layer is used **only** to build this mask. It is never exported or drawn. Cities and roads are clipped with the same mask. The landward edge of the data therefore follows the GCC outer boundary, while internal GCC borders are never drawn.
+
+Simplify the geometry so that `docs/data/geology.geojson` is **under 8 MB**. Use topology-preserving coverage simplification on the individual polygons (no dissolve), and keep `pid`, `GLG`, `level1_class`, `level1_colour` and `level2_label` on every feature.
 
 **Viewer implications (M3/M4):**
-- The legend has a **"Generalized / Detailed" toggle**. It switches the fill colour between `l1_colour` and `l2_colour`, and the legend between L1 entries and L2 entries nested under their L1 parent. Toggling class visibility works at both levels: hiding an L1 parent hides its children.
-- **Popups show both levels** (L1 class and L2 unit), plus the source `GLG` code(s), age, lithology note and source citation.
-- **Elevation stats are computed for both levels**. `elev_stats.json` has `level1` and `level2` blocks, and the legend shows the bars for the active level.
+- The legend lists the eight L1 classes, each with an on/off toggle. There is no L1/L2 switch.
+- **Popups** show the `pid` (so the owner can quote it in correction requests), the L1 class, the L2 label if present, the `GLG` code, age, lithology note and source citation.
+- **Elevation stats** are computed per L1 class. Per-L2-label stats are optional, for labelled features such as harrats and sabkha.
 
 ## "Geology × topography" features
-- **Bookmarks / tour:** 6–8 camera presets with flyTo, pitch and bearing, each with a two-sentence caption. Suggested stops: the Hijaz–Asir escarpment and the Shield; Harrat Rahat / Harrat Khaybar; the Tuwaiq escarpment; the Rub' al Khali; the Hajar Mountains and the Semail ophiolite; the Yemen highlands and traps; Dhofar.
-- **Elevation stats per class:** precompute the min, median and max elevation per geology class, at both Level 1 and Level 2, from Terrarium tiles sampled at a low zoom (z6–7). Show them in the legend as small inline bars. This makes the correlation quantitative.
+- **Bookmarks / tour:** 6–8 camera presets with flyTo, pitch and bearing, each with a two-sentence caption. Suggested stops: the Hijaz–Asir escarpment and the Shield; Harrat Rahat / Harrat Khaybar; the Tuwaiq escarpment; the Rub' al Khali; the Hajar Mountains and the Semail ophiolite; the Jabal Akhdar / Saih Hatat windows; Dhofar; the UAE coastal sabkhas and Musandam. (Yemen is outside the map extent.)
+- **Elevation stats per class:** precompute the min, median and max elevation per L1 class (optionally also per L2 label), from Terrarium tiles sampled at a low zoom (z6–7). Show them in the legend as small inline bars. This makes the correlation quantitative.
 
 ## Working rules (credit budget matters)
 - Work **one milestone per session**. When a milestone is done, commit, open a PR or push to main as instructed, write a five-line summary, and **stop**. Do not start the next milestone unprompted.
@@ -79,19 +80,19 @@ Simplify the geometry so that `docs/data/geology.geojson` is **under 8 MB**. Dis
 
 ## Milestones
 **M1 — Data acquisition and inspection.**
-Run `01_download.py` to fetch geo2bg and the Natural Earth places and roads. Clip everything to a bounding box of about 34°E–60°E, 12°N–33°N. Print a summary: CRS, feature counts, attribute fields, and the unique geology units with their counts. Draft `geology_classes.csv`.
+Run `01_download.py` to fetch the Natural Earth places, roads and admin-0 layers (geo2bg is already in the repo). Clip everything to the GCC mask, assign polygon `pid`s, apply `geology_classes.csv` and `polygon_overrides.csv`, and write `data/geology_polygons.csv`. Print a summary: CRS, feature counts, attribute fields, and unit, L1 and L2 counts and areas.
 *Done when:* the summary is printed in the session and the CSV draft is committed for owner review.
 
 **M2 — Geology and overlays processing.**
-Write `02_geology.py`: apply the CSV (both levels), dissolve by L2, simplify, reproject to EPSG:4326, and export `docs/data/geology.geojson`. Write `03_overlays.py`: select cities (population or scalerank threshold, about 40–80 labels) and major roads, then export GeoJSON.
+Write `02_geology.py`: read `data/interim/geology_gcc.gpkg` (pids and labels from M1), apply coverage simplification without dissolving, and export `docs/data/geology.geojson` in EPSG:4326 with the pid and label fields. Write `03_overlays.py`: select cities (population or scalerank threshold, about 40–80 labels) and major roads, then export GeoJSON.
 *Done when:* the files exist, `geology.geojson` is under 8 MB, and a quick matplotlib preview PNG is committed to `notebooks/`.
 
 **M3 — Viewer MVP.**
-Build `docs/index.html` with MapLibre, Terrarium terrain plus hillshade, the draped geology fill, roads, city labels, a side legend with class toggles and a Generalized/Detailed (L1/L2) switch with L2 nested under L1, popups showing both levels, and sliders for exaggeration and opacity. Add attribution for all sources.
+Build `docs/index.html` with MapLibre, Terrarium terrain plus hillshade, the draped geology fill, roads, city labels, a side legend with L1 class toggles, popups showing pid, L1, L2 label and GLG, and sliders for exaggeration and opacity. Add attribution for all sources.
 *Done when:* the site is served locally (`python -m http.server -d docs`), it loads without console errors, a screenshot is taken with Playwright, and no borders are visible.
 
 **M4 — Geology × topography layer.**
-Add bookmarks and the tour, plus the per-class elevation stats for L1 and L2 (`04_elevation_stats.py` → `docs/data/elev_stats.json`), shown in the legend for the active level.
+Add bookmarks and the tour, plus the per-L1-class elevation stats (`04_elevation_stats.py` → `docs/data/elev_stats.json`), shown in the legend.
 *Done when:* every bookmark renders in a screenshot and the stats are shown.
 
 **M5 — Publish.**

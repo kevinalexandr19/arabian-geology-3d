@@ -1,36 +1,36 @@
-source_unit,source_description,level1_class,level1_colour,level2_class,level2_colour,notes
-pC,preCambrian undifferentiated,Precambrian basement (Arabian Shield),#E8456B,Precambrian crystalline basement,#E8456B,
-PzpC,Paleozoic-preCambrian,Precambrian basement (Arabian Shield),#E8456B,Precambrian crystalline basement,#E8456B,AMBIGUOUS: basement windows in Yemen/Hadramawt (1.6k km2) mapped as Paleozoic-Precambrian; merged into basement as too small for own L2
-Pzi,Paleozoic intrusives,Precambrian basement (Arabian Shield),#E8456B,Precambrian crystalline basement,#E8456B,Not present in bbox; kept for completeness
-Cm,Cambrian,Paleozoic,#9DBF95,Cambrian-Ordovician,#768F70,
-OCm,Ordovician-Cambrian,Paleozoic,#9DBF95,Cambrian-Ordovician,#768F70,
-DSO,Devonian-Silurian-Ordovician,Paleozoic,#9DBF95,Ordovician-Devonian,#9DBF95,"Mostly Silurian-Devonian (Tabuk, Tawil, Jauf) but range starts in Ordovician"
-D,Devonian,Paleozoic,#9DBF95,Ordovician-Devonian,#9DBF95,
-C,Carboniferous,Paleozoic,#9DBF95,Carboniferous-Permian,#BFD5BA,Not present in bbox; kept for completeness
-P,Permian,Paleozoic,#9DBF95,Carboniferous-Permian,#BFD5BA,
-Pz,Paleozoic,Paleozoic,#9DBF95,Paleozoic undivided,#D8E5D5,
-MzPz,Mesozoic-Paleozoic,Paleozoic,#9DBF95,Paleozoic undivided,#D8E5D5,AMBIGUOUS: Nubian-type sandstones of Sinai/Jordan and N Arabia (4.1k km2) spanning Paleozoic-Mesozoic; could go to L1 Paleozoic or Cretaceous
-TrP,Triassic-Permian,Triassic,#8B3A9A,Triassic,#8B3A9A,"AMBIGUOUS: Khuff-Sudair (Permian-Triassic, 3.1k km2, mostly Oman/UAE and central Arabia); could go to L1 Paleozoic"
-Tr,Triassic,Triassic,#8B3A9A,Triassic,#8B3A9A,
-JTr,Jurassic-Triassic,Triassic,#8B3A9A,Triassic,#8B3A9A,AMBIGUOUS: Triassic-Jurassic (0.4k km2); could go to L1 Jurassic
-Mz,Mesozoic,Jurassic,#2BA6C9,Jurassic,#2BA6C9,Not present in bbox; kept for completeness
-J,Jurassic,Jurassic,#2BA6C9,Jurassic,#2BA6C9,Tuwaiq Mountain escarpment belt
-KJ,Cretaceous-Jurassic,Jurassic,#2BA6C9,Jurassic,#2BA6C9,"AMBIGUOUS: Musandam shelf carbonates (1.1k km2), Jurassic-Cretaceous; could go to L1 Cretaceous"
-K,Cretaceous,Cretaceous,#6DBE45,Cretaceous,#6DBE45,"AMBIGUOUS: in Oman/UAE (~44k km2) this unit very likely includes the Semail ophiolite and Hawasina allochthon, which geo2bg does NOT separate; L1 class 11 is therefore empty unless split spatially or from another source"
-TK,Tertiary-Cretaceous,Cretaceous,#6DBE45,Upper Cretaceous-Paleogene,#A7D88F,AMBIGUOUS: almost all in Jordan/Sinai/Levant (31k km2): Upper Cretaceous-Paleocene chalk/phosphorite plateau; could go to L1 Paleocene and Eocene
-T,Tertiary,"Tertiary sedimentary, undivided (PROVISIONAL)",#F2A65A,"Tertiary sedimentary, undivided",#F2A65A,"AMBIGUOUS (major, 708k km2): geo2bg does not separate Paleocene-Eocene / Oligocene / Miocene-Pliocene. Provisional L1 'Tertiary undivided'. Options: (a) map all T to L1 6, (b) split spatially in M2 using another source, (c) keep provisional class"
-QT,Quaternary-Tertiary,Miocene and Pliocene,#F2E35C,Neogene-Quaternary gravels,#F2E35C,"AMBIGUOUS: mostly Oman interior fans/gravel plains (Barzaman, 39k km2); could go to L1 10 (eolian sand and gravel)"
-TKv,Tertiary-Cretaceous volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Tertiary volcanics (Yemen traps),#8B6C00,Single polygon over Yemen highlands = Oligocene Yemen Volcanic Group despite T-K label
-Kv,Cretaceous volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Tertiary volcanics (Yemen traps),#8B6C00,Not present in bbox; kept for completeness
-QTv,Quaternary-Tertiary volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Tertiary-Quaternary volcanics (harrats),#C79A00,"Harrat fields (Rahat, Khaybar, Uwayrid, Ash Shaam, Hutaymah)"
-MzCzv,Mesozoic-Cenozoic volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Tertiary-Quaternary volcanics (harrats),#C79A00,Not present in bbox; kept for completeness
-Qv,Quaternary volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Quaternary volcanics,#D5B340,Young lava fields and cones
-TKi,Tertiary-Cretaceous intrusives,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Cenozoic intrusives,#644D00,AMBIGUOUS: reference legend has no intrusive class; Red Sea rift intrusives of Tihama-Asir (0.9k km2) placed with volcanics
-Czi,Cenozoic intrusives,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Cenozoic intrusives,#644D00,"AMBIGUOUS: as TKi (20 km2, S Jordan)"
-MzCzi,Mesozoic-Cenozoic intrusives,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Cenozoic intrusives,#644D00,Not present in bbox; kept for completeness
-Qe,Quaternary(eolian),"Eolian sand and gravel, mainly Quaternary",#F5EFAA,Eolian sand,#F5EFAA,"Rub' al Khali, Nafud, Dahna, Wahiba"
-Qf,Quaternary(fluvial),"Eolian sand and gravel, mainly Quaternary",#F5EFAA,Alluvium and gravel,#D8D296,"Wadi fill, gravel and coastal plains"
-Q,Quaternary,"Eolian sand and gravel, mainly Quaternary",#F5EFAA,Quaternary undivided,#BFBA85,
-Qsk,Quaternary(sahbka),"Eolian sand and gravel, mainly Quaternary",#F5EFAA,Sabkha,#A7A374,
-H2O,Ocean sea or open water,EXCLUDE,,EXCLUDE,,"Inland water (Dead Sea, Mesopotamian marshes); drop in M2"
-U,Land areas not included in this study,EXCLUDE,,EXCLUDE,,No data; drop in M2
+source_unit,source_description,level1_class,level1_colour,level2_label,notes
+pC,preCambrian undifferentiated,Precambrian basement (Arabian Shield),#E8456B,,
+PzpC,Paleozoic-preCambrian,Precambrian basement (Arabian Shield),#E8456B,Paleozoic-Precambrian,Owner decision 2026-11-04
+Pzi,Paleozoic intrusives,Precambrian basement (Arabian Shield),#E8456B,Paleozoic intrusives,Not present in GCC area
+Cm,Cambrian,Paleozoic,#9DBF95,Cambrian-Ordovician,
+OCm,Ordovician-Cambrian,Paleozoic,#9DBF95,Cambrian-Ordovician,
+DSO,Devonian-Silurian-Ordovician,Paleozoic,#9DBF95,Ordovician-Devonian,
+D,Devonian,Paleozoic,#9DBF95,Ordovician-Devonian,
+C,Carboniferous,Paleozoic,#9DBF95,Carboniferous-Permian,Not present in GCC area
+P,Permian,Paleozoic,#9DBF95,Carboniferous-Permian,
+Pz,Paleozoic,Paleozoic,#9DBF95,,
+MzPz,Mesozoic-Paleozoic,Paleozoic,#9DBF95,Paleozoic-Mesozoic,Owner decision 2026-11-04
+TrP,Triassic-Permian,Triassic,#8B3A9A,Permian-Triassic,Owner decision 2026-11-04
+Tr,Triassic,Triassic,#8B3A9A,,
+JTr,Jurassic-Triassic,Jurassic,#2BA6C9,Triassic-Jurassic,Owner decision 2026-11-04
+Mz,Mesozoic,Jurassic,#2BA6C9,Mesozoic undivided,Not present in GCC area
+J,Jurassic,Jurassic,#2BA6C9,,
+KJ,Cretaceous-Jurassic,Cretaceous,#6DBE45,Jurassic-Cretaceous,Owner decision 2026-11-04
+K,Cretaceous,Cretaceous,#6DBE45,,"Owner decision 2026-11-04. In Oman/UAE likely includes Semail ophiolite + Hawasina (not separated in geo2bg); label individual polygons via polygon_overrides.csv"
+TK,Tertiary-Cretaceous,Cretaceous,#6DBE45,Cretaceous-Tertiary,Owner decision 2026-11-04
+T,Tertiary,Tertiary sedimentary,#EE8E4A,,"Owner decision 2026-11-04: Paleocene-Eocene / Oligocene / Miocene-Pliocene not separable in geo2bg"
+TKv,Tertiary-Cretaceous volcanics,Cenozoic volcanics,#D9B400,Tertiary volcanics,
+Kv,Cretaceous volcanics,Cenozoic volcanics,#D9B400,Cretaceous volcanics,Not present in GCC area
+QTv,Quaternary-Tertiary volcanics,Cenozoic volcanics,#D9B400,Harrats (Tertiary-Quaternary),
+MzCzv,Mesozoic-Cenozoic volcanics,Cenozoic volcanics,#D9B400,Mesozoic-Cenozoic volcanics,Not present in GCC area
+Qv,Quaternary volcanics,Cenozoic volcanics,#D9B400,Harrats (Quaternary),
+TKi,Tertiary-Cretaceous intrusives,Cenozoic volcanics,#D9B400,Cenozoic intrusives,Owner decision 2026-11-04
+Czi,Cenozoic intrusives,Cenozoic volcanics,#D9B400,Cenozoic intrusives,Owner decision 2026-11-04
+MzCzi,Mesozoic-Cenozoic intrusives,Cenozoic volcanics,#D9B400,Cenozoic intrusives,Not present in GCC area
+Qe,Quaternary(eolian),Cenozoic eolian sand and gravel,#F5EFAA,Eolian sand,
+Qf,Quaternary(fluvial),Cenozoic eolian sand and gravel,#F5EFAA,Alluvium and gravel,
+Q,Quaternary,Cenozoic eolian sand and gravel,#F5EFAA,,
+Qsk,Quaternary(sahbka),Cenozoic eolian sand and gravel,#F5EFAA,Sabkha,
+QT,Quaternary-Tertiary,Cenozoic eolian sand and gravel,#F5EFAA,Neogene-Quaternary gravels,Owner decision 2026-11-04
+H2O,Ocean sea or open water,EXCLUDE,,,Dropped
+U,Land areas not included in this study,EXCLUDE,,,Dropped
