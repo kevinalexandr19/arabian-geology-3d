@@ -1,36 +1,36 @@
-source_unit,source_desc,class_id,class,colour,description
-pC,preCambrian undifferentiated,1,Precambrian basement (Arabian Shield),#b5507f,"Neoproterozoic crystalline basement: arc volcanics, granitoids, gneiss, Najd-age volcanosedimentary rocks (not separable in geo2bg)"
-PzpC,Paleozoic-preCambrian,1,Precambrian basement (Arabian Shield),#b5507f,"Basement windows in Yemen/Hadramawt mapped as Paleozoic-Precambrian; grouped with basement"
-Cm,Cambrian,2,Paleozoic sedimentary,#8db37b,"Cambrian clastics on the Shield margin (Saq/Siq, Jordan sandstones)"
-OCm,Ordovician-Cambrian,2,Paleozoic sedimentary,#8db37b,"Lower Paleozoic sandstones and shales (Saq, Qasim)"
-DSO,Devonian-Silurian-Ordovician,2,Paleozoic sedimentary,#8db37b,"Lower-middle Paleozoic clastics (Tabuk, Tawil, Jauf)"
-D,Devonian,2,Paleozoic sedimentary,#8db37b,"Devonian clastics (Jauf, Jubah)"
-C,Carboniferous,2,Paleozoic sedimentary,#8db37b,"Carboniferous clastics (absent in bbox; kept for completeness)"
-P,Permian,2,Paleozoic sedimentary,#8db37b,"Permian clastics/carbonates incl. Unayzah and Khuff base"
-Pz,Paleozoic,2,Paleozoic sedimentary,#8db37b,"Undifferentiated Paleozoic (Oman, Yemen)"
-MzPz,Mesozoic-Paleozoic,2,Paleozoic sedimentary,#8db37b,"Sinai/Jordan 'Nubian' sandstones spanning Paleozoic-Mesozoic; grouped with Paleozoic"
-TrP,Triassic-Permian,3,Triassic-Jurassic sedimentary,#3fa9c9,"Khuff-Sudair carbonates/shales at base of the Najd cuesta belt"
-Tr,Triassic,3,Triassic-Jurassic sedimentary,#3fa9c9,"Triassic clastics/carbonates (Sudair, Jilh, Minjur)"
-JTr,Jurassic-Triassic,3,Triassic-Jurassic sedimentary,#3fa9c9,"Triassic-Jurassic undifferentiated"
-J,Jurassic,3,Triassic-Jurassic sedimentary,#3fa9c9,"Jurassic carbonates of the Tuwaiq Mountain escarpment belt (Marrat, Tuwaiq, Hanifa, Jubaila, Arab)"
-KJ,Cretaceous-Jurassic,3,Triassic-Jurassic sedimentary,#3fa9c9,"Musandam shelf carbonates (Jurassic-Cretaceous)"
-Mz,Mesozoic,3,Triassic-Jurassic sedimentary,#3fa9c9,"Mesozoic undifferentiated (absent in bbox; kept for completeness)"
-K,Cretaceous,4,Cretaceous sedimentary,#7fc64e,"Cretaceous clastics/carbonates (Wasia, Aruma, Biyadh). NB: in Oman this unit likely also covers the Semail ophiolite and Hawasina; not separable by attribute"
-TK,Tertiary-Cretaceous,4,Cretaceous sedimentary,#7fc64e,"Upper Cretaceous-Paleogene chalks/phosphorites of the Jordan-Sinai plateau"
-T,Tertiary,5,Tertiary sedimentary,#f6a95b,"Paleogene-Neogene carbonates and clastics (Umm Er Radhuma, Dammam, Hadhramaut, Hofuf); Paleogene/Neogene not split in geo2bg"
-QT,Quaternary-Tertiary,6,Neogene-Quaternary gravels and clastics,#f3d77a,"Late Tertiary-Quaternary fans and gravel plains (Barzaman, Oman interior)"
-TKv,Tertiary-Cretaceous volcanics,7,Yemen Trap volcanics,#8b3a3a,"Oligocene Yemen Volcanic Group flood basalts and silicics forming the Yemen highlands"
-Kv,Cretaceous volcanics,7,Yemen Trap volcanics,#8b3a3a,"Absent in bbox; kept for completeness"
-QTv,Quaternary-Tertiary volcanics,8,Cenozoic harrats and intrusives,#4d4d66,"Harrat alkali basalt fields (Rahat, Khaybar, Uwayrid, Ash Shaam, Hutaymah)"
-Qv,Quaternary volcanics,8,Cenozoic harrats and intrusives,#4d4d66,"Young Quaternary lava fields and cones"
-MzCzv,Mesozoic-Cenozoic volcanics,8,Cenozoic harrats and intrusives,#4d4d66,"Absent in bbox; kept for completeness"
-TKi,Tertiary-Cretaceous intrusives,8,Cenozoic harrats and intrusives,#4d4d66,"Red Sea rift-related intrusives of the Tihama-Asir coastal belt"
-Czi,Cenozoic intrusives,8,Cenozoic harrats and intrusives,#4d4d66,"Small Cenozoic intrusives (southern Jordan)"
-MzCzi,Mesozoic-Cenozoic intrusives,8,Cenozoic harrats and intrusives,#4d4d66,"Absent in bbox; kept for completeness"
-Pzi,Paleozoic intrusives,1,Precambrian basement (Arabian Shield),#b5507f,"Absent in bbox; kept for completeness"
-Qe,Quaternary(eolian),9,Quaternary sand seas,#f2e6bf,"Eolian sand seas and dune fields (Rub' al Khali, Nafud, Dahna, Wahiba)"
-Q,Quaternary,10,Quaternary alluvium and coastal,#e2dccb,"Undifferentiated Quaternary surficial deposits"
-Qf,Quaternary(fluvial),10,Quaternary alluvium and coastal,#e2dccb,"Wadi alluvium, gravel plains and coastal plains (Tihama, Batinah)"
-Qsk,Quaternary(sahbka),11,Sabkha,#cfe3e8,"Coastal and inland sabkhas (Gulf coast, Umm as Samim)"
-H2O,Ocean sea or open water,0,EXCLUDE,,"Inland water bodies (Dead Sea, Mesopotamian marshes); drop in M2"
-U,Land areas not included in this study,0,EXCLUDE,,"No data; drop in M2"
+source_unit,source_description,level1_class,level1_colour,level2_class,level2_colour,notes
+pC,preCambrian undifferentiated,Precambrian basement (Arabian Shield),#E8456B,Precambrian crystalline basement,#E8456B,
+PzpC,Paleozoic-preCambrian,Precambrian basement (Arabian Shield),#E8456B,Precambrian crystalline basement,#E8456B,AMBIGUOUS: basement windows in Yemen/Hadramawt (1.6k km2) mapped as Paleozoic-Precambrian; merged into basement as too small for own L2
+Pzi,Paleozoic intrusives,Precambrian basement (Arabian Shield),#E8456B,Precambrian crystalline basement,#E8456B,Not present in bbox; kept for completeness
+Cm,Cambrian,Paleozoic,#9DBF95,Cambrian-Ordovician,#768F70,
+OCm,Ordovician-Cambrian,Paleozoic,#9DBF95,Cambrian-Ordovician,#768F70,
+DSO,Devonian-Silurian-Ordovician,Paleozoic,#9DBF95,Ordovician-Devonian,#9DBF95,"Mostly Silurian-Devonian (Tabuk, Tawil, Jauf) but range starts in Ordovician"
+D,Devonian,Paleozoic,#9DBF95,Ordovician-Devonian,#9DBF95,
+C,Carboniferous,Paleozoic,#9DBF95,Carboniferous-Permian,#BFD5BA,Not present in bbox; kept for completeness
+P,Permian,Paleozoic,#9DBF95,Carboniferous-Permian,#BFD5BA,
+Pz,Paleozoic,Paleozoic,#9DBF95,Paleozoic undivided,#D8E5D5,
+MzPz,Mesozoic-Paleozoic,Paleozoic,#9DBF95,Paleozoic undivided,#D8E5D5,AMBIGUOUS: Nubian-type sandstones of Sinai/Jordan and N Arabia (4.1k km2) spanning Paleozoic-Mesozoic; could go to L1 Paleozoic or Cretaceous
+TrP,Triassic-Permian,Triassic,#8B3A9A,Triassic,#8B3A9A,"AMBIGUOUS: Khuff-Sudair (Permian-Triassic, 3.1k km2, mostly Oman/UAE and central Arabia); could go to L1 Paleozoic"
+Tr,Triassic,Triassic,#8B3A9A,Triassic,#8B3A9A,
+JTr,Jurassic-Triassic,Triassic,#8B3A9A,Triassic,#8B3A9A,AMBIGUOUS: Triassic-Jurassic (0.4k km2); could go to L1 Jurassic
+Mz,Mesozoic,Jurassic,#2BA6C9,Jurassic,#2BA6C9,Not present in bbox; kept for completeness
+J,Jurassic,Jurassic,#2BA6C9,Jurassic,#2BA6C9,Tuwaiq Mountain escarpment belt
+KJ,Cretaceous-Jurassic,Jurassic,#2BA6C9,Jurassic,#2BA6C9,"AMBIGUOUS: Musandam shelf carbonates (1.1k km2), Jurassic-Cretaceous; could go to L1 Cretaceous"
+K,Cretaceous,Cretaceous,#6DBE45,Cretaceous,#6DBE45,"AMBIGUOUS: in Oman/UAE (~44k km2) this unit very likely includes the Semail ophiolite and Hawasina allochthon, which geo2bg does NOT separate; L1 class 11 is therefore empty unless split spatially or from another source"
+TK,Tertiary-Cretaceous,Cretaceous,#6DBE45,Upper Cretaceous-Paleogene,#A7D88F,AMBIGUOUS: almost all in Jordan/Sinai/Levant (31k km2): Upper Cretaceous-Paleocene chalk/phosphorite plateau; could go to L1 Paleocene and Eocene
+T,Tertiary,"Tertiary sedimentary, undivided (PROVISIONAL)",#F2A65A,"Tertiary sedimentary, undivided",#F2A65A,"AMBIGUOUS (major, 708k km2): geo2bg does not separate Paleocene-Eocene / Oligocene / Miocene-Pliocene. Provisional L1 'Tertiary undivided'. Options: (a) map all T to L1 6, (b) split spatially in M2 using another source, (c) keep provisional class"
+QT,Quaternary-Tertiary,Miocene and Pliocene,#F2E35C,Neogene-Quaternary gravels,#F2E35C,"AMBIGUOUS: mostly Oman interior fans/gravel plains (Barzaman, 39k km2); could go to L1 10 (eolian sand and gravel)"
+TKv,Tertiary-Cretaceous volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Tertiary volcanics (Yemen traps),#8B6C00,Single polygon over Yemen highlands = Oligocene Yemen Volcanic Group despite T-K label
+Kv,Cretaceous volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Tertiary volcanics (Yemen traps),#8B6C00,Not present in bbox; kept for completeness
+QTv,Quaternary-Tertiary volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Tertiary-Quaternary volcanics (harrats),#C79A00,"Harrat fields (Rahat, Khaybar, Uwayrid, Ash Shaam, Hutaymah)"
+MzCzv,Mesozoic-Cenozoic volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Tertiary-Quaternary volcanics (harrats),#C79A00,Not present in bbox; kept for completeness
+Qv,Quaternary volcanics,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Quaternary volcanics,#D5B340,Young lava fields and cones
+TKi,Tertiary-Cretaceous intrusives,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Cenozoic intrusives,#644D00,AMBIGUOUS: reference legend has no intrusive class; Red Sea rift intrusives of Tihama-Asir (0.9k km2) placed with volcanics
+Czi,Cenozoic intrusives,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Cenozoic intrusives,#644D00,"AMBIGUOUS: as TKi (20 km2, S Jordan)"
+MzCzi,Mesozoic-Cenozoic intrusives,"Volcanic rocks, Tertiary and Quaternary",#C79A00,Cenozoic intrusives,#644D00,Not present in bbox; kept for completeness
+Qe,Quaternary(eolian),"Eolian sand and gravel, mainly Quaternary",#F5EFAA,Eolian sand,#F5EFAA,"Rub' al Khali, Nafud, Dahna, Wahiba"
+Qf,Quaternary(fluvial),"Eolian sand and gravel, mainly Quaternary",#F5EFAA,Alluvium and gravel,#D8D296,"Wadi fill, gravel and coastal plains"
+Q,Quaternary,"Eolian sand and gravel, mainly Quaternary",#F5EFAA,Quaternary undivided,#BFBA85,
+Qsk,Quaternary(sahbka),"Eolian sand and gravel, mainly Quaternary",#F5EFAA,Sabkha,#A7A374,
+H2O,Ocean sea or open water,EXCLUDE,,EXCLUDE,,"Inland water (Dead Sea, Mesopotamian marshes); drop in M2"
+U,Land areas not included in this study,EXCLUDE,,EXCLUDE,,No data; drop in M2
