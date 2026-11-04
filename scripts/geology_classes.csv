@@ -16,7 +16,7 @@ JTr,Jurassic-Triassic,Jurassic,#2BA6C9,Triassic-Jurassic,Owner decision 2026-11-
 Mz,Mesozoic,Jurassic,#2BA6C9,Mesozoic undivided,Not present in peninsula area
 J,Jurassic,Jurassic,#2BA6C9,,
 KJ,Cretaceous-Jurassic,Cretaceous,#6DBE45,Jurassic-Cretaceous,Owner decision 2026-11-04
-K,Cretaceous,Cretaceous,#6DBE45,,"Owner decision 2026-11-04. In Oman/UAE likely includes Semail ophiolite + Hawasina (not separated in geo2bg); label individual polygons via polygon_overrides.csv"
+K,Cretaceous,Cretaceous,#6DBE45,,"Owner decision 2026-11-04. In Oman/UAE includes the Semail ophiolite and Hawasina, deliberately not separated (generalized map)"
 TK,Tertiary-Cretaceous,Cretaceous,#6DBE45,Cretaceous-Tertiary,Owner decision 2026-11-04
 T,Tertiary,Tertiary sedimentary,#EE8E4A,,"Owner decision 2026-11-04: Paleocene-Eocene / Oligocene / Miocene-Pliocene not separable in geo2bg"
 TKv,Tertiary-Cretaceous volcanics,Cenozoic volcanics,#D9B400,Yemen traps (Tertiary volcanics),"Oligocene Yemen Volcanic Group despite T-K label"

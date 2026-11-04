@@ -39,7 +39,9 @@ README.md       what it is, the live link, how to rebuild, sources and licences
 ## Geology classification (owner decisions, 2026-11-04)
 geo2bg has a single age attribute, `GLG`. In the peninsula area it contains 27 codes. Classification uses two files in `scripts/`:
 - **`geology_classes.csv`**: maps each `GLG` code to `level1_class`, `level1_colour` and an optional `level2_label`, plus `notes`. `H2O` and `U` are `EXCLUDE`.
-- **`polygon_overrides.csv`**: per-polygon corrections, with columns `pid, level1_class, level2_label, notes`. A non-empty field replaces the unit-based value. Example: `AG01234,Triassic,,owner: Khuff outcrop`. This is how a request like "polygon X should be Triassic" is applied, and how polygon-only labels such as "Semail ophiolite" are added.
+- **`polygon_overrides.csv`**: per-polygon corrections, with columns `pid, level1_class, level2_label, notes`. A non-empty field replaces the unit-based value. Example: `AG01234,Triassic,,owner: Khuff outcrop`. This is how a request like "polygon X should be Triassic" is applied.
+
+**Purpose and scope.** This is a *generalized* geological map of the Arabian Peninsula, made for KFUPM. The Semail ophiolite and Hawasina allochthon are deliberately **not** separated: they stay inside Cretaceous `K`, as in geo2bg (owner decision).
 
 **Level 1 is the only fill scheme.** Eight classes, colours from the reference generalized map:
 
@@ -54,7 +56,7 @@ geo2bg has a single age attribute, `GLG`. In the peninsula area it contains 27 c
 | Cenozoic volcanics | #D9B400 | QTv, Qv, TKv (Yemen traps), TKi, Czi |
 | Cenozoic eolian sand and gravel | #F5EFAA | Qe, Qf, Q, Qsk, QT |
 
-**Level 2 is an optional label, not a fill.** It records either a finer age range from the source code (Cambrian-Ordovician, Ordovician-Devonian, Carboniferous-Permian, Permian-Triassic, Triassic-Jurassic, Jurassic-Cretaceous, Cretaceous-Tertiary, Paleozoic-Mesozoic) or a special feature (Harrats, Yemen traps, Sabkha, Eolian sand, Alluvium and gravel, Neogene-Quaternary gravels, Cenozoic intrusives, and later Semail ophiolite via overrides). Polygons with no label have it blank.
+**Level 2 is an optional label, not a fill.** It records either a finer age range from the source code (Cambrian-Ordovician, Ordovician-Devonian, Carboniferous-Permian, Permian-Triassic, Triassic-Jurassic, Jurassic-Cretaceous, Cretaceous-Tertiary, Paleozoic-Mesozoic) or a special feature (Harrats, Yemen traps, Sabkha, Eolian sand, Alluvium and gravel, Neogene-Quaternary gravels, Cenozoic intrusives). Polygons with no label have it blank.
 
 **Polygon IDs.** Every polygon has a stable `pid` = `AG` + 5-digit `GEO2BG_ID`. Where the peninsula clip splits a source polygon, the parts get `-a`, `-b`, … (largest first). `01_download.py` writes the committed table `data/geology_polygons.csv` (pid, GEO2BG_ID, GLG, level1_class, level1_colour, level2_label, label_source, area_km2, lon, lat) for review. **pids must survive every later step:** M2 does not dissolve.
 
@@ -68,7 +70,7 @@ Simplify the geometry so that `docs/data/geology.geojson` is **under 8 MB**. Use
 - **Elevation stats** are computed per L1 class. Per-L2-label stats are optional, for labelled features such as harrats and sabkha.
 
 ## "Geology × topography" features
-- **Bookmarks / tour:** 6–8 camera presets with flyTo, pitch and bearing, each with a two-sentence caption. Suggested stops: the Hijaz–Asir escarpment and the Shield; Harrat Rahat / Harrat Khaybar; the Tuwaiq escarpment; the Rub' al Khali; the Hajar Mountains and the Semail ophiolite; the Yemen highlands and traps; Dhofar; the UAE coastal sabkhas and Musandam.
+- **Bookmarks / tour:** 6–8 camera presets with flyTo, pitch and bearing, each with a two-sentence caption. Suggested stops: the Hijaz–Asir escarpment and the Shield; Harrat Rahat / Harrat Khaybar; the Tuwaiq escarpment; the Rub' al Khali; the Hajar Mountains; the Yemen highlands and traps; Dhofar; the UAE coastal sabkhas and Musandam.
 - **Elevation stats per class:** precompute the min, median and max elevation per L1 class (optionally also per L2 label), from Terrarium tiles sampled at a low zoom (z6–7). Show them in the legend as small inline bars. This makes the correlation quantitative.
 
 ## Working rules (credit budget matters)
