@@ -1,0 +1,848 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Pollastro, Richard M.</origin>
+        <pubdate>1998</pubdate>
+        <title>Bedrock geology of the Arabian Peninsula and selected adjacent areas (geo2bg)</title>
+        <geoform>Downloadable GIS Data</geoform>
+        <pubinfo>
+          <pubplace>Reston,VA</pubplace>
+          <publish>U.S. Geological Survey, Central Energy Resources Team</publish>
+        </pubinfo>
+        <lworkcit>
+          <citeinfo>
+            <origin>Richard M. Pollastro, Amy S. Karshbaum, Roland J. Viger</origin>
+            <pubdate>1999</pubdate>
+            <title>Map Showing Geology, Oil and Gas Fields and Geologic Provinces of the Arabian Peninsula</title>
+            <edition>version 2</edition>
+            <serinfo>
+              <sername>U.S. Geological Survey Open-File Report</sername>
+              <issue>OFR-97-470-B</issue>
+            </serinfo>
+            <pubinfo>
+              <pubplace>Denver, Colorado</pubplace>
+              <publish>U.S. Geological Survey, Central Energy Resources Team</publish>
+            </pubinfo>
+            <onlink>https://geology.cr.usgs.gov/energy/WorldEnergy/OF97-470B/index.html</onlink>
+            <lworkcit>
+              <citeinfo>
+                <origin>U.S. Geological Survey</origin>
+                <pubdate>1998</pubdate>
+                <title>World energy data on CD-ROM</title>
+                <edition>1.0</edition>
+                <geoform>map</geoform>
+                <serinfo>
+                  <sername>U.S. Geological Survey, Open-File Report</sername>
+                  <issue>97-470</issue>
+                </serinfo>
+                <onlink>https://energy.cr.usgs.gov/oilgas/wep/</onlink>
+              </citeinfo>
+            </lworkcit>
+          </citeinfo>
+        </lworkcit>
+        <onlink>https://doi.org/10.5066/P9GI9NS4</onlink>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>The data set for this coverage includes arcs, polygons, and
+polygon labels that outline and describe the general geologic
+age and type of bedrock of the Arabian Peninsula and selected
+adjacent areas.  It also includes shoreline and inland water
+bodies.  The Arabian Peninsula is part of Region 2 for the USGS
+World Energy Assessment.</abstract>
+      <purpose>Although a geologic map displays the geographic distribution of
+the different geologic units and rock types for numerous purposes,
+this data set was compiled primarily for the World Energy Project
+as part of a required strategic base for assessing the petroleum
+potential of this region.  For this purpose, the map provides an
+outline of the general geographic distribution of both known or
+hypothetical petroleum-potential formations and units, that is,
+sedimentary rocks and basins, and areas containing igneous and
+metamorphic rocks which have virtually little or no potential.
+The map was also compiled, in part, to provide a basis
+for outlining the geographic and petroleum provinces of coverage
+PROV_2A.  This basic geologic data set, combined with numerous
+others, such as tectonic and burial histories, distribution of
+known oil and gas fields, distribution and quality of reservoir
+rocks, organic geochemistry, etc., will ultimately define the
+basis for the assessment of undiscovered oil and gas in the
+Arabian Peninsula.</purpose>
+      <supplinf>This data set is a modified compilation of two source maps; the
+1:2,000,000 scale U.S. Geological Survey-Arabian American Oil
+Company, 1963, Geologic Map of the Arabian Peninsula, and UNESCO-
+AGSU, 1:5,000,000 scale Geologic Map of Europe, eastern sheet
+(see Selected References).  The geology attribute data was
+assigned using standardized geologic symbols for the World Energy
+project.  Although all polygons from the source maps are in-
+cluded in the data, geology was simplified from its original
+version, and attributed only by overall age; no technical
+division was made of geologic ages into upper, lower, early,
+late, etc., nor were geologic units differentiated within any
+particular geologic age or region as they appear on the source
+maps.  This is particularily true for Precambrian units.</supplinf>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <sngdate>
+          <caldate>1999</caldate>
+        </sngdate>
+      </timeinfo>
+      <current>publication date</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>None planned</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>32.3</westbc>
+        <eastbc>60.5</eastbc>
+        <northbc>39.3</northbc>
+        <southbc>11.3</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>None</themekt>
+        <themekey>Geology</themekey>
+        <themekey>Geologic map</themekey>
+      </theme>
+      <theme>
+        <themekt>Gateway to the Earth Thesaurus</themekt>
+        <themekey>Oil shale resources</themekey>
+        <themekey>Oil sand resources</themekey>
+        <themekey>Natural gas resources</themekey>
+        <themekey>Economic geology</themekey>
+      </theme>
+      <theme>
+        <themekt>ArcIMS Metadata Server Theme Codes Thesaurus</themekt>
+        <themekey>geoscientificInformation</themekey>
+        <themekey>environment</themekey>
+      </theme>
+      <theme>
+        <themekt>USGS Energy Program Themes Thesaurus</themekt>
+        <themekey>Earth Science</themekey>
+        <themekey>Natural Resources</themekey>
+        <themekey>U.S. Geological Survey</themekey>
+        <themekey>USGS</themekey>
+        <themekey>Geology</themekey>
+        <themekey>Oil</themekey>
+        <themekey>Natural Gas</themekey>
+        <themekey>Petroleum</themekey>
+        <themekey>Resource Assessment</themekey>
+      </theme>
+      <theme>
+        <themekt>EnergyResourceActivities</themekt>
+        <themekey>oilgas</themekey>
+        <themekey>wep</themekey>
+        <themekey>worldgeologicmaps</themekey>
+        <themekey>arabian</themekey>
+      </theme>
+      <place>
+        <placekt>None</placekt>
+        <placekey>Arabian Peninsula</placekey>
+        <placekey>Bahrain</placekey>
+        <placekey>Iraq</placekey>
+        <placekey>Israel</placekey>
+        <placekey>Jordan</placekey>
+        <placekey>Kingdom of Jordan</placekey>
+        <placekey>Kingdom of Saudi Arabia</placekey>
+        <placekey>Kuwait</placekey>
+        <placekey>Lebanese Republic</placekey>
+        <placekey>Lebanon</placekey>
+        <placekey>Middle East</placekey>
+        <placekey>Oman</placekey>
+        <placekey>Qatar</placekey>
+        <placekey>Region 2</placekey>
+        <placekey>Republic of Iraq</placekey>
+        <placekey>Republic of Yemen</placekey>
+        <placekey>Saudi Arabia</placekey>
+        <placekey>South Yemen</placekey>
+        <placekey>State of Bahrain</placekey>
+        <placekey>State of Israel</placekey>
+        <placekey>State of Kuwait</placekey>
+        <placekey>State of Qatar</placekey>
+        <placekey>Sultanate of Oman</placekey>
+        <placekey>Syria</placekey>
+        <placekey>Syrian Arab Republic</placekey>
+        <placekey>United Arab Emirates</placekey>
+        <placekey>Yemen</placekey>
+        <placekey>BA</placekey>
+        <placekey>IZ</placekey>
+        <placekey>IS</placekey>
+        <placekey>JO</placekey>
+        <placekey>KU</placekey>
+        <placekey>LE</placekey>
+        <placekey>MU</placekey>
+        <placekey>QA</placekey>
+        <placekey>SA</placekey>
+        <placekey>TC</placekey>
+        <placekey>YM</placekey>
+      </place>
+      <place>
+        <placekt>USGS Energy Program Petroleum Assessment Units</placekt>
+        <placekey>Anah Graben, Province 2089</placekey>
+        <placekey>Arabian Shield, Province 2101</placekey>
+        <placekey>Beirut, Province 2078</placekey>
+        <placekey>Central Oman Platform, Province 2015</placekey>
+        <placekey>East Flank Oman Sub-basin, Province 2012</placekey>
+        <placekey>Euphrates/Mardin, Province 2075</placekey>
+        <placekey>Fahud Salt Basin, Province 2016</placekey>
+        <placekey>Ghaba Salt Basin, Province 2014</placekey>
+        <placekey>Ghudun-Khasfeh Flank, Province 2010</placekey>
+        <placekey>Greater Ghawar Uplift, Province 2021</placekey>
+        <placekey>Gulf of Oman Basin, Province 2018</placekey>
+        <placekey>Hail-Ga'Ara Arch, Province 2025</placekey>
+        <placekey>Haleb, Province 2076</placekey>
+        <placekey>Hays Structural Belt, Province 2003</placekey>
+        <placekey>Huqf-Haushi Uplift, Province 2013</placekey>
+        <placekey>Interior Homocline-Central Arch, Province 2020</placekey>
+        <placekey>Jafr-Tabuk Basin, Province 2026</placekey>
+        <placekey>Khleisha Uplift, Province 2074</placekey>
+        <placekey>Levantine Basin, Province 2032</placekey>
+        <placekey>Ma'Rib-Al Jawf/Masila Basin, Province 2004</placekey>
+        <placekey>Masila-Jeza Basin, Province 2009</placekey>
+        <placekey>Masirah Trough, Province 2008</placekey>
+        <placekey>Mesopotamian Foredeep Basin, Province 2024</placekey>
+        <placekey>Mirbat Precambrian Basement, Province 2102</placekey>
+        <placekey>Mukalla Rift Basin, Province 2005</placekey>
+        <placekey>North Harrah Volcanics, Province 2027</placekey>
+        <placekey>Oman Mountains, Province 2017</placekey>
+        <placekey>Palmyra Zone, Province 2077</placekey>
+        <placekey>Qatar Arch, Province 2022</placekey>
+        <placekey>Red Sea Basin, Province 2071</placekey>
+        <placekey>Rub Al Khali Basin, Province 2019</placekey>
+        <placekey>Rutbah Uplift, Province 2028</placekey>
+        <placekey>Shabwah Basin, Province 2006</placekey>
+        <placekey>Sharmah Rift Basin, Province 2007</placekey>
+        <placekey>Sinai Basin, Province 2033</placekey>
+        <placekey>South Harrah Volcanics, Province 2034</placekey>
+        <placekey>South Oman Salt Basin, Province 2011</placekey>
+        <placekey>Wadi-Surhan Basin, Province 2029</placekey>
+        <placekey>Widyan Basin-Interior Platform, Province 2023</placekey>
+        <placekey>Yemen Volcanic Basin (North), Province 2001</placekey>
+        <placekey>Yemen Volcanic Basin (South), Province 2002</placekey>
+        <placekey>Zagros Fold Belt, Province 2030</placekey>
+        <placekey>Zagros Thrust Zone, Province 2031</placekey>
+      </place>
+      <theme>
+        <themekt>USGS Metadata Identifier</themekt>
+        <themekey>USGS:60ad3d94d34e4043c850f291</themekey>
+      </theme>
+    </keywords>
+    <accconst>None</accconst>
+    <useconst>None</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey - CERSC Data Management Services Project</cntorg>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>Denver Federal Center, Building 25, Mail Stop 939</address>
+          <city>Denver</city>
+          <state>CO</state>
+          <postal>80225</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntemail>datamgt@usgs.gov</cntemail>
+      </cntinfo>
+    </ptcontac>
+    <browse>
+      <browsen>https://www.sciencebase.gov/catalog/file/get/60ad3d94d34e4043c850f291?f=__disk__d8%2F72%2F89%2Fd87289273334c9e0f25b737558d896345940062b</browsen>
+      <browset>JPEG</browset>
+    </browse>
+    <datacred>Digital Map Compilation - Richard M. Pollastro, Amy S. Karshbaum
+Geologic Attribution - Richard M. Pollastro, Amy S. Karshbaum
+The_Metadata - Richard M. Pollastro, Amy S. Karshbaum, B. S. Larson, P. Schweitzer</datacred>
+    <native>Hardware :  Sun Sparc Server 1000 with Solaris 2.5.1
+GIS Software :  Workstation ARC/INFO ver. 7.0.4, ArcView 3.0</native>
+    <crossref>
+      <citeinfo>
+        <origin>United States Geological Survey</origin>
+        <pubdate>1997</pubdate>
+        <title>Geology of the Arabian Peninsula</title>
+        <edition>first</edition>
+        <geoform>map</geoform>
+        <serinfo>
+          <sername>Miscellaneous Investigations Map</sername>
+          <issue>I-270A</issue>
+        </serinfo>
+        <pubinfo>
+          <pubplace>Denver, Colorado</pubplace>
+          <publish>U.S. Geological Survey</publish>
+        </pubinfo>
+      </citeinfo>
+    </crossref>
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>Overall attribute accuracy is based on the accuracy of the general geology
+coverage.  Two original geologic maps were inked onto mylar and
+scanned by a wide-format Anatech scanner at a resolution of 300 dpi.
+These scanned Tiff images were converted to Arc GRID files, then to Arc
+Vector coverages and transformed to Lambert Conformal Conic projection
+with RMS error no greater than 0.5 mm.  The two coverages were then merged.
+Verification of attribute reliability is performed with the Arc/Info command
+labelerrors to find polygons without assigned character value or with more
+than one value.  Subsequent visual error checking is done with verification
+plots by at least two indidividuals.</attraccr>
+      <qattracc>
+        <attraccv>Good</attraccv>
+        <attracce>This is a deductive estimate based on based on a polygon overlay
+of a coverage plot and the orignal materials.  Checks by both the
+compiler and an independent source identified labeling and classification
+errors which are corrected.  Any remaining errors are most likey a
+result of misinterpretation of source data.  Commonly, this would be
+for small polygons with ambiguous color or patterns.  Also there are
+apparent discrepencies between source maps due to differences in scale
+or differences in interpretation.
+A comparison between color hard copy and original paper map is
+carried out by visual comparison.  Color plot in 1:2,000,000 scale
+is superimposed on original map in 1:2,000,000 scale and any
+detected errors are corrected in ARC/INFO.</attracce>
+      </qattracc>
+    </attracc>
+    <logic>The Data set is a collection of ARC/INFO coverages that are
+topologically consistent.  The fuzzy tolerance has been consistent
+through each processing step.
+Execution of Arc/Info Clean command indicates the coverage is topologically
+clean.  Duplicate lines, overshoots and undershoots if any are corrected.
+All polygons are closed and labeled.  In some rare cases very small polygons
+could be eliminated.  Polygons at the edge of the map are closed with a
+map estent polygon.</logic>
+    <complete>The data set is a modified compilation of two source maps.  The
+geology attribute data is assigned using standardized geologic
+symbols for the World Energy project.  Although all polygons from
+the source maps are included in the data set, geology is
+simplified from its original version, and attributed only by
+overall geologic age; no technical division is made of geologic
+ages into upper, lower, early, late, etc., nor are geologic units
+differentiated within any particular geologic age or region as
+they appear on the source maps.  Since the emphasis of this study is
+an evaluation of oil and gas resources, Precambrian units and other
+non-petroleum bearing units are generalized more than younger units.</complete>
+    <posacc>
+      <horizpa>
+        <horizpar>Average positional accuracy tests is performed using a visual
+comparison to the source map.  A 1:2,000,000 scale plot is
+superimposed onto the original 1:2,000,000 scale geologic map.
+The original geologic map and final geologic plot are both
+in Lambert Conformal Conic projection.
+The Iraq portion of the Arabian Peninsula is derived from a
+separate source at the scale of 1:5,000,000, so a separate
+1:5,000,000 scale plot of the Iraq portion is superimposed
+onto the original geologic map of Iraq.  Both maps are in
+Lambert Conformal Conic projection.
+Original geological map is of 170 meter maximum accuracy
+(0.085 mm on paper map of 1:2,00,000 scale).  The 1:5,000,000
+map is at a 425 meter maximum accuracy.
+Scanned images are of 300 dot/inch resolution
+(0.085 mm on paper).  That is why fuzzy tolerance for CLEAN
+programm in ARC/INFO is set to 340 m (two pixels).  It is 850 meters
+for the smaller scale map.</horizpar>
+        <qhorizpa>
+          <horizpav>1000 meters</horizpav>
+          <horizpae>Given the original map scales, scanning resolution and drafting
+accuracy, the horizontal accuracy estimate is thought to be no
+better than 1000 meters.</horizpae>
+        </qhorizpa>
+      </horizpa>
+      <vertacc>
+        <vertaccr>This is not applicable as a vertical component is not considered.</vertaccr>
+      </vertacc>
+    </posacc>
+    <lineage>
+      <srcinfo>
+        <srccite>
+          <citeinfo>
+            <origin>U.S. Geological Survey - Arabian American Oil Company</origin>
+            <pubdate>1963</pubdate>
+            <title>Geologic Map of the Arabian Peninsula</title>
+            <geoform>map</geoform>
+            <serinfo>
+              <sername>Miscellaneous Investigations map</sername>
+              <issue>I-270A</issue>
+            </serinfo>
+            <pubinfo>
+              <pubplace>Denver, Colorado  USA</pubplace>
+              <publish>U.S. Geological Survey</publish>
+            </pubinfo>
+          </citeinfo>
+        </srccite>
+        <srcscale>2000000</srcscale>
+        <typesrc>paper</typesrc>
+        <srctime>
+          <timeinfo>
+            <sngdate>
+              <caldate>1963</caldate>
+            </sngdate>
+          </timeinfo>
+          <srccurr>publication date</srccurr>
+        </srctime>
+        <srccitea>USGS 1963</srccitea>
+        <srccontr>One of the two paper map sheets are used as the sources
+for creation of the corresponding ARC/INFO geology coverage.</srccontr>
+      </srcinfo>
+      <srcinfo>
+        <srccite>
+          <citeinfo>
+            <origin>Commission for the Geologic Map of the World/UNESCO-ASGU</origin>
+            <pubdate>1971</pubdate>
+            <title>Carte geologique de l'Europe et des regions riveraines de la
+Mediterranee</title>
+            <geoform>map</geoform>
+            <serinfo>
+              <sername>Geologic investigations</sername>
+              <issue>Eastern sheet</issue>
+            </serinfo>
+            <pubinfo>
+              <pubplace>Hanover, Germany</pubplace>
+              <publish>UNESCO</publish>
+            </pubinfo>
+          </citeinfo>
+        </srccite>
+        <srcscale>5000000</srcscale>
+        <typesrc>paper</typesrc>
+        <srctime>
+          <timeinfo>
+            <sngdate>
+              <caldate>1971</caldate>
+            </sngdate>
+          </timeinfo>
+          <srccurr>publication date</srccurr>
+        </srctime>
+        <srccitea>UNESCO 1971</srccitea>
+        <srccontr>One of the two paper map sheets are used as the sources
+for creation of the corresponding ARC/INFO geology coverage.</srccontr>
+      </srcinfo>
+      <procstep>
+        <procdesc>Mylar is placed over original paper source map and geology
+polygons and inland water bodies are traced using a 00 rapidiograph
+pen.  Latitude and longitude tics are carefully transferred from
+the source maps to the mylar tracing and recorded.  The mylar
+tracing is then scanned using a large-format Anatech scanner at
+a resolution of 300 dpi to create a TIFF image file.  The scanned
+TIFF image is then transferred to ARC/INFO, converted to an Arc GRID,
+then to an Arc Vector coverage, and transformed to Lambert Conformal
+Conic projection.  The geological attributes are then assigned
+to each polygon using the original source maps, in ARCEDIT.  A
+modified or abbreviated geologic character designation, standardized
+by the USGS World Energy Project, and used for labeling.</procdesc>
+        <srcused>USGS 1963</srcused>
+        <procdate>1997</procdate>
+        <srcprod>GEOL 1997</srcprod>
+        <proccont>
+          <cntinfo>
+            <cntperp>
+              <cntper>Richard M. Pollastro</cntper>
+            </cntperp>
+            <cntpos>Geologist</cntpos>
+            <cntaddr>
+              <addrtype>mailing and physical address</addrtype>
+              <address>Mail Stop 939
+Box 25046
+Denver Federal Center</address>
+              <city>Denver</city>
+              <state>Colorado</state>
+              <postal>80225-0046</postal>
+              <country>USA</country>
+            </cntaddr>
+            <cntvoice>303-236-5750</cntvoice>
+            <cntfax>303-236-8822</cntfax>
+            <cntemail>pollastro@usgs.gov</cntemail>
+            <hours>8 a.m. - 4 p.m. local time U.S. Rocky Mountain Time Zone</hours>
+          </cntinfo>
+        </proccont>
+      </procstep>
+      <procstep>
+        <procdesc>Mylar is placed over the original paper source map and geology
+polygons and inland water bodies are traced using a 00 rapidiograph
+pen.  Latitude and longitude tics are carefully transferred from
+the source map to the mylar and recorded.  The mylar tracing is
+then scanned on a large-format Anatech scanner at a resolution of
+300 dpi to a create a TIFF image file.  The TIFF image is then
+transferred to ARC/INFO, converted to an Arc GRID, then to an Arc Vector
+coverage, and transformed to Lambert Conformal Conic projection.
+The geological attributes are assigned to each polygon using the
+geology of the original source maps, in ARCEDIT.  A modified or
+abbreviated geologic character designation, standardized
+by the USGS World Energy Project, and used for labeling.</procdesc>
+        <srcused>UNESCO 1971</srcused>
+        <procdate>Unknown</procdate>
+        <srcprod>GEOL 1997</srcprod>
+        <proccont>
+          <cntinfo>
+            <cntperp>
+              <cntper>Richard M. Pollastro</cntper>
+            </cntperp>
+            <cntpos>Geologist</cntpos>
+            <cntaddr>
+              <addrtype>mailing and physical address</addrtype>
+              <address>Mail Stop 939
+Box 25046
+Denver Federal Center</address>
+              <city>Denver</city>
+              <state>Colorado</state>
+              <postal>80225-0046</postal>
+              <country>USA</country>
+            </cntaddr>
+            <cntvoice>303-236-5750</cntvoice>
+            <cntfax>303-236-8822</cntfax>
+            <cntemail>pollastro@usgs.gov</cntemail>
+            <hours>8 a.m. - 4 p.m. local time U.S. Rocky Mountain Time Zone</hours>
+          </cntinfo>
+        </proccont>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+    <indspref>Arabian Peninsula, Middle East, Bahrain, Lebanon, Israel, Iraq,
+Jordan, Kuwait, Qatar, Oman, South Yemen, Yemen, Saudi Arabia,
+United Arab Emirates, Gaza Strip, and West Bank.</indspref>
+    <direct>Vector</direct>
+    <ptvctinf>
+      <sdtsterm>
+        <sdtstype>Area point</sdtstype>
+      </sdtsterm>
+    </ptvctinf>
+  </spdoinfo>
+  <spref>
+    <horizsys>
+      <geograph>
+        <geogunit>Decimal degrees</geogunit>
+      </geograph>
+      <geodetic>
+        <horizdn>D_WGS_1984</horizdn>
+        <ellips>WGS_1984</ellips>
+        <semiaxis>6378137.000000</semiaxis>
+        <denflat>298.257224</denflat>
+      </geodetic>
+    </horizsys>
+  </spref>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>Surficial geology</enttypl>
+        <enttypd>The geologic age of the rock formations as they occur on the
+surface.  Some attribute data also indicates rock type, i.e.,
+sedimentary, igneous, volcanic, metamorphic, etc., or facies, i.e.,
+eolian, fluvial, salt, etc.</enttypd>
+        <enttypds>U.S. Geologic Survey</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>GLG</attrlabl>
+        <attrdef>The abbreviated geologic age of the surficial rock formation.</attrdef>
+        <attrdefs>U.S. Geologic Survey</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Q</edomv>
+            <edomvd>Quaternary</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Qf</edomv>
+            <edomvd>Quaternary(fluvial)</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Qe</edomv>
+            <edomvd>Quaternary(eolian)</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Qsk</edomv>
+            <edomvd>Quaternary(sahbka)</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>QT</edomv>
+            <edomvd>Quaternary-Tertiary</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>T</edomv>
+            <edomvd>Tertiary</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>TK</edomv>
+            <edomvd>Tertiary-Cretaceous</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>K</edomv>
+            <edomvd>Cretaceous</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>KJ</edomv>
+            <edomvd>Cretaceous-Jurassic</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>J</edomv>
+            <edomvd>Jurassic</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>JTr</edomv>
+            <edomvd>Jurassic-Triassic</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Tr</edomv>
+            <edomvd>Triassic</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>TrP</edomv>
+            <edomvd>Triassic-Permian</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>P</edomv>
+            <edomvd>Permian</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>C</edomv>
+            <edomvd>Carboniferous</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>D</edomv>
+            <edomvd>Devonian</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>DSO</edomv>
+            <edomvd>Devonian-Silurian-Ordovician</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>OCm</edomv>
+            <edomvd>Ordovician-Cambrian</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Cm</edomv>
+            <edomvd>Cambrian</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Mz</edomv>
+            <edomvd>Mesozoic</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>MzPz</edomv>
+            <edomvd>Mesozoic-Paleozoic</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Pz</edomv>
+            <edomvd>Paleozoic</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>PzpC</edomv>
+            <edomvd>Paleozoic-preCambrian</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>pC</edomv>
+            <edomvd>preCambrian undifferentiated</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Kv</edomv>
+            <edomvd>Cretaceous volcanics</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>TKv</edomv>
+            <edomvd>Tertiary-Cretaceous volcanics</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>TKi</edomv>
+            <edomvd>Tertiary-Cretaceous intrusives</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Qv</edomv>
+            <edomvd>Quaternary volcanics</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>QTv</edomv>
+            <edomvd>Quaternary-Tertiary volcanics</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Czi</edomv>
+            <edomvd>Cenozoic intrusives</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>MzCzi</edomv>
+            <edomvd>Mesozoic-Cenozoic intrusives</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>MzCzv</edomv>
+            <edomvd>Mesozoic-Cenozoic volcanics</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>Pzi</edomv>
+            <edomvd>Paleozoic intrusives</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>U</edomv>
+            <edomvd>Land areas not included in this study</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>H2O</edomv>
+            <edomvd>Ocean sea or open water</edomvd>
+            <edomvds>U.S. Geologic Survey</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+    </detailed>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey - ScienceBase</cntorg>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>Denver Federal Center, Building 810, Mail Stop 302</address>
+          <city>Denver</city>
+          <state>CO</state>
+          <postal>80225</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntemail>sciencebase@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <resdesc>Downloadable Data</resdesc>
+    <distliab>Unless otherwise stated, all data, metadata and related materials are considered to satisfy the quality standards relative to the purpose for which the data were collected. Although these data and associated metadata have been reviewed for accuracy and completeness and approved for release by the U.S. Geological Survey (USGS), no warranty expressed or implied is made regarding the display or utility of the data on any other system or for general or scientific purposes, nor shall the act of distribution constitute any such warranty.</distliab>
+    <stdorder>
+      <digform>
+        <digtinfo>
+          <formname>Shapefile</formname>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://doi.org/10.5066/P9GI9NS4</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+    </stdorder>
+  </distinfo>
+  <metainfo>
+    <metd>20210525</metd>
+    <metrd>20040623</metrd>
+    <metc>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey - CERSC Data Management Services Project</cntorg>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>Denver Federal Center, Building 25, Mail Stop 939</address>
+          <city>Denver</city>
+          <state>CO</state>
+          <postal>80225</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntemail>datamgt@usgs.gov</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Content Standards for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+  </metainfo>
+</metadata>
