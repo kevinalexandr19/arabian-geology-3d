@@ -9,7 +9,7 @@ A generalized geological map of the Arabian Peninsula, draped over 3D terrain in
 | Milestone | State |
 |---|---|
 | M1 — data acquisition, clipping, classification, polygon IDs | done |
-| M2 — simplified GeoJSON for the web | to do |
+| M2 — simplified GeoJSON for the web | done |
 | M3 — MapLibre 3D viewer | to do |
 | M4 — tour bookmarks and per-class elevation stats | to do |
 | M5 — publish on GitHub Pages | to do |
@@ -59,23 +59,35 @@ Empty fields keep the value that comes from the polygon's unit. The script stops
 Requires Python 3.11+.
 
 ```bash
-pip install geopandas shapely pyproj pyogrio requests
+pip install geopandas "shapely>=2.2" pyproj pyogrio requests matplotlib
 ```
 
 ```bash
 python scripts/01_download.py
 ```
 
-`01_download.py` downloads the Natural Earth layers into `data/raw/naturalearth/` and writes the clipped layers to `data/interim/` (both gitignored). It regenerates `data/geology_polygons.csv` and prints a summary. Scripts 02–04 will be added in M2–M4.
+```bash
+python scripts/02_geology.py
+```
+
+```bash
+python scripts/03_overlays.py
+```
+
+`01_download.py` downloads the Natural Earth layers into `data/raw/naturalearth/` and writes the clipped layers to `data/interim/` (both gitignored). It regenerates `data/geology_polygons.csv` and prints a summary. `02_geology.py` cleans the polygon coverage (GEOS CoverageCleaner, so shared edges match vertex-for-vertex), applies topology-preserving coverage simplification (tolerance 0.004°, no dissolve, every `pid` kept), rounds coordinates to 4 decimals and writes `docs/data/geology.geojson` (~7 MB). It stops if the pid set differs from `data/geology_polygons.csv`, if any geometry is empty or invalid, or if gaps or overlaps appear. Shapely ≥ 2.2 (GEOS ≥ 3.14) is needed for `coverage_clean`.
+
+`03_overlays.py` writes `docs/data/cities.geojson` (Natural Earth places with `SCALERANK` ≤ 8, 68 cities) and `docs/data/roads.geojson` (types "Major Highway" and "Road", 324 features). `notebooks/m2_preview.py` renders `notebooks/m2_preview.png`.
 
 ## Repository layout
 
 ```
-scripts/      01_download.py, geology_classes.csv, polygon_overrides.csv
+scripts/      01_download.py, 02_geology.py, 03_overlays.py, geology_classes.csv, polygon_overrides.csv
 data/raw/     geo2bg shapefile (committed); Natural Earth zips (gitignored)
 data/interim/ clipped layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location
+docs/data/    web layers: geology.geojson, cities.geojson, roads.geojson
 docs/         web viewer (from M3)
+notebooks/    m2_preview.py / .png
 ```
 
 ## Sources and licences
