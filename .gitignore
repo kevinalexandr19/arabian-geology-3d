@@ -1,0 +1,4 @@
+data/raw/naturalearth/
+data/interim/
+__pycache__/
+.ipynb_checkpoints/
