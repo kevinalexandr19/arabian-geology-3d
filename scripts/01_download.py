@@ -35,6 +35,8 @@ POLY_TABLE = ROOT / "data" / "geology_polygons.csv"
 BBOX = (34.0, 12.0, 60.0, 33.0)  # lon_min, lat_min, lon_max, lat_max (EPSG:4326)
 STATES = ["SAU", "KWT", "BHR", "QAT", "ARE", "OMN", "YEM"]  # GCC + Yemen
 COAST_BUFFER_DEG = 0.2
+# Areas removed from the mask: Socotra archipelago (Yemen) has no geo2bg coverage
+EXCLUDE_BOXES = {"Socotra archipelago": (51.5, 11.0, 55.0, 13.0)}
 MIN_PART_KM2 = 0.1  # drop clip slivers smaller than this
 EQUAL_AREA = 6933
 
@@ -67,6 +69,9 @@ def peninsula_mask(countries_zip: Path):
     print(f"States in mask: {sorted(keep['ADMIN'])}")
     print(f"Excluded neighbours: {sorted(others['ADMIN'])}")
     mask = keep.union_all().buffer(COAST_BUFFER_DEG).difference(others.union_all())
+    for name, b in EXCLUDE_BOXES.items():
+        print(f"Removed from mask: {name} {b}")
+        mask = mask.difference(box(*b))
     return mask.intersection(box(*BBOX))
 
 
