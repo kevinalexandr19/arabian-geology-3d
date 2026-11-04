@@ -1,12 +1,17 @@
-"""M2: select cities and major roads (already clipped to the peninsula mask by 01_download.py) and export
-GeoJSON for the viewer.
+"""M2: cities and roads (already clipped to the peninsula mask by 01_download.py) -> GeoJSON for the viewer.
 
-Cities: Natural Earth 10m populated_places with SCALERANK <= 8 (drops the 6 least important of 74 places
-inside the mask). Fields: name, pop (POP_MAX), scalerank, capital (1 = national capital), for label
-size/priority in the viewer.
+Cities: every Natural Earth 10m populated place inside the mask, joined to scripts/cities.csv by the NE
+`NAME`. cities.csv gives the name in regional English usage (e.g. Madinah, Jazan, Sohar, Sana'a), a curated
+Arabic name (NE's NAME_AR has errors) and an include flag (only Hawalli, part of Kuwait City, is excluded).
+The script stops if a place has no row in cities.csv, so new NE places can't slip through unnamed.
+Fields: name, name_ar, scalerank (NE label priority, 0 = most important), capital (1 = national capital).
 
-Roads: Natural Earth 10m roads with type "Major Highway" or "Road". Drops type "Unknown" (mostly
-scalerank 8-10 minor links) and "Track". Fields: type, scalerank.
+Roads: ALL Natural Earth 10m roads inside the mask. NE's `type` field is unreliable here: "Unknown" includes
+trunk routes (e.g. Hail-Buraydah, Najran-Sharurah, Al Kharj-Haradh, Mukalla-Salalah, Muscat-Sur,
+Sohar-Ibri), some at scalerank 8-9, so no attribute filter is safe. A `class` field is added for styling:
+  major     = type "Major Highway" or "Road", or scalerank <= 7
+  secondary = the rest (NE "Unknown"/"Track", scalerank 8-10)
+Fields: class, type, scalerank.
 
 Outputs: docs/data/cities.geojson, docs/data/roads.geojson (EPSG:4326)
 """
@@ -15,14 +20,16 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import shapely
 
 ROOT = Path(__file__).resolve().parents[1]
 INTERIM = ROOT / "data" / "interim"
+CITY_TABLE = ROOT / "scripts" / "cities.csv"
 OUT = ROOT / "docs" / "data"
 
-CITY_MAX_SCALERANK = 8
-ROAD_TYPES = ["Major Highway", "Road"]
+MAJOR_TYPES = ["Major Highway", "Road"]
+MAJOR_MAX_SCALERANK = 7
 PRECISION = 4  # decimals (~11 m)
 
 
@@ -37,33 +44,52 @@ def write_geojson(gdf: gpd.GeoDataFrame, path: Path) -> None:
     print(f"Wrote {path.relative_to(ROOT)}: {len(feats)} features, {path.stat().st_size / 1e3:.0f} kB")
 
 
-def main() -> None:
+def cities() -> gpd.GeoDataFrame:
     places = gpd.read_file(INTERIM / "populated_places_peninsula.gpkg")
-    cities = places[places.SCALERANK <= CITY_MAX_SCALERANK].copy()
-    cities = gpd.GeoDataFrame({
-        "name": cities.NAME,
-        "pop": cities.POP_MAX.astype(int),
-        "scalerank": cities.SCALERANK.astype(int),
-        "capital": (cities.ADM0CAP == 1).astype(int),
-        "geometry": cities.geometry,
-    }, crs=places.crs).sort_values(["scalerank", "pop"], ascending=[True, False])
-    print(f"Cities: SCALERANK <= {CITY_MAX_SCALERANK} -> {len(cities)} of {len(places)}")
-    assert 40 <= len(cities) <= 80, len(cities)
+    table = pd.read_csv(CITY_TABLE, dtype={"notes": str})
+    missing = set(places.NAME) - set(table.ne_name)
+    assert not missing, f"places missing from {CITY_TABLE.name}: {sorted(missing)}"
+    unused = set(table.ne_name) - set(places.NAME)
+    assert not unused, f"rows in {CITY_TABLE.name} with no NE place: {sorted(unused)}"
+    m = places.merge(table, left_on="NAME", right_on="ne_name", validate="one_to_one")
+    m = m[m.include == 1]
+    out = gpd.GeoDataFrame({
+        "name": m["name"],
+        "name_ar": m["name_ar"],
+        "scalerank": m.SCALERANK.astype(int),
+        "capital": (m.ADM0CAP == 1).astype(int),
+        "geometry": m.geometry,
+    }, crs=places.crs).sort_values(["scalerank", "name"])
+    renamed = m[m.NAME != m["name"]]
+    print(f"Cities: {len(out)} of {len(places)} NE places (excluded: "
+          f"{', '.join(table.loc[table.include == 0, 'ne_name'])}); {len(renamed)} renamed to regional usage:")
+    print("  " + "; ".join(f"{a} -> {b}" for a, b in zip(renamed.NAME, renamed["name"])))
+    assert 40 <= len(out) <= 80, len(out)
+    return out
 
-    roads = gpd.read_file(INTERIM / "roads_peninsula.gpkg")
-    major = roads[roads["type"].isin(ROAD_TYPES)]
-    major = gpd.GeoDataFrame({
-        "type": major["type"],
-        "scalerank": major.scalerank.astype(int),
-        "geometry": major.geometry,
-    }, crs=roads.crs)
-    km = major.to_crs(6933).length.sum() / 1e3
-    print(f"Roads: type in {ROAD_TYPES} -> {len(major)} of {len(roads)} features, {km:,.0f} km")
-    print(major["type"].value_counts().to_string())
 
-    assert cities.crs.to_epsg() == 4326 and major.crs.to_epsg() == 4326
-    write_geojson(cities, OUT / "cities.geojson")
-    write_geojson(major, OUT / "roads.geojson")
+def roads() -> gpd.GeoDataFrame:
+    r = gpd.read_file(INTERIM / "roads_peninsula.gpkg")
+    rtype = r["type"].str.strip()
+    major = rtype.isin(MAJOR_TYPES) | (r.scalerank <= MAJOR_MAX_SCALERANK)
+    out = gpd.GeoDataFrame({
+        "class": np.where(major, "major", "secondary"),
+        "type": rtype,
+        "scalerank": r.scalerank.astype(int),
+        "geometry": r.geometry,
+    }, crs=r.crs).sort_values("class", ascending=False)  # secondary first, major drawn on top
+    km = out.to_crs(6933).length / 1e3
+    print(f"Roads: all {len(out)} NE features in the mask, {km.sum():,.0f} km")
+    print(pd.DataFrame({"class": out["class"], "type": out["type"], "km": km})
+          .groupby(["class", "type"]).agg(features=("km", "size"), km=("km", "sum")).round(0).to_string())
+    return out
+
+
+def main() -> None:
+    c, r = cities(), roads()
+    assert c.crs.to_epsg() == 4326 and r.crs.to_epsg() == 4326
+    write_geojson(c, OUT / "cities.geojson")
+    write_geojson(r, OUT / "roads.geojson")
 
 
 if __name__ == "__main__":

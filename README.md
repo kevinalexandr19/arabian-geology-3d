@@ -31,14 +31,15 @@ Source: USGS OFR 97-470B (geo2bg), whose only geological attribute is the age co
 | Triassic | `#8B3A9A` | Tr, TrP |
 | Jurassic | `#2BA6C9` | J, JTr |
 | Cretaceous | `#6DBE45` | K, KJ, TK |
-| Tertiary sedimentary | `#EE8E4A` | T |
+| Paleogene-Neogene sedimentary | `#EE8E4A` | T |
 | Cenozoic volcanics | `#D9B400` | QTv, Qv, TKv, TKi, Czi |
-| Cenozoic eolian sand and gravel | `#F5EFAA` | Qe, Qf, Q, Qsk, QT |
+| Neogene-Quaternary surficial deposits | `#F5EFAA` | Qe, Qf, Q, Qsk, QT |
 
 **Level 2** is an optional label, not a colour. It gives either a finer age range taken from the source code (for example Cambrian-Ordovician, Permian-Triassic) or a named feature (Harrats, Yemen traps, Sabkha, Eolian sand, Alluvium and gravel, Neogene-Quaternary gravels, Cenozoic intrusives).
 
 Limits of the source data:
-- geo2bg does not subdivide the Tertiary, so Paleocene–Eocene, Oligocene and Miocene–Pliocene are mapped together.
+- geo2bg does not subdivide its "Tertiary" unit (T), so Paleocene–Eocene, Oligocene and Miocene–Pliocene are mapped together as Paleogene-Neogene. "Tertiary" is no longer a formal ICS unit, so it is not used in class names.
+- The surficial class is mostly alluvium, gravel and sabkha as well as eolian sand; Level 2 labels separate them. It is Neogene-Quaternary because geo2bg QT gravels are included.
 - The Semail ophiolite and Hawasina allochthon are not separated from the Cretaceous. This is deliberate, since this is a generalized map.
 
 ## Polygon IDs and corrections
@@ -76,12 +77,12 @@ python scripts/03_overlays.py
 
 `01_download.py` downloads the Natural Earth layers into `data/raw/naturalearth/` and writes the clipped layers to `data/interim/` (both gitignored). It regenerates `data/geology_polygons.csv` and prints a summary. `02_geology.py` cleans the polygon coverage (GEOS CoverageCleaner, so shared edges match vertex-for-vertex), applies topology-preserving coverage simplification (tolerance 0.004°, no dissolve, every `pid` kept), rounds coordinates to 4 decimals and writes `docs/data/geology.geojson` (~7 MB). It stops if the pid set differs from `data/geology_polygons.csv`, if any geometry is empty or invalid, or if gaps or overlaps appear. Shapely ≥ 2.2 (GEOS ≥ 3.14) is needed for `coverage_clean`.
 
-`03_overlays.py` writes `docs/data/cities.geojson` (Natural Earth places with `SCALERANK` ≤ 8, 68 cities) and `docs/data/roads.geojson` (types "Major Highway" and "Road", 324 features). `notebooks/m2_preview.py` renders `notebooks/m2_preview.png`.
+`03_overlays.py` writes `docs/data/cities.geojson` and `docs/data/roads.geojson`. Cities: all 73 Natural Earth places in the extent (Hawalli dropped as part of Kuwait City), named in regional English usage (Madinah, Jazan, Sohar, Sana'a, …) with curated Arabic names, both from [`scripts/cities.csv`](scripts/cities.csv); edit that file to rename or drop a city. Roads: all 775 Natural Earth road features in the extent (~42,800 km), with `class` = `major` (NE "Major Highway"/"Road", or scalerank ≤ 7) or `secondary`. NE's road `type` is unreliable in Arabia (many trunk routes are "Unknown"), so nothing is filtered out. Limits: NE roads are generalized for 1:10M (positions can be off by 1–3 km) and miss some recent highways; OpenStreetMap would be the fix but its download hosts are not reachable from the build environment. `notebooks/m2_preview.py` renders `notebooks/m2_preview.png`.
 
 ## Repository layout
 
 ```
-scripts/      01_download.py, 02_geology.py, 03_overlays.py, geology_classes.csv, polygon_overrides.csv
+scripts/      01_download.py, 02_geology.py, 03_overlays.py, geology_classes.csv, cities.csv, polygon_overrides.csv
 data/raw/     geo2bg shapefile (committed); Natural Earth zips (gitignored)
 data/interim/ clipped layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location

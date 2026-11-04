@@ -19,7 +19,7 @@ Owner: geoscientist (petrology/geochemistry, Python). Communicate in English. Ke
 - **Viewer:** MapLibre GL JS (from cdnjs/unpkg), plain HTML/CSS/JS, no framework, no bundler.
 - **Terrain:** AWS Open Data "Terrain Tiles" in Terrarium encoding (`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png`). They are public and need no key. Use them as a `raster-dem` source for both `terrain` and a `hillshade` layer. Include the attribution the dataset requires.
 - **Geology:** USGS Open-File Report 97-470B, "Bedrock geology of the Arabian Peninsula and selected adjacent areas" (geo2bg), DOI 10.3133/ofr97470B. This is public domain, derived from the USGS–Aramco 1963 1:2,000,000 map. Find the data release (USGS ScienceBase or pubs.usgs.gov) and download the shapefile.
-- **Cities and roads:** Natural Earth 1:10m `populated_places` and `roads` (public domain). The only use of an admin layer is `admin_0_countries`, as an internal peninsula clip mask; never display or export it.
+- **Cities and roads:** Natural Earth 1:10m `populated_places` and `roads` (public domain). City names follow regional English usage (Madinah, not Medina) and are curated in `scripts/cities.csv` with Arabic names for a later Arabic UI. All NE roads in the extent are kept (NE `type` is unreliable here), with a `major`/`secondary` class. The only use of an admin layer is `admin_0_countries`, as an internal peninsula clip mask; never display or export it.
 - **Label glyphs:** a public glyph endpoint, for example `https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf`. If that is unreliable, self-host the glyph PBFs in the repo.
 - **Processing:** Python 3.11+, with geopandas, shapely, pyproj, rasterio, numpy, requests. Put the scripts in `scripts/`, numbered in run order. Add an optional exploratory notebook in `notebooks/`, since the owner works in JupyterLab.
 
@@ -52,11 +52,13 @@ geo2bg has a single age attribute, `GLG`. In the peninsula area it contains 27 c
 | Triassic | #8B3A9A | Tr, TrP |
 | Jurassic | #2BA6C9 | J, JTr |
 | Cretaceous | #6DBE45 | K, KJ, TK |
-| Tertiary sedimentary | #EE8E4A | T (Paleocene–Eocene / Oligocene / Miocene–Pliocene are not separable in geo2bg) |
+| Paleogene-Neogene sedimentary | #EE8E4A | T (Paleocene–Eocene / Oligocene / Miocene–Pliocene are not separable in geo2bg) |
 | Cenozoic volcanics | #D9B400 | QTv, Qv, TKv (Yemen traps), TKi, Czi |
-| Cenozoic eolian sand and gravel | #F5EFAA | Qe, Qf, Q, Qsk, QT |
+| Neogene-Quaternary surficial deposits | #F5EFAA | Qe, Qf, Q, Qsk, QT |
 
-**Level 2 is an optional label, not a fill.** It records either a finer age range from the source code (Cambrian-Ordovician, Ordovician-Devonian, Carboniferous-Permian, Permian-Triassic, Triassic-Jurassic, Jurassic-Cretaceous, Cretaceous-Tertiary, Paleozoic-Mesozoic) or a special feature (Harrats, Yemen traps, Sabkha, Eolian sand, Alluvium and gravel, Neogene-Quaternary gravels, Cenozoic intrusives). Polygons with no label have it blank.
+Class names follow the ICS: "Tertiary" is not used (renamed 2026-11-04 from "Tertiary sedimentary" and "Cenozoic eolian sand and gravel").
+
+**Level 2 is an optional label, not a fill.** It records either a finer age range from the source code (Cambrian-Ordovician, Ordovician-Devonian, Carboniferous-Permian, Permian-Triassic, Triassic-Jurassic, Jurassic-Cretaceous, Cretaceous-Paleogene, Paleozoic-Mesozoic) or a special feature (Harrats, Yemen traps, Sabkha, Eolian sand, Alluvium and gravel, Neogene-Quaternary gravels, Cenozoic intrusives). Polygons with no label have it blank.
 
 **Polygon IDs.** Every polygon has a stable `pid` = `AG` + 5-digit `GEO2BG_ID`. Where the peninsula clip splits a source polygon, the parts get `-a`, `-b`, … (largest first). `01_download.py` writes the committed table `data/geology_polygons.csv` (pid, GEO2BG_ID, GLG, level1_class, level1_colour, level2_label, label_source, area_km2, lon, lat) for review. **pids must survive every later step:** M2 does not dissolve.
 
