@@ -1,9 +1,9 @@
-"""M1: fetch Natural Earth layers, clip all inputs to the GCC states, assign polygon IDs, print a summary.
+"""M1: fetch Natural Earth layers, clip all inputs to the Arabian Peninsula states (GCC + Yemen), assign polygon IDs, print a summary.
 
 geo2bg (USGS OFR 97-470B) is already in the repo at data/raw/geology/ and is not downloaded.
 
-GCC mask: the Natural Earth admin-0 layer is used ONLY to build the clip mask here. It is never
-exported or displayed. Mask = (GCC states buffered 0.2 deg seaward) minus (all other countries).
+Peninsula mask: the Natural Earth admin-0 layer is used ONLY to build the clip mask here. It is never
+exported or displayed. Mask = (peninsula states buffered 0.2 deg seaward) minus (all other countries).
 The buffer keeps geo2bg's own coastline intact where it differs from Natural Earth's.
 
 Polygon IDs: pid = "AG" + GEO2BG_ID (5 digits). If the mask splits a source polygon, the parts
@@ -13,7 +13,7 @@ Labels: scripts/geology_classes.csv maps GLG -> level1_class (+ colour) and an o
 scripts/polygon_overrides.csv then overrides individual polygons by pid.
 
 Outputs:
-  data/interim/*.gpkg            clipped layers (gitignored); geology_gcc.gpkg has pid + labels
+  data/interim/*.gpkg            clipped layers (gitignored); geology_peninsula.gpkg has pid + labels
   data/geology_polygons.csv      committed per-polygon table (no geometry) for review/edits by pid
 """
 from pathlib import Path
@@ -33,7 +33,7 @@ OVERRIDES = ROOT / "scripts" / "polygon_overrides.csv"
 POLY_TABLE = ROOT / "data" / "geology_polygons.csv"
 
 BBOX = (34.0, 12.0, 60.0, 33.0)  # lon_min, lat_min, lon_max, lat_max (EPSG:4326)
-GCC = ["SAU", "KWT", "BHR", "QAT", "ARE", "OMN"]
+STATES = ["SAU", "KWT", "BHR", "QAT", "ARE", "OMN", "YEM"]  # GCC + Yemen
 COAST_BUFFER_DEG = 0.2
 MIN_PART_KM2 = 0.1  # drop clip slivers smaller than this
 EQUAL_AREA = 6933
@@ -59,14 +59,14 @@ def download(url: str, dest: Path) -> Path:
     return dest
 
 
-def gcc_mask(countries_zip: Path):
+def peninsula_mask(countries_zip: Path):
     c = gpd.read_file(f"zip://{countries_zip}").to_crs(4326)
     c = c[c.intersects(box(*BBOX))]
-    gcc = c[c["ADM0_A3"].isin(GCC)]
-    others = c[~c["ADM0_A3"].isin(GCC)]
-    print(f"GCC states in mask: {sorted(gcc['ADMIN'])}")
+    keep = c[c["ADM0_A3"].isin(STATES)]
+    others = c[~c["ADM0_A3"].isin(STATES)]
+    print(f"States in mask: {sorted(keep['ADMIN'])}")
     print(f"Excluded neighbours: {sorted(others['ADMIN'])}")
-    mask = gcc.union_all().buffer(COAST_BUFFER_DEG).difference(others.union_all())
+    mask = keep.union_all().buffer(COAST_BUFFER_DEG).difference(others.union_all())
     return mask.intersection(box(*BBOX))
 
 
@@ -77,7 +77,7 @@ def area_km2(gdf: gpd.GeoDataFrame) -> pd.Series:
 def summary(name: str, raw: gpd.GeoDataFrame, clipped: gpd.GeoDataFrame) -> None:
     print(f"\n=== {name} ===")
     print(f"CRS:      {raw.crs.to_string() if raw.crs else None}")
-    print(f"Features: {len(raw)} total -> {len(clipped)} in GCC mask")
+    print(f"Features: {len(raw)} total -> {len(clipped)} in peninsula mask")
     print(f"Geometry: {sorted(clipped.geom_type.unique())}")
     print(f"Fields:   {[c for c in raw.columns if c != 'geometry']}")
 
@@ -138,16 +138,16 @@ def main() -> None:
     zips = {k: download(u, NE_DIR / Path(u).name) for k, u in NE_URLS.items()}
     INTERIM.mkdir(parents=True, exist_ok=True)
 
-    mask = gcc_mask(zips["admin_0_countries"])
+    mask = peninsula_mask(zips["admin_0_countries"])
 
     # Geology
     geo_raw = gpd.read_file(GEO_SHP)
     geo = build_geology(mask)
     summary("geo2bg (USGS OFR 97-470B), clipped + exploded", geo_raw, geo)
-    geo.to_file(INTERIM / "geology_gcc.gpkg", driver="GPKG")
+    geo.to_file(INTERIM / "geology_peninsula.gpkg", driver="GPKG")
     pd.DataFrame(geo.drop(columns="geometry")).to_csv(POLY_TABLE, index=False)
 
-    print("\nGLG units in GCC area (polygons, km2):")
+    print("\nGLG units in peninsula area (polygons, km2):")
     print(geo.groupby("GLG").agg(polygons=("pid", "size"), area_km2=("area_km2", "sum"))
           .sort_values("area_km2", ascending=False).round(0).to_string())
     print("\nLevel 1 classes:")
@@ -166,9 +166,9 @@ def main() -> None:
             print("SCALERANK counts:", gdf_c["SCALERANK"].value_counts().sort_index().to_dict())
         else:
             print("type counts:", gdf_c["type"].value_counts().to_dict())
-        gdf_c.to_file(INTERIM / f"{key}_gcc.gpkg", driver="GPKG")
+        gdf_c.to_file(INTERIM / f"{key}_peninsula.gpkg", driver="GPKG")
 
-    print(f"\nWrote {INTERIM.relative_to(ROOT)}/*_gcc.gpkg and {POLY_TABLE.relative_to(ROOT)}")
+    print(f"\nWrote {INTERIM.relative_to(ROOT)}/*_peninsula.gpkg and {POLY_TABLE.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
