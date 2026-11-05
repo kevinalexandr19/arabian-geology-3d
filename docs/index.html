@@ -24,6 +24,18 @@
         <button type="button" id="all-on">All on</button>
         <button type="button" id="all-off">All off</button>
       </div>
+      <p class="scale-note">Elevation, m: 0 — 3,700; box = p10–p90, tick = median</p>
+    </section>
+
+    <section class="tour">
+      <h2>Tour</h2>
+      <div id="bookmarks" class="bookmarks"></div>
+      <div class="tour-actions">
+        <button type="button" id="tour-play">▶ Play tour</button>
+        <button type="button" id="tour-stop" disabled>■ Stop</button>
+        <button type="button" id="tour-home">⌂ Home</button>
+      </div>
+      <p class="hint">Each stop shows flags on key summits, labels, outlines of the featured units and, where relevant, the escarpment trace (dashed red, derived from the z7 DEM).</p>
     </section>
 
     <section class="controls">
@@ -43,6 +55,11 @@
 
   <button id="panel-open" class="panel-open" aria-label="Show legend">Legend</button>
   <div id="map"></div>
+  <div id="caption" class="caption" hidden>
+    <button type="button" class="caption-close" aria-label="Hide caption">×</button>
+    <h3></h3>
+    <p></p>
+  </div>
 
   <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
   <script src="app.js"></script>

@@ -11,7 +11,7 @@ A generalized geological map of the Arabian Peninsula, draped over 3D terrain in
 | M1 — data acquisition, clipping, classification, polygon IDs | done |
 | M2 — simplified GeoJSON for the web | done |
 | M3 — MapLibre 3D viewer | done |
-| M4 — tour bookmarks and per-class elevation stats | to do |
+| M4 — tour bookmarks and per-class elevation stats | done |
 | M5 — publish on GitHub Pages | to do |
 
 ## Extent
@@ -87,18 +87,30 @@ The OSM data are Geofabrik extracts (`gcc-states`, `yemen`, 2026-11-03) filtered
 python scripts/05_units.py
 ```
 
+Elevation statistics per geology class (needs `rasterio` and `numpy` in addition):
+
+```bash
+pip install rasterio numpy
+```
+
+```bash
+python scripts/04_elevation_stats.py
+```
+
+`04_elevation_stats.py` downloads the 90 AWS Terrarium tiles at zoom 7 that cover the geology (cached in `data/interim/terrarium/`). It decodes elevation as R×256 + G + B/256 − 32768 and mosaics them on their native EPSG:3857 grid (~1.22 km/px). It then rasterizes `docs/data/geology.geojson` onto the same grid (a pixel belongs to the polygon containing its centre) and computes min, p10, median, p90, max, pixel count and the number of pixels below 0 m, per Level 1 class and per Level 2 label. Each pixel counts once: large polygons weigh more and there is no per-polygon averaging. Negative values (coastal pixels that fall on bathymetry) are kept and counted. Web-Mercator pixels shrink towards the north (cos lat, 0.97 at 13°N, 0.85 at 32°N); this is ignored. The result is `docs/data/elev_stats.json`, which the legend draws as box plots on a shared 0–3,700 m scale. The script prints a table and three sanity checks. The Sabkha check (median near 0 m) fails because the inland sabkhas (Umm as Samim, landward Sabkha Matti, Rub' al Khali interdune flats, Al Jafr) lift the median to ~56 m; coastal sabkhas sit at 0–10 m.
+
 `notebooks/m2_preview.py` renders `notebooks/m2_preview.png`.
 
 ## Repository layout
 
 ```
-scripts/      01_download.py, 02_geology.py, 03_overlays.py, 05_units.py, geology_classes.csv, cities.csv, polygon_overrides.csv
+scripts/      01_download.py, 02_geology.py, 03_overlays.py, 04_elevation_stats.py, 05_units.py, geology_classes.csv, cities.csv, polygon_overrides.csv
 data/raw/     geo2bg shapefile and OSM road extracts in osm/ (committed); Natural Earth zips (gitignored)
 data/interim/ clipped layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location
-docs/data/    web layers: geology.geojson, cities.geojson, roads.geojson, units.json
+docs/data/    web layers: geology.geojson, cities.geojson, roads.geojson, units.json, elev_stats.json
 docs/         web viewer: index.html, app.js, style.css
-notebooks/    m2_preview.py / .png, m3_*.png viewer screenshots
+notebooks/    m2_preview.py / .png, m3_*.png viewer screenshots, m4_screenshots.py / m4_*.png tour and legend check
 ```
 
 ## Viewer
@@ -110,6 +122,8 @@ python -m http.server -d docs
 ```
 
 Then open http://localhost:8000. The map loads ~8.5 MB of GeoJSON uncompressed (geology 7.0 MB, roads 1.5 MB), ~2.2 MB gzipped as GitHub Pages serves it. Screenshots of the M3 check are in `notebooks/m3_*.png`.
+
+The legend shows, per class, an elevation box plot (line = min–max, box = p10–p90, tick = median; hover for numbers). The **Tour** section has eight camera presets (Hijaz–Asir escarpment, Harrat Rahat/Khaybar, Tuwaiq, Rub' al Khali, Hajar, Yemen highlands, Dhofar, UAE sabkhas and Musandam), each with a two-sentence caption. **Play tour** steps through them (~8 s per stop); any drag or zoom stops it, and **Home** returns to the peninsula view. Cameras and captions are in the `STOPS` array at the top of the tour section in `docs/app.js`. Each stop also has `marks`, shown only while that stop is active: red **flags** on named summits (Jabal Sawda, Jabal Shams, Jabal an-Nabi Shu'ayb, Jabal Samhan, Jebel Harim; positions are the z7 DEM maxima near each summit, heights are the commonly quoted values), **area labels** (Arabian Shield, Tihamah, the harrats, Jabal Akhdar and Saih Hatat windows, Semail ophiolite, Yemen traps, Musandam and others), a dark **outline** of the featured geology polygons (harrats, Jurassic outcrop, Oman windows, Yemen traps, sabkhas; a MapLibre filter on `geology.geojson`) and, for stops 1 and 3, a dashed red **escarpment trace**. The traces were derived from the z7 Terrarium mosaic: at each 0.25° of latitude, the steepest eastward rise over ~5–7 km (inside the Jurassic outcrop for Tuwaiq, 20.0–25.25°N; between 41° and 43.6°E for Asir, 18.0–20.25°N). They are approximate, at the ~1–5 km level. Flags and area labels are DOM markers, so they stand upright on the terrain and are never hidden by terrain occlusion. To add or move one, edit `marks` in `STOPS`. `notebooks/m4_screenshots.py` (Python Playwright, with the site served on port 8000) reshoots `notebooks/m4_*.png`.
 
 ## Sources and licences
 
