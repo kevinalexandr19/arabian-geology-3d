@@ -19,7 +19,8 @@ Owner: geoscientist (petrology/geochemistry, Python). Communicate in English. Ke
 - **Viewer:** MapLibre GL JS (from cdnjs/unpkg), plain HTML/CSS/JS, no framework, no bundler.
 - **Terrain:** AWS Open Data "Terrain Tiles" in Terrarium encoding (`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png`). They are public and need no key. Use them as a `raster-dem` source for both `terrain` and a `hillshade` layer. Include the attribution the dataset requires.
 - **Geology:** USGS Open-File Report 97-470B, "Bedrock geology of the Arabian Peninsula and selected adjacent areas" (geo2bg), DOI 10.3133/ofr97470B. This is public domain, derived from the USGS–Aramco 1963 1:2,000,000 map. Find the data release (USGS ScienceBase or pubs.usgs.gov) and download the shapefile.
-- **Cities and roads:** Natural Earth 1:10m `populated_places` and `roads` (public domain). City names follow regional English usage (Madinah, not Medina) and are curated in `scripts/cities.csv` with Arabic names for a later Arabic UI. All NE roads in the extent are kept (NE `type` is unreliable here), with a `major`/`secondary` class. The only use of an admin layer is `admin_0_countries`, as an internal peninsula clip mask; never display or export it.
+- **Cities:** Natural Earth 1:10m `populated_places` (public domain). City names follow regional English usage (Madinah, not Medina) and are curated in `scripts/cities.csv` with Arabic names for a later Arabic UI. The only use of an admin layer is `admin_0_countries`, as an internal peninsula clip mask; never display or export it.
+- **Roads:** OpenStreetMap `highway=motorway|trunk|primary` (ODbL, "© OpenStreetMap contributors" must be shown), from Geofabrik extracts filtered with pyosmium and committed to `data/raw/osm/`. Overpass and Geofabrik are blocked from the cloud environment, so the owner refreshes the extracts locally. Changed from Natural Earth 10m roads (owner decision, 2026-11-05) because NE roads are generalized to 1:10M and miss or misclassify trunk routes. Extra dependency: `osmium` (pyosmium ≥ 4.0), to read the .osm.pbf files.
 - **Label glyphs:** a public glyph endpoint, for example `https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf`. If that is unreliable, self-host the glyph PBFs in the repo.
 - **Processing:** Python 3.11+, with geopandas, shapely, pyproj, rasterio, numpy, requests. Put the scripts in `scripts/`, numbered in run order. Add an optional exploratory notebook in `notebooks/`, since the owner works in JupyterLab.
 
@@ -27,7 +28,7 @@ Owner: geoscientist (petrology/geochemistry, Python). Communicate in English. Ke
 ```
 scripts/        01_download.py, 02_geology.py, 03_overlays.py, 04_elevation_stats.py,
                 geology_classes.csv, polygon_overrides.csv
-data/raw/       sources (geo2bg committed; Natural Earth zips gitignored)
+data/raw/       sources (geo2bg and filtered OSM roads in osm/ committed; Natural Earth zips gitignored)
 data/interim/   clipped layers (gitignored)
 data/geology_polygons.csv   per-polygon table: pid + labels (committed)
 docs/           the published site (GitHub Pages serves /docs from main)
@@ -106,5 +107,6 @@ Write the README (live link, rebuild steps, sources and licences). Configure Git
 ## Sources and licences
 - USGS OFR 97-470B (Pollastro, Karshbaum & Viger) — public domain; cite the DOI.
 - Natural Earth — public domain.
+- OpenStreetMap (roads) — © OpenStreetMap contributors, ODbL 1.0; credit required in the viewer attribution.
 - AWS Terrain Tiles — open data; credit the underlying sources as the dataset documentation requires.
 - MapLibre GL JS — BSD-3.

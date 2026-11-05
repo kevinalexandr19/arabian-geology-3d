@@ -60,7 +60,7 @@ Empty fields keep the value that comes from the polygon's unit. The script stops
 Requires Python 3.11+.
 
 ```bash
-pip install geopandas "shapely>=2.2" pyproj pyogrio requests matplotlib
+pip install geopandas "shapely>=2.2" pyproj pyogrio requests matplotlib "osmium>=4.0"
 ```
 
 ```bash
@@ -75,15 +75,19 @@ python scripts/02_geology.py
 python scripts/03_overlays.py
 ```
 
-`01_download.py` downloads the Natural Earth layers into `data/raw/naturalearth/` and writes the clipped layers to `data/interim/` (both gitignored). It regenerates `data/geology_polygons.csv` and prints a summary. `02_geology.py` cleans the polygon coverage (GEOS CoverageCleaner, so shared edges match vertex-for-vertex), applies topology-preserving coverage simplification (tolerance 0.004°, no dissolve, every `pid` kept), rounds coordinates to 4 decimals and writes `docs/data/geology.geojson` (~7 MB). It stops if the pid set differs from `data/geology_polygons.csv`, if any geometry is empty or invalid, or if gaps or overlaps appear. Shapely ≥ 2.2 (GEOS ≥ 3.14) is needed for `coverage_clean`.
+`01_download.py` downloads the Natural Earth layers into `data/raw/naturalearth/`, reads the OpenStreetMap road extracts in `data/raw/osm/`, and writes the clipped layers to `data/interim/` (naturalearth and interim are gitignored). It regenerates `data/geology_polygons.csv` and prints a summary. `02_geology.py` cleans the polygon coverage (GEOS CoverageCleaner, so shared edges match vertex-for-vertex), applies topology-preserving coverage simplification (tolerance 0.004°, no dissolve, every `pid` kept), rounds coordinates to 4 decimals and writes `docs/data/geology.geojson` (~7 MB). It stops if the pid set differs from `data/geology_polygons.csv`, if any geometry is empty or invalid, or if gaps or overlaps appear. Shapely ≥ 2.2 (GEOS ≥ 3.14) is needed for `coverage_clean`.
 
-`03_overlays.py` writes `docs/data/cities.geojson` and `docs/data/roads.geojson`. Cities: all 73 Natural Earth places in the extent (Hawalli dropped as part of Kuwait City), named in regional English usage (Madinah, Jazan, Sohar, Sana'a, …) with curated Arabic names, both from [`scripts/cities.csv`](scripts/cities.csv); edit that file to rename or drop a city. Roads: all 775 Natural Earth road features in the extent (~42,800 km), with `class` = `major` (NE "Major Highway"/"Road", or scalerank ≤ 7) or `secondary`. NE's road `type` is unreliable in Arabia (many trunk routes are "Unknown"), so nothing is filtered out. Limits: NE roads are generalized for 1:10M (positions can be off by 1–3 km) and miss some recent highways; OpenStreetMap would be the fix but its download hosts are not reachable from the build environment. `notebooks/m2_preview.py` renders `notebooks/m2_preview.png`.
+`03_overlays.py` writes `docs/data/cities.geojson` and `docs/data/roads.geojson`. Cities: all 73 Natural Earth places in the extent (Hawalli dropped as part of Kuwait City), named in regional English usage (Madinah, Jazan, Sohar, Sana'a, …) with curated Arabic names, both from [`scripts/cities.csv`](scripts/cities.csv); edit that file to rename or drop a city. Roads: OpenStreetMap `highway=motorway|trunk|primary` (~98,800 km), merged per (class, `ref`), or per (class, name) where there is no ref, giving 1,400 features (1.5 MB). Fields: `class`, `ref`, `name_en`, `name_ar`. Geometry is simplified at 0.001° (~100 m), parts under 0.5 km are dropped and coordinates are rounded to 4 decimals. Natural Earth roads were used before. They were dropped because they are generalized for 1:10M (off by 1–3 km), miss recent highways and misclassify trunk routes as "Unknown". The script still prints the NE roads with no OSM motorway/trunk/primary within 5 km, as a check.
+
+The OSM data are Geofabrik extracts (`gcc-states`, `yemen`, 2026-11-03) filtered to the three road classes and committed to `data/raw/osm/` (8.5 MB). Overpass and Geofabrik are not reachable from the cloud build environment. To refresh, download https://download.geofabrik.de/asia/gcc-states-latest.osm.pbf and https://download.geofabrik.de/asia/yemen-latest.osm.pbf, then run `python scripts/01_download.py --osm-extract <download dir> <YYMMDD>` and update `OSM_FILES` in `01_download.py`.
+
+`notebooks/m2_preview.py` renders `notebooks/m2_preview.png`.
 
 ## Repository layout
 
 ```
 scripts/      01_download.py, 02_geology.py, 03_overlays.py, geology_classes.csv, cities.csv, polygon_overrides.csv
-data/raw/     geo2bg shapefile (committed); Natural Earth zips (gitignored)
+data/raw/     geo2bg shapefile and OSM road extracts in osm/ (committed); Natural Earth zips (gitignored)
 data/interim/ clipped layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location
 docs/data/    web layers: geology.geojson, cities.geojson, roads.geojson
@@ -94,6 +98,7 @@ notebooks/    m2_preview.py / .png
 ## Sources and licences
 
 - **Geology:** Pollastro, R.M., 1998, *Bedrock geology of the Arabian Peninsula and selected adjacent areas (geo2bg)*, digital dataset in Pollastro, R.M., Karshbaum, A.S., and Viger, R.J., 1999, *Map showing geology, oil and gas fields and geologic provinces of the Arabian Peninsula*, USGS Open-File Report 97-470-B, https://doi.org/10.3133/ofr97470B. Public domain. Derived from the USGS–ARAMCO 1:2,000,000 geologic map (1963).
-- **Cities, roads, clip mask:** Natural Earth 1:10m, public domain.
+- **Cities, clip mask:** Natural Earth 1:10m, public domain.
+- **Roads:** © OpenStreetMap contributors, https://www.openstreetmap.org/copyright. Extracts from Geofabrik (download.geofabrik.de), 2026-11-03. `docs/data/roads.geojson` and `data/raw/osm/*.osm.pbf` are derived from OpenStreetMap and licensed under the [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/1-0/). You may copy, share and adapt them, provided you credit "© OpenStreetMap contributors" and share any public adapted database under the ODbL. The viewer must show this credit in its map attribution. The rest of the repository keeps its own licence.
 - **Terrain (from M3):** AWS Open Data Terrain Tiles (Terrarium).
 - **Viewer (from M3):** MapLibre GL JS, BSD-3.

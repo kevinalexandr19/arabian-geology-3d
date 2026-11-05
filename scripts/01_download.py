@@ -12,13 +12,25 @@ get a suffix -a, -b, ... (largest first). IDs are stable while the source data a
 Labels: scripts/geology_classes.csv maps GLG -> level1_class (+ colour) and an optional level2_label.
 scripts/polygon_overrides.csv then overrides individual polygons by pid.
 
+OSM roads: highway=motorway|trunk|primary from OpenStreetMap (ODbL, (c) OpenStreetMap contributors).
+Overpass and Geofabrik are not reachable from the cloud build environment, so the raw data are Geofabrik
+extracts (gcc-states, yemen; 2026-11-03) filtered locally to these three classes and committed to
+data/raw/osm/ (8.5 MB). To refresh: download https://download.geofabrik.de/asia/gcc-states-latest.osm.pbf
+and .../yemen-latest.osm.pbf, then run
+  python scripts/01_download.py --osm-extract <dir with the full .osm.pbf files> <YYMMDD>
+and update OSM_FILES. Ways are de-duplicated by OSM id (the two extracts overlap at the border) and
+clipped with the same peninsula mask.
+
 Outputs:
   data/interim/*.gpkg            clipped layers (gitignored); geology_peninsula.gpkg has pid + labels
   data/geology_polygons.csv      committed per-polygon table (no geometry) for review/edits by pid
 """
+import sys
 from pathlib import Path
 
 import geopandas as gpd
+import osmium
+import shapely
 import pandas as pd
 import requests
 from shapely.geometry import box
@@ -39,6 +51,11 @@ COAST_BUFFER_DEG = 0.2
 EXCLUDE_BOXES = {"Socotra archipelago": (51.5, 11.0, 55.0, 13.0)}
 MIN_PART_KM2 = 0.1  # drop clip slivers smaller than this
 EQUAL_AREA = 6933
+
+OSM_DIR = RAW / "osm"
+OSM_FILES = ["gcc_roads_261103.osm.pbf", "yemen_roads_261103.osm.pbf"]
+OSM_CLASSES = ("motorway", "trunk", "primary")
+OSM_TAGS = {"ref": "ref", "int_ref": "int_ref", "name": "name", "name_en": "name:en", "name_ar": "name:ar"}
 
 NE_URLS = {
     "populated_places": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_populated_places.zip",
@@ -73,6 +90,39 @@ def peninsula_mask(countries_zip: Path):
         print(f"Removed from mask: {name} {b}")
         mask = mask.difference(box(*b))
     return mask.intersection(box(*BBOX))
+
+
+def osm_extract(src_dir: Path, date: str) -> None:
+    """Filter full Geofabrik extracts to OSM_CLASSES ways (+ their nodes) into data/raw/osm/."""
+    road_filter = osmium.filter.TagFilter(*[("highway", c) for c in OSM_CLASSES])
+    OSM_DIR.mkdir(parents=True, exist_ok=True)
+    for region, short in (("gcc-states", "gcc"), ("yemen", "yemen")):
+        src = next(Path(src_dir).glob(f"{region}-*.osm.pbf"))
+        dst = OSM_DIR / f"{short}_roads_{date}.osm.pbf"
+        with osmium.BackReferenceWriter(str(dst), ref_src=str(src), overwrite=True) as w:
+            for way in osmium.FileProcessor(str(src), osmium.osm.WAY).with_filter(road_filter):
+                w.add(way)
+        print(f"  {src.name} -> {dst.relative_to(ROOT)} ({dst.stat().st_size / 1e6:.1f} MB)")
+
+
+def read_osm_roads() -> gpd.GeoDataFrame:
+    wkb = osmium.geom.WKBFactory()
+    rows, n_bad = {}, 0
+    for fname in OSM_FILES:
+        fp = osmium.FileProcessor(str(OSM_DIR / fname), osmium.osm.NODE | osmium.osm.WAY).with_locations()
+        for w in fp:
+            if not w.is_way() or w.id in rows or w.tags.get("highway") not in OSM_CLASSES:
+                continue
+            try:
+                geom = shapely.from_wkb(wkb.create_linestring(w))
+            except (osmium.InvalidLocationError, RuntimeError):
+                n_bad += 1
+                continue
+            rows[w.id] = {"osm_id": w.id, "highway": w.tags["highway"],
+                          **{k: w.tags.get(t, "") for k, t in OSM_TAGS.items()}, "geometry": geom}
+    if n_bad:
+        print(f"Skipped {n_bad} OSM ways with missing node locations")
+    return gpd.GeoDataFrame(list(rows.values()), crs=4326)
 
 
 def area_km2(gdf: gpd.GeoDataFrame) -> pd.Series:
@@ -173,8 +223,23 @@ def main() -> None:
             print("type counts:", gdf_c["type"].value_counts().to_dict())
         gdf_c.to_file(INTERIM / f"{key}_peninsula.gpkg", driver="GPKG")
 
+    # OSM main roads, same mask
+    osm = read_osm_roads()
+    osm_c = gpd.clip(osm, mask)
+    osm_c = osm_c[osm_c.geom_type.isin(["LineString", "MultiLineString"])]
+    summary(f"OpenStreetMap roads ({', '.join(OSM_FILES)})", osm, osm_c)
+    km = osm_c.to_crs(EQUAL_AREA).length / 1e3
+    print("highway (ways, km):", {h: (int((osm_c.highway == h).sum()), round(km[osm_c.highway == h].sum()))
+                                  for h in OSM_CLASSES})
+    print(f"ways with ref: {(osm_c.ref != '').mean():.0%}, name:en: {(osm_c.name_en != '').mean():.0%}, "
+          f"name:ar: {(osm_c.name_ar != '').mean():.0%}")
+    osm_c.to_file(INTERIM / "osm_roads_peninsula.gpkg", driver="GPKG")
+
     print(f"\nWrote {INTERIM.relative_to(ROOT)}/*_peninsula.gpkg and {POLY_TABLE.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 4 and sys.argv[1] == "--osm-extract":
+        osm_extract(Path(sys.argv[2]), sys.argv[3])
+    else:
+        main()
