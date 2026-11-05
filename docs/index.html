@@ -36,8 +36,11 @@
         <button type="button" id="all-on">All on</button>
         <button type="button" id="all-off">All off</button>
       </div>
-      <p class="scale-note">Elevation, m: 0 — 3,700; box = p10–p90, tick = median. Tap or click a bar for the numbers.</p>
     </details>
+
+    <button type="button" class="launch" data-open="stats-win">
+      <span>Elevation statistics</span><span class="launch-ico" aria-hidden="true">↗</span>
+    </button>
 
     <details class="sec tour">
       <summary>Tour</summary>
@@ -47,7 +50,7 @@
         <button type="button" id="tour-stop" disabled>■ Stop</button>
         <button type="button" id="tour-home">⌂ Home</button>
       </div>
-      <p class="hint">Each stop shows flags on key summits, labels, outlines of the featured units and, where relevant, the escarpment trace (dashed red, derived from the z7 DEM).</p>
+      <p class="hint">Use ◀ Prev / Next ▶ in the caption to step through the stops. Each stop shows flags on key summits, labels, outlines or highlights of the featured units and, where relevant, the escarpment trace (dashed red, derived from the z7 DEM).</p>
     </details>
 
     <details class="sec controls">
@@ -65,28 +68,9 @@
       <p class="hint">Click a polygon for unit details. Right-drag (or two-finger drag) to tilt and rotate.</p>
     </details>
 
-    <details class="sec about">
-      <summary>About</summary>
-      <p class="author">Kevin Alexander Gomez</p>
-      <p class="links">
-        <a href="https://www.linkedin.com/in/kevin-alexander-gomez/" target="_blank" rel="noopener">LinkedIn</a>
-        <span aria-hidden="true">·</span>
-        <a href="https://github.com/kevinalexandr19" target="_blank" rel="noopener">GitHub</a>
-        <span aria-hidden="true">·</span>
-        <a href="https://github.com/kevinalexandr19/arabian-geology-3d" target="_blank" rel="noopener">Source code</a>
-      </p>
-      <p>Dedicated to KFUPM and the College of Petroleum Engineering and Geosciences (CPG).</p>
-      <p class="disclaimer">Generalized 1:2,000,000-scale map for teaching and outreach; not for site-specific use.</p>
-      <h3>Data</h3>
-      <ul class="credits">
-        <li>Geology: <a href="https://doi.org/10.3133/ofr97470B" target="_blank" rel="noopener">USGS Open-File Report 97-470-B</a> (geo2bg; Pollastro, Karshbaum &amp; Viger, after the USGS–ARAMCO 1963 map), public domain</li>
-        <li>Terrain: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles</a> (Mapzen; SRTM, GMTED2010, ETOPO1)</li>
-        <li>Roads: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL</li>
-        <li>Cities: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>, public domain</li>
-        <li>Map library: <a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre GL JS</a></li>
-      </ul>
-      <p class="made">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> · Last updated <time datetime="2026-11-05">5 November 2026</time></p>
-    </details>
+    <button type="button" class="launch" data-open="about-win">
+      <span>About the project</span><span class="launch-ico" aria-hidden="true">↗</span>
+    </button>
   </aside>
 
   <button id="panel-open" class="panel-open" aria-label="Show legend">Legend</button>
@@ -103,9 +87,75 @@
     <h3></h3>
     <p></p>
     <div class="caption-actions">
-      <button type="button" id="cap-stop" hidden>■ Stop tour</button>
+      <button type="button" id="cap-prev" aria-label="Previous stop">◀<span class="w"> Prev</span></button>
+      <span id="cap-count" class="cap-count"></span>
+      <button type="button" id="cap-next" aria-label="Next stop"><span class="w">Next </span>▶</button>
+      <span class="cap-gap"></span>
+      <button type="button" id="cap-stop" hidden>■ Stop</button>
       <button type="button" id="cap-home">⌂ Home</button>
     </div>
+  </div>
+
+
+  <!-- Elevation statistics window -->
+  <div id="stats-win" class="win-backdrop" hidden>
+    <section class="win win-stats" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+      <button type="button" class="win-close" aria-label="Close">×</button>
+      <header class="win-head">
+        <p class="win-kicker">Geology × topography</p>
+        <h2 id="stats-title">Elevation by geological class</h2>
+        <p class="win-sub">Terrain beneath each Level 1 class, sampled from AWS Terrain Tiles at zoom 7 (~1.2 km pixels). Bars: thin line = min–max, box = 10th–90th percentile, dark tick = median. Classes sorted by median.</p>
+      </header>
+      <div id="stats-chart" class="schart"></div>
+      <h3 class="win-h3">Selected features (Level 2)</h3>
+      <div id="stats-chart-l2" class="schart"></div>
+      <h3 class="win-h3">Observations</h3>
+      <ul id="stats-notes" class="snotes"></ul>
+      <details class="stable-wrap">
+        <summary>Table of values (m)</summary>
+        <div class="stable-scroll"><table id="stats-table" class="stable"></table></div>
+      </details>
+      <p class="win-foot">Each pixel counts once; values below 0 m are coastal pixels over the sea floor and are clipped at 0 in the bars. Generalized 1:2,000,000 geology, so contacts are approximate at the kilometre scale.</p>
+    </section>
+  </div>
+
+  <!-- About window -->
+  <div id="about-win" class="win-backdrop" hidden>
+    <section class="win win-about" role="dialog" aria-modal="true" aria-labelledby="about-title">
+      <button type="button" class="win-close" aria-label="Close">×</button>
+      <header class="about-hero">
+        <div class="about-strata" aria-hidden="true">
+          <span style="background:#F5EFAA"></span><span style="background:#EE8E4A"></span><span style="background:#6DBE45"></span><span style="background:#2BA6C9"></span><span style="background:#8B3A9A"></span><span style="background:#9DBF95"></span><span style="background:#E8456B"></span>
+        </div>
+        <p class="win-kicker">About the project</p>
+        <h2 id="about-title">Arabia 3D</h2>
+        <p class="about-lede">A generalized geological map of the Arabian Peninsula draped over 3D terrain, built to show how rock type controls relief: the Arabian Shield, the cuestas of the platform, the harrats, the sand seas and the Oman mountains.</p>
+      </header>
+      <div class="about-body">
+        <div class="about-author">
+          <div class="avatar" aria-hidden="true">KG</div>
+          <div>
+            <p class="author">Kevin Alexander Gomez</p>
+            <p class="links">
+              <a href="https://www.linkedin.com/in/kevin-alexander-gomez/" target="_blank" rel="noopener">LinkedIn</a>
+              <a href="https://github.com/kevinalexandr19" target="_blank" rel="noopener">GitHub</a>
+              <a href="https://github.com/kevinalexandr19/arabian-geology-3d" target="_blank" rel="noopener">Source code</a>
+            </p>
+          </div>
+        </div>
+        <p class="dedication">Dedicated to KFUPM and the College of Petroleum Engineering and Geosciences (CPG).</p>
+        <h3 class="win-h3">Data and software</h3>
+        <ul class="credits">
+          <li><span class="cred-k">Geology</span><span><a href="https://doi.org/10.3133/ofr97470B" target="_blank" rel="noopener">USGS Open-File Report 97-470-B</a> (geo2bg; Pollastro, Karshbaum &amp; Viger, after the USGS–ARAMCO 1963 map). Public domain.</span></li>
+          <li><span class="cred-k">Terrain</span><span><a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles</a> (Mapzen; SRTM, GMTED2010, ETOPO1).</span></li>
+          <li><span class="cred-k">Roads</span><span>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL.</span></li>
+          <li><span class="cred-k">Cities</span><span><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>. Public domain.</span></li>
+          <li><span class="cred-k">Map library</span><span><a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre GL JS</a> (BSD-3).</span></li>
+        </ul>
+        <p class="disclaimer">Generalized 1:2,000,000-scale map for teaching and outreach; not for site-specific use.</p>
+      </div>
+      <footer class="about-foot made">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> · Last updated <time datetime="2026-11-05">5 November 2026</time></footer>
+    </section>
   </div>
 
   <div id="loading" class="loading" role="status"><span class="spinner"></span>Loading geology…</div>

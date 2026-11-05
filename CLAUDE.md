@@ -73,8 +73,8 @@ Simplify the geometry so that `docs/data/geology.geojson` is **under 8 MB**. Use
 - **Elevation stats** are computed per L1 class. Per-L2-label stats are optional, for labelled features such as harrats and sabkha.
 
 ## "Geology × topography" features
-- **Bookmarks / tour:** 6–8 camera presets with flyTo, pitch and bearing, each with a two-sentence caption. Suggested stops: the Hijaz–Asir escarpment and the Shield; Harrat Rahat / Harrat Khaybar; the Tuwaiq escarpment; the Rub' al Khali; the Hajar Mountains; the Yemen highlands and traps; Dhofar; the UAE coastal sabkhas and Musandam.
-- **Elevation stats per class:** precompute the min, median and max elevation per L1 class (optionally also per L2 label), from Terrarium tiles sampled at a low zoom (z6–7). Show them in the legend as small inline bars. This makes the correlation quantitative.
+- **Bookmarks / tour:** camera presets (10 since 2026-11-05, incl. overview stops for the whole Arabian Shield and the Arabian Platform; ◀ Prev / Next ▶ in the caption) with flyTo, pitch and bearing, each with a two-sentence caption. Suggested stops: the Hijaz–Asir escarpment and the Shield; Harrat Rahat / Harrat Khaybar; the Tuwaiq escarpment; the Rub' al Khali; the Hajar Mountains; the Yemen highlands and traps; Dhofar; the UAE coastal sabkhas and Musandam.
+- **Elevation stats per class:** precompute the min, median and max elevation per L1 class (optionally also per L2 label), from Terrarium tiles sampled at a low zoom (z6–7). Show them in a separate **Elevation statistics** window opened from the side panel (box plots, table, observations), not in the legend (owner decision, 2026-11-05). This makes the correlation quantitative.
 
 ## Working rules (credit budget matters)
 - Work **one milestone per session**. When a milestone is done, commit, open a PR or push to main as instructed, write a five-line summary, and **stop**. Do not start the next milestone unprompted.
