@@ -77,6 +77,20 @@ python scripts/03_overlays.py
 
 `01_download.py` downloads the Natural Earth layers into `data/raw/naturalearth/`, reads the OpenStreetMap road extracts in `data/raw/osm/`, and writes the clipped layers to `data/interim/` (naturalearth and interim are gitignored). It regenerates `data/geology_polygons.csv` and prints a summary. `02_geology.py` cleans the polygon coverage (GEOS CoverageCleaner, so shared edges match vertex-for-vertex), applies topology-preserving coverage simplification (tolerance 0.004°, no dissolve, every `pid` kept), rounds coordinates to 4 decimals and writes `docs/data/geology.geojson` (~7 MB). It stops if the pid set differs from `data/geology_polygons.csv`, if any geometry is empty or invalid, or if gaps or overlaps appear. Shapely ≥ 2.2 (GEOS ≥ 3.14) is needed for `coverage_clean`.
 
+**Mountain-front contacts adjusted to the terrain.** geo2bg was drawn at 1:2,000,000 in 1963. At mountain fronts the mapped bedrock/alluvium contact is typically 1–2 km from the foot of the slope in the SRTM-based terrain, so in 3D the colours spill onto the plain or up the slope. There is no systematic shift that a single nudge or warp could fix (`notebooks/alignment_check.py`). The offset is local (`notebooks/front_offsets.py`).
+
+`02_geology.py` therefore moves these contacts, and only these, with `scripts/contacts.py` (parameters at the top of that file):
+- **Which contacts:** shared edges with bedrock (any class except the surficial one) on one side and alluvium, gravel or sabkha on the other. Eolian sand is excluded because dunes have their own slopes.
+- **Where:** four areas — Hajar and Musandam, Asir and Tihamah, Yemen highlands, Dhofar.
+- **Finding the foot:** every 300 m along a contact, a z10 slope profile (~140 m pixels) is taken across it. The contact moves to the foot of the slope only where there is a clear front: ≥ 8° within 0.3–1.5 km on the bedrock side and ≤ 6° within 0.3–1.5 km on the plain side. Flat plateaux and pediments are not touched.
+- **Smoothing:** moves are smoothed along the contact, capped at 5 km, and fade to zero away from measured stretches and at junctions. Junctions never move.
+- **Safety:** a move that would cross or swallow another boundary is scaled down or dropped.
+- **Result:** polygons are rebuilt from their edges, so the coverage stays gap- and overlap-free and every pid is kept. The 02 checks run on the result.
+- **Not adjusted:** contacts between two bedrock units (e.g. Jurassic/Cretaceous) and harrat edges, because slope does not define them.
+- **Output:** 115 contacts moved in 108 polygons, and 1,241 km² reassigned between bedrock and alluvium (mostly bedrock → alluvium, where the mapped bedrock ran out onto the plain). In Asir the main escarpment lies inside the Precambrian in geo2bg (the Shield is mapped down to a narrow coastal strip), so only isolated ridges changed there.
+- **Flag:** adjusted polygons carry `contact_adjusted: 1`, and their popup says so. The unadjusted version is kept in `data/interim/geology_web_unadjusted.gpkg`. Run `python scripts/02_geology.py --no-adjust` to skip the step.
+- **Before/after maps:** `notebooks/contacts/*.png`, made by `python notebooks/contacts_before_after.py` — an overview and two close-ups per area. Each has Before, After and Change panels on hillshade: red = bedrock → alluvium, blue = alluvium → bedrock, dashed = old contact, solid = new contact.
+
 `03_overlays.py` writes `docs/data/cities.geojson` and `docs/data/roads.geojson`. Cities: all 73 Natural Earth places in the extent (Hawalli dropped as part of Kuwait City), named in regional English usage (Madinah, Jazan, Sohar, Sana'a, …) with curated Arabic names, both from [`scripts/cities.csv`](scripts/cities.csv); edit that file to rename or drop a city. Roads: OpenStreetMap `highway=motorway|trunk|primary` (~98,800 km), merged per (class, `ref`), or per (class, name) where there is no ref, giving 1,400 features (1.5 MB). Fields: `class`, `ref`, `name_en`, `name_ar`. Geometry is simplified at 0.001° (~100 m), parts under 0.5 km are dropped and coordinates are rounded to 4 decimals. Natural Earth roads were used before. They were dropped because they are generalized for 1:10M (off by 1–3 km), miss recent highways and misclassify trunk routes as "Unknown". The script still prints the NE roads with no OSM motorway/trunk/primary within 5 km, as a check.
 
 The OSM data are Geofabrik extracts (`gcc-states`, `yemen`, 2026-11-03) filtered to the three road classes and committed to `data/raw/osm/` (8.5 MB). Overpass and Geofabrik are not reachable from the cloud build environment. To refresh, download https://download.geofabrik.de/asia/gcc-states-latest.osm.pbf and https://download.geofabrik.de/asia/yemen-latest.osm.pbf, then run `python scripts/01_download.py --osm-extract <download dir> <YYMMDD>` and update `OSM_FILES` in `01_download.py`.
@@ -104,14 +118,16 @@ python scripts/04_elevation_stats.py
 ## Repository layout
 
 ```
-scripts/      01_download.py, 02_geology.py, 03_overlays.py, 04_elevation_stats.py, 05_units.py, geology_classes.csv, cities.csv, polygon_overrides.csv
+scripts/      01_download.py, 02_geology.py (+ contacts.py), 03_overlays.py, 04_elevation_stats.py, 05_units.py, geology_classes.csv, cities.csv, polygon_overrides.csv
 data/raw/     geo2bg shapefile and OSM road extracts in osm/ (committed); Natural Earth zips (gitignored)
 data/interim/ clipped layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location
 docs/data/    web layers: geology.geojson, cities.geojson, roads.geojson, units.json, elev_stats.json
 docs/         web viewer: index.html, app.js, style.css, favicon.svg (+ PNGs), preview.png
 notebooks/    m2_preview.py / .png, m3_*.png viewer screenshots, m4_screenshots.py / m4_*.png tour and legend check,
-              ui_check.py / ui_*.png interface check, make_preview.py (link-preview card)
+              ui_check.py / ui_*.png interface check, make_preview.py (link-preview card),
+              alignment_check.py, front_offsets.py (geology vs terrain diagnostics),
+              contacts_before_after.py / contacts/*.png (contact adjustment maps)
 ```
 
 ## Viewer

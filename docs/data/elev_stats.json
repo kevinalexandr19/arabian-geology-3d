@@ -6,9 +6,9 @@
    "min": -882,
    "p10": 367,
    "median": 957,
-   "p90": 1618,
+   "p90": 1619,
    "max": 3321,
-   "n_px": 399740,
+   "n_px": 399366,
    "n_neg": 154
   },
   "Paleozoic": {
@@ -26,25 +26,25 @@
    "median": 683,
    "p90": 791,
    "max": 2802,
-   "n_px": 8477,
+   "n_px": 8486,
    "n_neg": 19
   },
   "Jurassic": {
    "min": 36,
    "p10": 621,
    "median": 803,
-   "p90": 1757,
+   "p90": 1758,
    "max": 3272,
-   "n_px": 57487,
+   "n_px": 57484,
    "n_neg": 0
   },
   "Cretaceous": {
    "min": -1128,
-   "p10": 375,
+   "p10": 377,
    "median": 601,
    "p90": 816,
    "max": 3055,
-   "n_px": 145232,
+   "n_px": 145008,
    "n_neg": 259
   },
   "Paleogene-Neogene sedimentary": {
@@ -53,16 +53,16 @@
    "median": 395,
    "p90": 939,
    "max": 2987,
-   "n_px": 446505,
+   "n_px": 446446,
    "n_neg": 1155
   },
   "Cenozoic volcanics": {
    "min": -405,
-   "p10": 584,
+   "p10": 586,
    "median": 1053,
-   "p90": 1833,
+   "p90": 1834,
    "max": 3567,
-   "n_px": 104433,
+   "n_px": 104219,
    "n_neg": 46
   },
   "Neogene-Quaternary surficial deposits": {
@@ -70,8 +70,8 @@
    "p10": 72,
    "median": 311,
    "p90": 903,
-   "max": 3083,
-   "n_px": 918709,
+   "max": 2992,
+   "n_px": 919574,
    "n_neg": 3445
   }
  },
@@ -79,10 +79,10 @@
   "Alluvium and gravel": {
    "min": -3740,
    "p10": 38,
-   "median": 501,
-   "p90": 970,
-   "max": 3083,
-   "n_px": 309445,
+   "median": 500,
+   "p90": 971,
+   "max": 2992,
+   "n_px": 310266,
    "n_neg": 2542
   },
   "Cambrian-Ordovician": {
@@ -106,19 +106,19 @@
   "Cenozoic intrusives": {
    "min": 54,
    "p10": 85,
-   "median": 140,
-   "p90": 607,
+   "median": 142,
+   "p90": 609,
    "max": 1838,
-   "n_px": 652,
+   "n_px": 629,
    "n_neg": 0
   },
   "Cretaceous-Paleogene": {
-   "min": 0,
-   "p10": 130,
-   "median": 736,
-   "p90": 870,
+   "min": 2,
+   "p10": 139,
+   "median": 739,
+   "p90": 872,
    "max": 2401,
-   "n_px": 1086,
+   "n_px": 1081,
    "n_neg": 0
   },
   "Eolian sand": {
@@ -136,25 +136,25 @@
    "median": 1020,
    "p90": 1359,
    "max": 1985,
-   "n_px": 74887,
+   "n_px": 74845,
    "n_neg": 0
   },
   "Harrats (Quaternary)": {
    "min": -405,
-   "p10": 58,
-   "median": 591,
-   "p90": 2173,
+   "p10": 57,
+   "median": 607,
+   "p90": 2180,
    "max": 2883,
-   "n_px": 6856,
+   "n_px": 6768,
    "n_neg": 46
   },
   "Jurassic-Cretaceous": {
    "min": -60,
    "p10": 29,
-   "median": 452,
+   "median": 450,
    "p90": 1248,
    "max": 2003,
-   "n_px": 937,
+   "n_px": 939,
    "n_neg": 38
   },
   "Neogene-Quaternary gravels": {
@@ -163,7 +163,7 @@
    "median": 172,
    "p90": 269,
    "max": 407,
-   "n_px": 31248,
+   "n_px": 31284,
    "n_neg": 0
   },
   "Ordovician-Devonian": {
@@ -186,20 +186,20 @@
   },
   "Paleozoic-Precambrian": {
    "min": -4,
-   "p10": 855,
-   "median": 1340,
-   "p90": 1951,
+   "p10": 865,
+   "median": 1349,
+   "p90": 1956,
    "max": 2357,
-   "n_px": 1146,
+   "n_px": 1111,
    "n_neg": 1
   },
   "Permian-Triassic": {
    "min": -795,
-   "p10": 198,
+   "p10": 197,
    "median": 671,
-   "p90": 1395,
+   "p90": 1393,
    "max": 2802,
-   "n_px": 2469,
+   "n_px": 2478,
    "n_neg": 19
   },
   "Sabkha": {
@@ -222,11 +222,11 @@
   },
   "Yemen traps (Oligocene-Miocene)": {
    "min": 110,
-   "p10": 583,
-   "median": 1642,
-   "p90": 2539,
+   "p10": 587,
+   "median": 1644,
+   "p90": 2541,
    "max": 3567,
-   "n_px": 22038,
+   "n_px": 21977,
    "n_neg": 0
   }
  }
