@@ -317,6 +317,7 @@ map.on('click', (e) => {
     `<tr><th>GLG</th><td>${esc(p.GLG)} — ${esc(u.description)}</td></tr>` +
     `<tr><th>Age</th><td>${esc(u.age)}</td></tr>` +
     `<tr><th>Lithology</th><td>${esc(u.lithology)}</td></tr>` +
+    (p.contact_adjusted ? `<tr><th>Boundary</th><td>Mountain-front contact moved to the foot of the slope in the terrain data (not in geo2bg)</td></tr>` : '') +
     `</table>` +
     `<div class="src">Source: <a href="${esc(source.url)}" target="_blank" rel="noopener">${esc(source.short)}</a>, doi:${esc(source.doi)}. ` +
     `Lithology is a generalized summary.</div>` +

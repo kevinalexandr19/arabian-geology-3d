@@ -11,12 +11,17 @@ Steps
 2. coverage_simplify: topology-preserving simplification of each polygon; shared edges are simplified
    once, so neighbours stay gap- and overlap-free. Every pid is kept.
 3. Coordinates rounded to PRECISION decimals (1e-4 deg ~ 11 m, far below TOLERANCE).
+4. Bedrock/alluvium contacts at mountain fronts are moved to the foot of the slope in the terrain
+   (scripts/contacts.py; regions and parameters there). Junctions stay fixed, so the result is still a
+   coverage and every pid keeps one polygon. Adjusted polygons get contact_adjusted = 1. The unadjusted
+   version is saved to data/interim/geology_web_unadjusted.gpkg. Skip with --no-adjust.
 
 Checks (script stops if any fails): file < 8 MB; pid set == data/geology_polygons.csv; no empty or
 invalid geometries; output is a valid coverage (no overlaps, shared edges identical); the union of all
 polygons has no more holes than before (no gaps opened between neighbours).
 """
 import json
+import sys
 from pathlib import Path
 
 import geopandas as gpd
@@ -24,15 +29,19 @@ import numpy as np
 import pandas as pd
 import shapely
 
+import contacts
+
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "data" / "interim" / "geology_peninsula.gpkg"
 POLY_TABLE = ROOT / "data" / "geology_polygons.csv"
 OUT = ROOT / "docs" / "data" / "geology.geojson"
+UNADJUSTED = ROOT / "data" / "interim" / "geology_web_unadjusted.gpkg"   # before/after maps
 
 TOLERANCE = 0.004  # deg (~400 m); coverage_simplify tolerance
 PRECISION = 4  # decimals kept in the GeoJSON
 MAX_MB = 8.0
 FIELDS = ["pid", "GLG", "level1_class", "level1_colour", "level2_label"]
+FLAG = "contact_adjusted"   # set (1) only on polygons whose mountain-front contact was moved
 EQUAL_AREA = 6933
 
 
@@ -64,6 +73,19 @@ def main() -> None:
     simple = shapely.coverage_simplify(cleaned, TOLERANCE, simplify_boundary=True)
     simple = round_coords(simple, PRECISION)
 
+    # 4. DEM-guided adjustment of bedrock/alluvium contacts at mountain fronts (scripts/contacts.py)
+    gpd.GeoDataFrame(gdf[FIELDS], geometry=simple, crs=4326).to_file(UNADJUSTED, driver="GPKG")
+    a_before = area_km2(simple)
+    if "--no-adjust" in sys.argv:
+        adjusted = np.zeros(len(simple), bool)
+        print("Contact adjustment skipped (--no-adjust)")
+    else:
+        print("Adjusting bedrock/alluvium contacts to the foot of slope (z10 Terrarium):")
+        simple, adjusted, _ = contacts.adjust(simple, gdf["level1_class"], gdf["level2_label"].fillna(""))
+        d = area_km2(simple) - a_before
+        print(f"  polygons changed: {int(adjusted.sum())}; area moved between polygons: "
+              f"{np.abs(d).sum() / 2:,.0f} km2; total area change {d.sum():+.2f} km2")
+
     # --- checks -------------------------------------------------------------------------------
     assert not shapely.is_empty(simple).any(), "empty geometry after simplification"
     assert shapely.is_valid(simple).all(), "invalid geometry after simplification"
@@ -85,10 +107,13 @@ def main() -> None:
     assert len(ref) == len(gdf) and set(ref.pid) == set(gdf.pid), "pid set differs from geology_polygons.csv"
 
     # --- export -------------------------------------------------------------------------------
-    props = gdf[FIELDS].astype(object).where(gdf[FIELDS].notna(), "")
+    props = gdf[FIELDS].astype(object).where(gdf[FIELDS].notna(), "").to_dict("records")
+    for p, a in zip(props, adjusted):
+        if a:
+            p[FLAG] = 1
     feats = [
         {"type": "Feature", "properties": p, "geometry": shapely.geometry.mapping(g)}
-        for p, g in zip(props.to_dict("records"), simple)
+        for p, g in zip(props, simple)
     ]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT, "w") as f:
@@ -105,7 +130,7 @@ def main() -> None:
     back = gpd.read_file(OUT)
     assert len(back) == len(ref) and set(back.pid) == set(ref.pid)
     assert back.is_valid.all() and not back.is_empty.any()
-    assert list(back.columns) == FIELDS + ["geometry"], list(back.columns)
+    assert [c for c in back.columns if c != FLAG] == FIELDS + ["geometry"], list(back.columns)
     print("Checks passed: pid set matches data/geology_polygons.csv; no empty/invalid geometries; "
           "valid coverage (no overlaps/gaps).")
 
