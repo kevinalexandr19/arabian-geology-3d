@@ -109,8 +109,9 @@ data/raw/     geo2bg shapefile and OSM road extracts in osm/ (committed); Natura
 data/interim/ clipped layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location
 docs/data/    web layers: geology.geojson, cities.geojson, roads.geojson, units.json, elev_stats.json
-docs/         web viewer: index.html, app.js, style.css
-notebooks/    m2_preview.py / .png, m3_*.png viewer screenshots, m4_screenshots.py / m4_*.png tour and legend check
+docs/         web viewer: index.html, app.js, style.css, favicon.svg (+ PNGs), preview.png
+notebooks/    m2_preview.py / .png, m3_*.png viewer screenshots, m4_screenshots.py / m4_*.png tour and legend check,
+              ui_check.py / ui_*.png interface check, make_preview.py (link-preview card)
 ```
 
 ## Viewer
@@ -124,6 +125,18 @@ python -m http.server -d docs
 Then open http://localhost:8000. The map loads ~8.5 MB of GeoJSON uncompressed (geology 7.0 MB, roads 1.5 MB), ~2.2 MB gzipped as GitHub Pages serves it. Screenshots of the M3 check are in `notebooks/m3_*.png`.
 
 The legend shows, per class, an elevation box plot (line = min–max, box = p10–p90, tick = median; hover for numbers). The **Tour** section has eight camera presets (Hijaz–Asir escarpment, Harrat Rahat/Khaybar, Tuwaiq, Rub' al Khali, Hajar, Yemen highlands, Dhofar, UAE sabkhas and Musandam), each with a two-sentence caption. **Play tour** steps through them (~8 s per stop); any drag or zoom stops it, and **Home** returns to the peninsula view. Cameras and captions are in the `STOPS` array at the top of the tour section in `docs/app.js`. Each stop also has `marks`, shown only while that stop is active: red **flags** on named summits (Jabal Sawda, Jabal Shams, Jabal an-Nabi Shu'ayb, Jabal Samhan, Jebel Harim; positions are the z7 DEM maxima near each summit, heights are the commonly quoted values), **area labels** (Arabian Shield, Tihamah, the harrats, Jabal Akhdar and Saih Hatat windows, Semail ophiolite, Yemen traps, Musandam and others), a dark **outline** of the featured geology polygons (harrats, Jurassic outcrop, Oman windows, Yemen traps, sabkhas; a MapLibre filter on `geology.geojson`) and, for stops 1 and 3, a dashed red **escarpment trace**. The traces were derived from the z7 Terrarium mosaic: at each 0.25° of latitude, the steepest eastward rise over ~5–7 km (inside the Jurassic outcrop for Tuwaiq, 20.0–25.25°N; between 41° and 43.6°E for Asir, 18.0–20.25°N). They are approximate, at the ~1–5 km level. Flags and area labels are DOM markers, so they stand upright on the terrain and are never hidden by terrain occlusion. To add or move one, edit `marks` in `STOPS`. `notebooks/m4_screenshots.py` (Python Playwright, with the site served on port 8000) reshoots `notebooks/m4_*.png`.
+
+Interface:
+- **First view:** the whole peninsula (flatter camera on phones), with an intro card and a **Take the tour** button. While a stop is shown, its caption box has **Stop tour** and **Home**.
+- **Side panel:** collapsible sections. Geology is open; Tour, Display (exaggeration and opacity), Overlays and About start folded.
+- **Legend bars:** tap or click a bar to show its numbers (also works on phones, where hover tooltips don't).
+- **Cursor readout** (bottom left; tap on phones): latitude, longitude and elevation. The elevation is decoded from the Terrarium tile under the cursor (z7–z12, depending on zoom), so it is in true metres whatever the exaggeration slider says.
+- **Loading message** until the geology layer is drawn.
+- **About:** author and links, source code, dedication, a one-line disclaimer, data credits and a "Last updated" date. Update the date in `docs/index.html` by hand when you publish changes.
+- **Icon:** `docs/favicon.svg` is the peninsula outline (simplified from `geology.geojson`) filled with concentric bands in the Level 1 colours, echoing the cover belts arcing around the Shield. `favicon-32.png` and `apple-touch-icon.png` are rendered from it.
+- **Link preview:** `docs/preview.png` (1200×630, a flat view of the whole map) is the `og:image` card shown when the link is shared. The meta tags in `docs/index.html` point to the GitHub Pages address, so the card appears once Pages is live. Regenerate it with `python notebooks/make_preview.py` (site served on port 8000).
+
+`notebooks/ui_check.py` checks the above in Playwright (desktop and phone), writes `notebooks/ui_*.png` and prints any console errors.
 
 ## Sources and licences
 

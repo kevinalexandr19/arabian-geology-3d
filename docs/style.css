@@ -203,3 +203,98 @@ body { display: flex; }
   color: #2a1640;
   text-shadow: 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px rgba(255,255,255,.9);
 }
+
+/* ---- About ---- */
+.about { font-size: 12px; }
+.about p { margin: 4px 0; }
+.about .author { font-weight: 600; font-size: 13px; color: var(--ink); }
+.about .links { display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.about a { color: var(--accent); text-decoration: none; }
+.about a:hover { text-decoration: underline; }
+.about .disclaimer { color: var(--muted); font-style: italic; }
+.about h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 10px 0 2px; }
+.about .credits { margin: 0; padding-left: 16px; }
+.about .credits li { margin: 2px 0; }
+.about .made { color: var(--muted); margin-top: 10px; }
+
+/* ---- Collapsible panel sections ---- */
+.sec { border-top: 1px solid var(--line); padding: 2px 0 8px; }
+.sec > summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--muted); padding: 10px 0 6px;
+}
+.sec > summary::-webkit-details-marker { display: none; }
+.sec > summary::after { content: "▸"; font-size: 12px; transition: transform .15s; }
+.sec[open] > summary::after { transform: rotate(90deg); }
+.sec > summary:hover { color: var(--ink); }
+.controls label:first-of-type { margin-top: 4px; }
+
+/* ---- Tap-to-show elevation numbers ---- */
+.ebar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.estats {
+  margin: 0 0 4px 60px; font-size: 11px; color: var(--ink);
+  font-variant-numeric: tabular-nums; background: #f6f8fa; border-radius: 3px; padding: 2px 6px;
+}
+.estats[hidden] { display: none; }
+
+/* ---- Intro card (first view) ---- */
+.intro {
+  position: absolute; top: 12px; left: calc(var(--panel-w) + 12px); z-index: 5;
+  max-width: 340px; padding: 10px 30px 12px 12px;
+  background: rgba(255,255,255,.95); border-radius: 6px; box-shadow: 0 1px 8px rgba(0,0,0,.25);
+}
+.intro[hidden] { display: none; }
+.intro p { margin: 0 0 8px; font-size: 13px; }
+.intro-tour {
+  font: inherit; font-weight: 600; font-size: 14px; padding: 7px 14px; cursor: pointer;
+  color: #fff; background: var(--accent); border: 0; border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+.intro-tour:hover { background: #245a94; }
+.intro-close {
+  position: absolute; top: 2px; right: 2px; border: 0; background: none;
+  font-size: 18px; line-height: 1; padding: 4px 6px; cursor: pointer; color: var(--muted);
+}
+
+/* ---- Loading message ---- */
+.loading {
+  position: absolute; z-index: 6; left: calc(50% + var(--panel-w) / 2); top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; background: rgba(255,255,255,.95); border-radius: 20px;
+  box-shadow: 0 1px 8px rgba(0,0,0,.25); font-weight: 600;
+}
+.loading[hidden] { display: none; }
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2.5px solid var(--line); border-top-color: var(--accent);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Cursor readout ---- */
+.readout {
+  position: absolute; z-index: 4; left: calc(var(--panel-w) + 10px); bottom: 10px;
+  padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,.88);
+  font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; color: var(--ink);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2); pointer-events: none;
+}
+.readout[hidden] { display: none; }
+
+@media (max-width: 700px) {
+  .intro { top: 56px; left: 10px; right: 52px; max-width: none; }
+  .loading { left: 50%; }
+  .readout { left: 10px; bottom: 10px; font-size: 11px; }
+  body.panel-visible .readout { display: none; }
+}
+
+/* ---- Caption actions (Stop / Home over the map) ---- */
+.caption-actions { display: flex; gap: 6px; margin-top: 8px; }
+.caption-actions button {
+  font: inherit; font-size: 12px; padding: 3px 10px; cursor: pointer;
+  border: 1px solid var(--line); background: #f6f8fa; border-radius: 4px;
+}
+.caption-actions button:hover { background: #eaeef2; }
+.caption-actions button[hidden] { display: none; }

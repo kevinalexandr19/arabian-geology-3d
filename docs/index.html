@@ -4,8 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Arabia 3D — Geology × Topography</title>
-  <meta name="description" content="Generalized geology of the Arabian Peninsula draped over 3D terrain.">
-  <link rel="icon" href="data:,">
+  <meta name="description" content="Generalized geology of the Arabian Peninsula draped over 3D terrain: see how rock type controls relief.">
+  <!-- Link preview card (LinkedIn, X, WhatsApp...). Absolute URLs: the GitHub Pages address. -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Arabia 3D — Geology × Topography of the Arabian Peninsula">
+  <meta property="og:description" content="Generalized geology draped on 3D terrain: the Arabian Shield, cuesta escarpments, harrats, sand seas and the Oman mountains. Interactive map with a guided tour.">
+  <meta property="og:url" content="https://kevinalexandr19.github.io/arabian-geology-3d/">
+  <meta property="og:image" content="https://kevinalexandr19.github.io/arabian-geology-3d/preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Generalized geological map of the Arabian Peninsula on shaded relief">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -17,18 +29,18 @@
       <button id="panel-close" class="panel-close" aria-label="Hide panel">×</button>
     </header>
 
-    <section>
-      <h2>Geology (Level 1)</h2>
+    <details class="sec" open>
+      <summary>Geology (Level 1)</summary>
       <ul id="legend" class="legend"></ul>
       <div class="legend-actions">
         <button type="button" id="all-on">All on</button>
         <button type="button" id="all-off">All off</button>
       </div>
-      <p class="scale-note">Elevation, m: 0 — 3,700; box = p10–p90, tick = median</p>
-    </section>
+      <p class="scale-note">Elevation, m: 0 — 3,700; box = p10–p90, tick = median. Tap or click a bar for the numbers.</p>
+    </details>
 
-    <section class="tour">
-      <h2>Tour</h2>
+    <details class="sec tour">
+      <summary>Tour</summary>
       <div id="bookmarks" class="bookmarks"></div>
       <div class="tour-actions">
         <button type="button" id="tour-play">▶ Play tour</button>
@@ -36,30 +48,68 @@
         <button type="button" id="tour-home">⌂ Home</button>
       </div>
       <p class="hint">Each stop shows flags on key summits, labels, outlines of the featured units and, where relevant, the escarpment trace (dashed red, derived from the z7 DEM).</p>
-    </section>
+    </details>
 
-    <section class="controls">
+    <details class="sec controls">
+      <summary>Display</summary>
       <label for="exag">Vertical exaggeration <output id="exag-val">1.5×</output></label>
       <input id="exag" type="range" min="0" max="5" step="0.1" value="1.5">
       <label for="opacity">Geology opacity <output id="opacity-val">0.75</output></label>
       <input id="opacity" type="range" min="0" max="1" step="0.05" value="0.75">
-    </section>
+    </details>
 
-    <section class="key">
-      <h2>Overlays</h2>
+    <details class="sec key">
+      <summary>Overlays</summary>
       <p><span class="item"><span class="sw-road motorway"></span>Motorway</span><span class="item"><span class="sw-road trunk"></span>Trunk</span><span class="item"><span class="sw-road primary"></span>Primary (zoom ≥ 6)</span></p>
       <p><span class="item"><span class="sw-city capital"></span>Capital</span><span class="item"><span class="sw-city"></span>City</span></p>
       <p class="hint">Click a polygon for unit details. Right-drag (or two-finger drag) to tilt and rotate.</p>
-    </section>
+    </details>
+
+    <details class="sec about">
+      <summary>About</summary>
+      <p class="author">Kevin Alexander Gomez</p>
+      <p class="links">
+        <a href="https://www.linkedin.com/in/kevin-alexander-gomez/" target="_blank" rel="noopener">LinkedIn</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://github.com/kevinalexandr19" target="_blank" rel="noopener">GitHub</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://github.com/kevinalexandr19/arabian-geology-3d" target="_blank" rel="noopener">Source code</a>
+      </p>
+      <p>Dedicated to KFUPM and the College of Petroleum Engineering and Geosciences (CPG).</p>
+      <p class="disclaimer">Generalized 1:2,000,000-scale map for teaching and outreach; not for site-specific use.</p>
+      <h3>Data</h3>
+      <ul class="credits">
+        <li>Geology: <a href="https://doi.org/10.3133/ofr97470B" target="_blank" rel="noopener">USGS Open-File Report 97-470-B</a> (geo2bg; Pollastro, Karshbaum &amp; Viger, after the USGS–ARAMCO 1963 map), public domain</li>
+        <li>Terrain: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles</a> (Mapzen; SRTM, GMTED2010, ETOPO1)</li>
+        <li>Roads: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL</li>
+        <li>Cities: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>, public domain</li>
+        <li>Map library: <a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre GL JS</a></li>
+      </ul>
+      <p class="made">Made with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> · Last updated <time datetime="2026-11-05">5 November 2026</time></p>
+    </details>
   </aside>
 
   <button id="panel-open" class="panel-open" aria-label="Show legend">Legend</button>
   <div id="map"></div>
+
+  <div id="intro" class="intro">
+    <button type="button" class="intro-close" aria-label="Hide introduction">×</button>
+    <p>Generalized geology draped on 3D terrain: see how rock type controls relief.</p>
+    <button type="button" id="intro-tour" class="intro-tour">▶ Take the tour</button>
+  </div>
+
   <div id="caption" class="caption" hidden>
     <button type="button" class="caption-close" aria-label="Hide caption">×</button>
     <h3></h3>
     <p></p>
+    <div class="caption-actions">
+      <button type="button" id="cap-stop" hidden>■ Stop tour</button>
+      <button type="button" id="cap-home">⌂ Home</button>
+    </div>
   </div>
+
+  <div id="loading" class="loading" role="status"><span class="spinner"></span>Loading geology…</div>
+  <div id="readout" class="readout" hidden></div>
 
   <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
   <script src="app.js"></script>
