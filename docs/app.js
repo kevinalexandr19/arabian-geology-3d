@@ -26,6 +26,9 @@ const demSource = () => ({
 });
 
 const isPhone = () => window.matchMedia('(max-width: 700px)').matches;
+// Home view: whole peninsula. Phones get a flatter camera and room above for the intro card.
+const HOME_PITCH = () => (isPhone() ? 20 : 45);
+const HOME_PADDING = () => (isPhone() ? { top: 190, bottom: 40, left: 10, right: 10 } : 30);
 
 const style = {
   version: 8,
@@ -173,8 +176,8 @@ const map = new maplibregl.Map({
   container: 'map',
   style,
   bounds: PENINSULA,
-  fitBoundsOptions: { padding: isPhone() ? 10 : 30 },
-  pitch: 45,
+  fitBoundsOptions: { padding: HOME_PADDING() },
+  pitch: HOME_PITCH(),
   maxPitch: 75,
   attributionControl: false,
   hash: true,
@@ -213,6 +216,10 @@ function applyClassFilter() {
 const ELEV_MAX = 3700;
 const fmt = (v) => v.toLocaleString('en-US').replace('-', '−');
 
+function statsText(st) {
+  return `min ${fmt(st.min)} · p10 ${fmt(st.p10)} · <b>median ${fmt(st.median)}</b> · p90 ${fmt(st.p90)} · max ${fmt(st.max)} m`;
+}
+
 function elevBar(st, colour) {
   if (!st) return '';
   const x = (v) => `${(Math.min(Math.max(v, 0), ELEV_MAX) / ELEV_MAX * 100).toFixed(2)}%`;
@@ -220,7 +227,7 @@ function elevBar(st, colour) {
   const tip =
     `Elevation (m): min ${fmt(st.min)} · p10 ${fmt(st.p10)} · median ${fmt(st.median)} · ` +
     `p90 ${fmt(st.p90)} · max ${fmt(st.max)}\n${fmt(st.n_px)} px at ~1.2 km, ${fmt(st.n_neg)} below 0 m`;
-  return `<span class="ebar" title="${tip}">` +
+  return `<span class="ebar" title="${tip}" role="button" tabindex="0" aria-label="Show elevation statistics">` +
     `<span class="whisk" style="left:${x(st.min)};width:${w(st.min, st.max)};background:${colour}"></span>` +
     `<span class="box" style="left:${x(st.p10)};width:${w(st.p10, st.p90)};background:${colour}"></span>` +
     `<span class="med" style="left:${x(st.median)}"></span></span>`;
@@ -236,7 +243,20 @@ function buildLegend(classes, elev) {
       `<label><input type="checkbox" checked>` +
       `<span class="swatch" style="background:${c.colour}"></span>` +
       `<span class="text"><span class="name">${c.name}</span><br><span class="codes">${c.codes.join(', ')}</span>` +
-      `${elevBar(elev[c.name], c.colour)}</span></label>`;
+      `${elevBar(elev[c.name], c.colour)}</span></label>` +
+      (elev[c.name] ? `<div class="estats" hidden>${statsText(elev[c.name])}</div>` : '');
+    // Bars sit inside the <label>: stop the click from toggling the checkbox, show the numbers instead.
+    const bar = li.querySelector('.ebar');
+    if (bar) {
+      const toggle = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const box = li.querySelector('.estats');
+        box.hidden = !box.hidden;
+      };
+      bar.addEventListener('click', toggle);
+      bar.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') toggle(e); });
+    }
     li.querySelector('input').addEventListener('change', (e) => {
       if (e.target.checked) enabled.add(c.name); else enabled.delete(c.name);
       applyClassFilter();
@@ -472,6 +492,7 @@ function hideCaption() {
 caption.querySelector('.caption-close').onclick = hideCaption;
 
 function goTo(i, duration) {
+  hideIntro();
   showCaption(i);
   showMarks(i);
   if (isPhone()) document.body.classList.remove('panel-visible');
@@ -485,6 +506,7 @@ function stopTour() {
   tour = null;
   document.getElementById('tour-play').disabled = false;
   document.getElementById('tour-stop').disabled = true;
+  document.getElementById('cap-stop').hidden = true;
 }
 
 function tourStep() {
@@ -500,6 +522,8 @@ function startTour() {
   tour = { i: 0, timer: null };
   document.getElementById('tour-play').disabled = true;
   document.getElementById('tour-stop').disabled = false;
+  document.getElementById('cap-stop').hidden = false;
+  document.querySelector('details.tour').open = true;  // keep Stop/Home in reach in the panel too
   tourStep();
 }
 
@@ -507,8 +531,9 @@ function goHome() {
   stopTour();
   hideCaption();
   clearMarks();
-  const cam = map.cameraForBounds(PENINSULA, { padding: isPhone() ? 10 : 30 });
-  map.flyTo({ ...cam, pitch: 45, bearing: 0, essential: true });
+  showIntro();
+  const cam = map.cameraForBounds(PENINSULA, { padding: HOME_PADDING() });
+  map.flyTo({ ...cam, pitch: HOME_PITCH(), bearing: 0, essential: true });
 }
 
 const bm = document.getElementById('bookmarks');
@@ -522,8 +547,85 @@ STOPS.forEach((st, i) => {
 document.getElementById('tour-play').onclick = startTour;
 document.getElementById('tour-stop').onclick = stopTour;
 document.getElementById('tour-home').onclick = goHome;
+document.getElementById('cap-stop').onclick = stopTour;
+document.getElementById('cap-home').onclick = goHome;
 // Any user drag, zoom, rotate or tilt stops the tour (programmatic flyTo has no originalEvent).
 map.on('movestart', (e) => { if (e.originalEvent) stopTour(); });
+
+// ---- Intro card (first view) ----
+const intro = document.getElementById('intro');
+function hideIntro() { intro.hidden = true; }
+function showIntro() { intro.hidden = false; }
+intro.querySelector('.intro-close').onclick = hideIntro;
+document.getElementById('intro-tour').onclick = startTour;
+
+// ---- Loading message: until the geology GeoJSON is parsed and drawn ----
+const loading = document.getElementById('loading');
+function hideLoading() { loading.hidden = true; }
+map.on('sourcedata', (e) => { if (e.sourceId === 'geology' && map.isSourceLoaded('geology')) hideLoading(); });
+map.on('error', (e) => {
+  if (e.sourceId === 'geology') { loading.textContent = 'Could not load the geology layer. Please reload.'; }
+});
+
+// ---- Cursor readout: geographic coordinates + elevation ----
+// Elevation is decoded from the Terrarium tile under the cursor (true metres, independent of the
+// exaggeration slider; MapLibre's queryTerrainElevation includes the exaggeration and uses coarse tiles).
+const readout = document.getElementById('readout');
+const tileCache = new Map();   // "z/x/y" -> Promise<ImageData|null>
+const TILE_CACHE_MAX = 48;
+
+function getTile(z, x, y) {
+  const key = `${z}/${x}/${y}`;
+  if (tileCache.has(key)) return tileCache.get(key);
+  const p = fetch(TERRAIN_TILES.replace('{z}', z).replace('{x}', x).replace('{y}', y))
+    .then((r) => (r.ok ? r.blob() : Promise.reject(r.status)))
+    .then((b) => createImageBitmap(b))
+    .then((img) => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const ctx = c.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      return ctx.getImageData(0, 0, c.width, c.height);
+    })
+    .catch(() => null);
+  tileCache.set(key, p);
+  if (tileCache.size > TILE_CACHE_MAX) tileCache.delete(tileCache.keys().next().value);
+  return p;
+}
+
+async function elevationAt(lng, lat) {
+  const z = Math.max(7, Math.min(12, Math.floor(map.getZoom()) + 2));
+  const n = 2 ** z;
+  const fx = (lng + 180) / 360 * n;
+  const fy = (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * n;
+  const x = Math.floor(fx), y = Math.floor(fy);
+  const img = await getTile(z, x, y);
+  if (!img) return null;
+  const px = Math.min(img.width - 1, Math.floor((fx - x) * img.width));
+  const py = Math.min(img.height - 1, Math.floor((fy - y) * img.height));
+  const i = (py * img.width + px) * 4;
+  return img.data[i] * 256 + img.data[i + 1] + img.data[i + 2] / 256 - 32768;
+}
+
+const hemi = (v, pos, neg) => `${Math.abs(v).toFixed(4)}° ${v >= 0 ? pos : neg}`;
+let readoutSeq = 0;
+async function updateReadout(lngLat) {
+  const seq = ++readoutSeq;
+  const { lng, lat } = lngLat;
+  const coords = `${hemi(lat, 'N', 'S')}, ${hemi(lng, 'E', 'W')}`;
+  readout.hidden = false;
+  readout.textContent = coords;
+  const h = await elevationAt(lng, lat);
+  if (seq !== readoutSeq) return;  // a newer position arrived meanwhile
+  readout.textContent = h == null ? coords : `${coords} · ${fmt(Math.round(h))} m`;
+}
+let readoutTimer = null;
+map.on('mousemove', (e) => {
+  clearTimeout(readoutTimer);
+  readoutTimer = setTimeout(() => updateReadout(e.lngLat), 60);
+});
+map.on('click', (e) => updateReadout(e.lngLat));   // phones: tap shows the readout
+map.getCanvasContainer().addEventListener('mouseleave', () => { if (!isPhone()) readout.hidden = true; });
 
 // ---- Phone panel toggle ----
 document.getElementById('panel-open').onclick = () => document.body.classList.add('panel-visible');
