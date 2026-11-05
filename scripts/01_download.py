@@ -3,8 +3,12 @@
 geo2bg (USGS OFR 97-470B) is already in the repo at data/raw/geology/ and is not downloaded.
 
 Peninsula mask: the Natural Earth admin-0 layer is used ONLY to build the clip mask here. It is never
-exported or displayed. Mask = (peninsula states buffered 0.2 deg seaward) minus (all other countries).
-The buffer keeps geo2bg's own coastline intact where it differs from Natural Earth's.
+exported or displayed. Mask = (peninsula states buffered 0.2 deg seaward) minus (all other countries),
+minus the part of that sea buffer that is closer to a neighbour's coast than to the peninsula's
+(median line, e.g. across the Gulf of Aqaba). The buffer keeps geo2bg's own coastline intact where it
+differs from Natural Earth's; the median line stops it from keeping geo2bg's Sinai or Aqaba shore.
+Tiran and Sanafir islands are treated as Saudi (transferred from Egypt in 2017; Natural Earth still
+assigns them to Egypt).
 
 Polygon IDs: pid = "AG" + GEO2BG_ID (5 digits). If the mask splits a source polygon, the parts
 get a suffix -a, -b, ... (largest first). IDs are stable while the source data and mask stay the same.
@@ -29,6 +33,7 @@ import sys
 from pathlib import Path
 
 import geopandas as gpd
+import numpy as np
 import osmium
 import shapely
 import pandas as pd
@@ -49,6 +54,9 @@ STATES = ["SAU", "KWT", "BHR", "QAT", "ARE", "OMN", "YEM"]  # GCC + Yemen
 COAST_BUFFER_DEG = 0.2
 # Areas removed from the mask: Socotra archipelago (Yemen) has no geo2bg coverage
 EXCLUDE_BOXES = {"Socotra archipelago": (51.5, 11.0, 55.0, 13.0)}
+# Natural Earth polygons moved to the peninsula side of the mask (bbox of the island polygons).
+TREAT_AS_PENINSULA = {"Tiran and Sanafir islands (Saudi Arabia since 2017)": (34.40, 27.85, 34.80, 28.10)}
+MEDIAN_STEP_DEG = 0.01  # coast sampling step for the median line (~1 km)
 MIN_PART_KM2 = 0.1  # drop clip slivers smaller than this
 EQUAL_AREA = 6933
 
@@ -78,6 +86,35 @@ def download(url: str, dest: Path) -> Path:
     return dest
 
 
+def neighbour_side(keep_u, others_u, mask):
+    """Part of `mask` closer to a neighbour's coast than to the peninsula's (median line).
+
+    Both coastlines are sampled every MEDIAN_STEP_DEG; the Voronoi cells of the neighbour samples,
+    intersected with the mask, are the area to remove."""
+    zone = mask.buffer(COAST_BUFFER_DEG)
+    def samples(geom):
+        line = shapely.intersection(geom.boundary, zone)
+        pts = []
+        for part in getattr(line, "geoms", [line]):
+            if part.is_empty or part.length == 0:
+                continue
+            n = max(2, int(part.length / MEDIAN_STEP_DEG) + 1)
+            pts.extend(part.interpolate(np.linspace(0, part.length, n)))
+        return pts
+    # De-duplicate (shared land borders give coincident samples); the peninsula's copy wins.
+    seen, pk, po = set(), [], []
+    for pts, out in ((samples(keep_u), pk), (samples(others_u), po)):
+        for pt in pts:
+            key = (round(pt.x, 5), round(pt.y, 5))
+            if key not in seen:
+                seen.add(key)
+                out.append(pt)
+    cells = shapely.voronoi_polygons(shapely.MultiPoint(pk + po), extend_to=zone, ordered=True)
+    other_cells = shapely.union_all(list(cells.geoms)[len(pk):])
+    # Only the sea buffer is affected: the peninsula states' own land always stays.
+    return mask.intersection(other_cells).difference(keep_u)
+
+
 def peninsula_mask(countries_zip: Path):
     c = gpd.read_file(f"zip://{countries_zip}").to_crs(4326)
     c = c[c.intersects(box(*BBOX))]
@@ -85,7 +122,16 @@ def peninsula_mask(countries_zip: Path):
     others = c[~c["ADM0_A3"].isin(STATES)]
     print(f"States in mask: {sorted(keep['ADMIN'])}")
     print(f"Excluded neighbours: {sorted(others['ADMIN'])}")
-    mask = keep.union_all().buffer(COAST_BUFFER_DEG).difference(others.union_all())
+    keep_u, others_u = keep.union_all(), others.union_all()
+    for name, b in TREAT_AS_PENINSULA.items():
+        islands = shapely.MultiPolygon([p for p in getattr(others_u, "geoms", [others_u])
+                                        if box(*b).contains(p)])
+        print(f"Treated as peninsula: {name}: {len(islands.geoms)} Natural Earth polygons")
+        keep_u, others_u = keep_u.union(islands), others_u.difference(islands)
+    mask = keep_u.buffer(COAST_BUFFER_DEG).difference(others_u)
+    near = neighbour_side(keep_u, others_u, mask)
+    print(f"Removed from mask: sea buffer closer to a neighbour ({near.area:.3f} deg2)")
+    mask = mask.difference(near)
     for name, b in EXCLUDE_BOXES.items():
         print(f"Removed from mask: {name} {b}")
         mask = mask.difference(box(*b))
@@ -137,6 +183,43 @@ def summary(name: str, raw: gpd.GeoDataFrame, clipped: gpd.GeoDataFrame) -> None
     print(f"Fields:   {[c for c in raw.columns if c != 'geometry']}")
 
 
+def assign_pids(g: gpd.GeoDataFrame) -> list[str]:
+    """Stable pids. g is sorted by GEO2BG_ID, then area (largest first).
+
+    Fresh build: AG<id>, with -a, -b, ... (largest first) when the clip splits a polygon.
+    With a previous data/geology_polygons.csv, a part keeps the old pid whose stored point
+    (lon, lat) falls inside it, so pids survive mask changes. Removed pids are never reused:
+    a genuinely new part gets the next letter not used before for that GEO2BG_ID."""
+    prev = pd.read_csv(POLY_TABLE, dtype={"pid": str}) if POLY_TABLE.exists() else None
+    pids = []
+    for gid, grp in g.groupby("GEO2BG_ID", sort=False):
+        b = f"AG{int(gid):05d}"
+        old = prev[prev["GEO2BG_ID"] == gid] if prev is not None else None
+        if old is None or old.empty:   # fresh: default scheme
+            pids += [b] if len(grp) == 1 else [f"{b}-{chr(97 + i)}" for i in range(len(grp))]
+            continue
+        used, out = set(), []
+        old_pts = gpd.points_from_xy(old["lon"], old["lat"], crs=4326)
+        for geom in grp.geometry:
+            hits = [pid for pid, pt in zip(old["pid"], old_pts) if pid not in used and geom.contains(pt)]
+            out.append(min(hits) if hits else None)
+            used.update(hits)    # merged parts: the other old pids retire with them
+        letters = {p.split("-")[1] for p in old["pid"] if "-" in p} | {p.split("-")[1] for p in out if p and "-" in p}
+        for i, p in enumerate(out):
+            if p is None:
+                if len(grp) == 1 and not letters and b not in set(old["pid"]):
+                    out[i] = b
+                else:
+                    nxt = next(chr(c) for c in range(97, 123) if chr(c) not in letters)
+                    letters.add(nxt)
+                    out[i] = f"{b}-{nxt}"
+        pids += out
+    if prev is not None:
+        gone, new = sorted(set(prev["pid"]) - set(pids)), sorted(set(pids) - set(prev["pid"]))
+        print(f"pids vs previous {POLY_TABLE.name}: {len(gone)} removed {gone}, {len(new)} new {new}")
+    return pids
+
+
 def build_geology(mask) -> gpd.GeoDataFrame:
     geo = gpd.read_file(GEO_SHP).to_crs(4326)
     classes = pd.read_csv(CLASSES, dtype=str).fillna("")
@@ -151,10 +234,7 @@ def build_geology(mask) -> gpd.GeoDataFrame:
 
     # pid: AG<GEO2BG_ID>, plus -a/-b/... (largest part first) where the clip split a polygon
     g = g.sort_values(["GEO2BG_ID", "area_km2"], ascending=[True, False])
-    part = g.groupby("GEO2BG_ID").cumcount()
-    nparts = g.groupby("GEO2BG_ID")["GLG"].transform("size")
-    g["pid"] = "AG" + g["GEO2BG_ID"].astype(int).map("{:05d}".format)
-    g.loc[nparts > 1, "pid"] += "-" + part[nparts > 1].map(lambda i: chr(97 + i))
+    g["pid"] = assign_pids(g)
     assert g["pid"].is_unique
 
     g = g.merge(classes[["source_unit", "level1_class", "level2_label"]],

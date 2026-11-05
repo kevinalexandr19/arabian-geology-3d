@@ -179,6 +179,9 @@ const map = new maplibregl.Map({
   fitBoundsOptions: { padding: HOME_PADDING() },
   pitch: HOME_PITCH(),
   maxPitch: 75,
+  // Right-drag (or Ctrl+drag) rotation speed: ~1/3 of MapLibre's default 0.8 deg/px.
+  // Direction is unchanged (MapLibre default behaviour).
+  rotateDegreesPerPixelMoved: 0.25,
   attributionControl: false,
   hash: true,
 });
