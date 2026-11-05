@@ -129,8 +129,16 @@ with sync_playwright() as p:
     phone.evaluate("document.querySelector('details.about').open = false")
     phone.click("#panel-close")
     phone.wait_for_timeout(400)
-    seen_p = run_tour(phone, "m5_phone", 2)
-    print("phone tour, stops seen:", seen_p)
+    seen_p = run_tour(phone, "m5_phone", 0)
+    print("phone tour, stops seen:", seen_p,
+          "| finished:", phone.evaluate("document.getElementById('tour-stop').disabled"))
+    for i in (0, 2, 4):  # Asir, Tuwaiq, Hajar via bookmarks, waiting for tiles
+        phone.click("#panel-open")
+        phone.evaluate("document.querySelector('details.tour').open = true")
+        phone.locator("#bookmarks button").nth(i).click()
+        phone.wait_for_timeout(500)
+        idle(phone)
+        phone.screenshot(path=OUT / f"m5_phone_stop{i + 1}.png")
     phone.close()
     browser.close()
 
