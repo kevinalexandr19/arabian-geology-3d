@@ -180,7 +180,24 @@ function applyClassFilter() {
   });
 }
 
-function buildLegend(classes) {
+// Elevation bar on a shared 0..ELEV_MAX m scale; negative values clip to 0.
+const ELEV_MAX = 3700;
+const fmt = (v) => v.toLocaleString('en-US').replace('-', '−');
+
+function elevBar(st, colour) {
+  if (!st) return '';
+  const x = (v) => `${(Math.min(Math.max(v, 0), ELEV_MAX) / ELEV_MAX * 100).toFixed(2)}%`;
+  const w = (a, b) => `${((Math.min(Math.max(b, 0), ELEV_MAX) - Math.min(Math.max(a, 0), ELEV_MAX)) / ELEV_MAX * 100).toFixed(2)}%`;
+  const tip =
+    `Elevation (m): min ${fmt(st.min)} · p10 ${fmt(st.p10)} · median ${fmt(st.median)} · ` +
+    `p90 ${fmt(st.p90)} · max ${fmt(st.max)}\n${fmt(st.n_px)} px at ~1.2 km, ${fmt(st.n_neg)} below 0 m`;
+  return `<span class="ebar" title="${tip}">` +
+    `<span class="whisk" style="left:${x(st.min)};width:${w(st.min, st.max)};background:${colour}"></span>` +
+    `<span class="box" style="left:${x(st.p10)};width:${w(st.p10, st.p90)};background:${colour}"></span>` +
+    `<span class="med" style="left:${x(st.median)}"></span></span>`;
+}
+
+function buildLegend(classes, elev) {
   const ul = document.getElementById('legend');
   for (const c of classes) {
     enabled.add(c.name);
@@ -189,7 +206,8 @@ function buildLegend(classes) {
     li.innerHTML =
       `<label><input type="checkbox" checked>` +
       `<span class="swatch" style="background:${c.colour}"></span>` +
-      `<span><span class="name">${c.name}</span><br><span class="codes">${c.codes.join(', ')}</span></span></label>`;
+      `<span class="text"><span class="name">${c.name}</span><br><span class="codes">${c.codes.join(', ')}</span>` +
+      `${elevBar(elev[c.name], c.colour)}</span></label>`;
     li.querySelector('input').addEventListener('change', (e) => {
       if (e.target.checked) enabled.add(c.name); else enabled.delete(c.name);
       applyClassFilter();
@@ -200,9 +218,11 @@ function buildLegend(classes) {
   document.getElementById('all-off').onclick = () => { enabled.clear(); applyClassFilter(); };
 }
 
-const unitsReady = fetch('data/units.json')
-  .then((r) => r.json())
-  .then((j) => { units = j.units; source = j.source; buildLegend(j.classes); });
+const getJSON = (url) => fetch(url).then((r) => r.json());
+const unitsReady = Promise.all([
+  getJSON('data/units.json'),
+  getJSON('data/elev_stats.json').catch(() => ({ level1: {} })),
+]).then(([j, e]) => { units = j.units; source = j.source; buildLegend(j.classes, e.level1); });
 
 Promise.all([unitsReady, new Promise((res) => map.once('load', res))]).then(applyClassFilter);
 
@@ -264,6 +284,129 @@ map.on('mousemove', (e) => {
   const geo = map.queryRenderedFeatures(e.point, { layers: ['geology-fill'] }).length;
   map.getCanvas().style.cursor = geo ? 'pointer' : '';
 });
+
+// ---- Bookmarks and tour ----
+// Captions: sentence 1 = the geology, sentence 2 = how it shows in the relief. Edit here.
+const STOPS = [
+  {
+    title: 'Hijaz–Asir escarpment and the Arabian Shield',
+    camera: { center: [42.6, 18.8], zoom: 8, pitch: 62, bearing: 65 },
+    caption: 'The Arabian Shield is Neoproterozoic crystalline basement (island-arc volcanics, metasediments and granites accreted c. 870–550 Ma), exposed where the Red Sea rift flank was uplifted. ' +
+      'The Asir highlands reach nearly 3,000 m and fall in a steep west-facing escarpment to the Tihamah coastal plain, while the Shield surface slopes gently east beneath the sedimentary cover.',
+  },
+  {
+    title: 'Harrat Rahat and Harrat Khaybar',
+    camera: { center: [39.9, 24.4], zoom: 7, pitch: 55, bearing: 0 },
+    caption: 'Harrat Rahat and Harrat Khaybar are Cenozoic alkali-basalt lava fields erupted through the Shield along north–south vent alignments; the youngest Rahat flow, south-east of Madinah, erupted in AD 1256. ' +
+      'They form broad dark lava plateaux at about 1,000–2,000 m, studded with scoria cones and domes and standing above the eroded basement around them.',
+  },
+  {
+    title: 'Tuwaiq escarpment',
+    camera: { center: [46.4, 24.3], zoom: 8, pitch: 62, bearing: 90 },
+    caption: 'The Tuwaiq escarpment is held up by resistant Middle–Upper Jurassic limestones (Tuwaiq Mountain and Jubaila formations) that dip gently east off the Shield. ' +
+      'It is the largest of the central Arabian cuestas: a west-facing cliff several hundred metres high that arcs for about 1,000 km past Riyadh.',
+  },
+  {
+    title: 'Rub\' al Khali',
+    camera: { center: [51.0, 21.0], zoom: 6.5, pitch: 50, bearing: 0 },
+    caption: 'The Rub\' al Khali is the largest continuous sand sea on Earth: Quaternary eolian sand with interdune sabkhas over a thick Cenozoic basin fill. ' +
+      'Its relief is made of dunes, not bedrock, with linear and star mega-dunes up to about 250 m high on a floor that falls from about 800 m in the south-west to near sea level in the north-east.',
+  },
+  {
+    title: 'Hajar Mountains',
+    camera: { center: [57.5, 23.1], zoom: 8, pitch: 60, bearing: 180 },
+    caption: 'The Hajar Mountains expose the Semail ophiolite and Hawasina deep-water sediments thrust onto the Arabian margin in the Late Cretaceous (both kept within the Cretaceous class here), with the underlying Paleozoic–Mesozoic shelf succession exposed in the Jabal Akhdar and Saih Hatat windows. ' +
+      'Neogene uplift raised the Jabal Akhdar dome to about 3,000 m, and the range rises abruptly above the Batinah gravel plain and the interior foreland.',
+  },
+  {
+    title: 'Yemen highlands and traps',
+    camera: { center: [44.2, 15.0], zoom: 7.5, pitch: 60, bearing: 90 },
+    caption: 'The Yemen highlands are capped by the Oligocene–Miocene Yemen traps, flood basalts and silicic volcanics erupted c. 31–29 Ma over Jurassic–Cretaceous sediments and Precambrian basement. ' +
+      'The traps build a plateau at 2,000–3,000 m, cut by deep wadis and topped by Jabal an-Nabi Shu\'ayb (c. 3,660 m, the highest point of the peninsula), which drops steeply west to the Tihamah.',
+  },
+  {
+    title: 'Dhofar',
+    camera: { center: [54.0, 17.5], zoom: 8.2, pitch: 58, bearing: 0 },
+    caption: 'Dhofar is a plateau of Paleocene–Eocene shelf limestones uplifted on the northern shoulder of the Gulf of Aden rift. ' +
+      'The Qara and Samhan mountains rise in a south-facing escarpment up to about 2,000 m above the Salalah plain and slope gently north into the interior.',
+  },
+  {
+    title: 'UAE coastal sabkhas and Musandam',
+    camera: { center: [55.4, 25.1], zoom: 7.5, pitch: 55, bearing: 40 },
+    caption: 'The Abu Dhabi coastal sabkhas are Holocene supratidal evaporite flats along the Gulf, while the Musandam peninsula exposes Mesozoic shelf carbonates folded and uplifted with the Oman mountains. ' +
+      'The sabkhas are almost flat surfaces within a few metres of sea level; Musandam rises to about 2,000 m and drops straight into the sea along drowned valleys (khawrs).',
+  },
+];
+const DWELL_MS = 4500;     // pause after each flight
+const FLY_MS = 3500;       // flight duration in the tour (~8 s per stop in total)
+
+const caption = document.getElementById('caption');
+let tour = null;           // { i, timer } while the tour runs
+
+function showCaption(i) {
+  const st = STOPS[i];
+  caption.querySelector('h3').textContent = `${i + 1}. ${st.title}`;
+  caption.querySelector('p').textContent = st.caption;
+  caption.hidden = false;
+  document.querySelectorAll('#bookmarks button').forEach((b, j) => b.classList.toggle('active', j === i));
+}
+function hideCaption() {
+  caption.hidden = true;
+  document.querySelectorAll('#bookmarks button').forEach((b) => b.classList.remove('active'));
+}
+caption.querySelector('.caption-close').onclick = hideCaption;
+
+function goTo(i, duration) {
+  showCaption(i);
+  if (isPhone()) document.body.classList.remove('panel-visible');
+  // Only pass duration when set: an explicit undefined overrides MapLibre's default and yields NaN frames.
+  map.flyTo({ ...STOPS[i].camera, ...(duration ? { duration } : {}), essential: true });
+}
+
+function stopTour() {
+  if (!tour) return;
+  clearTimeout(tour.timer);
+  tour = null;
+  document.getElementById('tour-play').disabled = false;
+  document.getElementById('tour-stop').disabled = true;
+}
+
+function tourStep() {
+  if (!tour) return;
+  if (tour.i >= STOPS.length) { stopTour(); return; }
+  const i = tour.i++;
+  goTo(i, FLY_MS);
+  map.once('moveend', () => { if (tour) tour.timer = setTimeout(tourStep, DWELL_MS); });
+}
+
+function startTour() {
+  stopTour();
+  tour = { i: 0, timer: null };
+  document.getElementById('tour-play').disabled = true;
+  document.getElementById('tour-stop').disabled = false;
+  tourStep();
+}
+
+function goHome() {
+  stopTour();
+  hideCaption();
+  const cam = map.cameraForBounds(PENINSULA, { padding: isPhone() ? 10 : 30 });
+  map.flyTo({ ...cam, pitch: 45, bearing: 0, essential: true });
+}
+
+const bm = document.getElementById('bookmarks');
+STOPS.forEach((st, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = `${i + 1}. ${st.title}`;
+  b.onclick = () => { stopTour(); goTo(i); };
+  bm.appendChild(b);
+});
+document.getElementById('tour-play').onclick = startTour;
+document.getElementById('tour-stop').onclick = stopTour;
+document.getElementById('tour-home').onclick = goHome;
+// Any user drag, zoom, rotate or tilt stops the tour (programmatic flyTo has no originalEvent).
+map.on('movestart', (e) => { if (e.originalEvent) stopTour(); });
 
 // ---- Phone panel toggle ----
 document.getElementById('panel-open').onclick = () => document.body.classList.add('panel-visible');

@@ -1,0 +1,233 @@
+{
+ "source": "AWS Terrain Tiles (Terrarium), z7, EPSG:3857 grid, ~1.2 km/px",
+ "method": "per-pixel statistics of all pixels whose centre falls inside the polygons",
+ "level1": {
+  "Precambrian basement (Arabian Shield)": {
+   "min": -1562,
+   "p10": 366,
+   "median": 957,
+   "p90": 1618,
+   "max": 3321,
+   "n_px": 399848,
+   "n_neg": 244
+  },
+  "Paleozoic": {
+   "min": -1458,
+   "p10": 701,
+   "median": 925,
+   "p90": 1221,
+   "max": 2775,
+   "n_px": 127643,
+   "n_neg": 72
+  },
+  "Triassic": {
+   "min": -795,
+   "p10": 555,
+   "median": 683,
+   "p90": 791,
+   "max": 2802,
+   "n_px": 8477,
+   "n_neg": 19
+  },
+  "Jurassic": {
+   "min": 36,
+   "p10": 621,
+   "median": 803,
+   "p90": 1757,
+   "max": 3272,
+   "n_px": 57487,
+   "n_neg": 0
+  },
+  "Cretaceous": {
+   "min": -1128,
+   "p10": 375,
+   "median": 601,
+   "p90": 816,
+   "max": 3055,
+   "n_px": 145238,
+   "n_neg": 263
+  },
+  "Paleogene-Neogene sedimentary": {
+   "min": -837,
+   "p10": 93,
+   "median": 395,
+   "p90": 939,
+   "max": 2987,
+   "n_px": 446483,
+   "n_neg": 1155
+  },
+  "Cenozoic volcanics": {
+   "min": -405,
+   "p10": 584,
+   "median": 1053,
+   "p90": 1833,
+   "max": 3567,
+   "n_px": 104433,
+   "n_neg": 46
+  },
+  "Neogene-Quaternary surficial deposits": {
+   "min": -3740,
+   "p10": 72,
+   "median": 311,
+   "p90": 903,
+   "max": 3083,
+   "n_px": 918747,
+   "n_neg": 3464
+  }
+ },
+ "level2": {
+  "Alluvium and gravel": {
+   "min": -3740,
+   "p10": 38,
+   "median": 501,
+   "p90": 970,
+   "max": 3083,
+   "n_px": 309441,
+   "n_neg": 2546
+  },
+  "Cambrian-Ordovician": {
+   "min": -9,
+   "p10": 780,
+   "median": 1003,
+   "p90": 1208,
+   "max": 1754,
+   "n_px": 37645,
+   "n_neg": 13
+  },
+  "Carboniferous-Permian": {
+   "min": 588,
+   "p10": 669,
+   "median": 990,
+   "p90": 1889,
+   "max": 2668,
+   "n_px": 29296,
+   "n_neg": 0
+  },
+  "Cenozoic intrusives": {
+   "min": 54,
+   "p10": 85,
+   "median": 140,
+   "p90": 607,
+   "max": 1838,
+   "n_px": 652,
+   "n_neg": 0
+  },
+  "Cretaceous-Paleogene": {
+   "min": 0,
+   "p10": 130,
+   "median": 736,
+   "p90": 870,
+   "max": 2401,
+   "n_px": 1086,
+   "n_neg": 0
+  },
+  "Eolian sand": {
+   "min": -49,
+   "p10": 93,
+   "median": 279,
+   "p90": 857,
+   "max": 1491,
+   "n_px": 554918,
+   "n_neg": 280
+  },
+  "Harrats (Oligocene-Quaternary)": {
+   "min": 4,
+   "p10": 683,
+   "median": 1020,
+   "p90": 1359,
+   "max": 1985,
+   "n_px": 74887,
+   "n_neg": 0
+  },
+  "Harrats (Quaternary)": {
+   "min": -405,
+   "p10": 58,
+   "median": 591,
+   "p90": 2173,
+   "max": 2883,
+   "n_px": 6856,
+   "n_neg": 46
+  },
+  "Jurassic-Cretaceous": {
+   "min": -60,
+   "p10": 29,
+   "median": 452,
+   "p90": 1248,
+   "max": 2003,
+   "n_px": 937,
+   "n_neg": 38
+  },
+  "Neogene-Quaternary gravels": {
+   "min": 2,
+   "p10": 104,
+   "median": 172,
+   "p90": 269,
+   "max": 407,
+   "n_px": 31248,
+   "n_neg": 0
+  },
+  "Ordovician-Devonian": {
+   "min": 455,
+   "p10": 735,
+   "median": 898,
+   "p90": 1102,
+   "max": 1868,
+   "n_px": 55097,
+   "n_neg": 0
+  },
+  "Paleozoic-Mesozoic": {
+   "min": -433,
+   "p10": 584,
+   "median": 633,
+   "p90": 699,
+   "max": 891,
+   "n_px": 2152,
+   "n_neg": 16
+  },
+  "Paleozoic-Precambrian": {
+   "min": -4,
+   "p10": 855,
+   "median": 1340,
+   "p90": 1951,
+   "max": 2357,
+   "n_px": 1146,
+   "n_neg": 1
+  },
+  "Permian-Triassic": {
+   "min": -795,
+   "p10": 198,
+   "median": 671,
+   "p90": 1395,
+   "max": 2802,
+   "n_px": 2469,
+   "n_neg": 19
+  },
+  "Sabkha": {
+   "min": -93,
+   "p10": 2,
+   "median": 56,
+   "p90": 108,
+   "max": 1243,
+   "n_px": 21813,
+   "n_neg": 619
+  },
+  "Triassic-Jurassic": {
+   "min": 589,
+   "p10": 652,
+   "median": 756,
+   "p90": 809,
+   "max": 1054,
+   "n_px": 316,
+   "n_neg": 0
+  },
+  "Yemen traps (Oligocene-Miocene)": {
+   "min": 110,
+   "p10": 583,
+   "median": 1642,
+   "p90": 2539,
+   "max": 3567,
+   "n_px": 22038,
+   "n_neg": 0
+  }
+ }
+}
