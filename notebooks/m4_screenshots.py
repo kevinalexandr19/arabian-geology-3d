@@ -43,6 +43,7 @@ with sync_playwright() as p:
         page.evaluate(WAIT_IDLE)
         page.wait_for_timeout(1500)
         page.evaluate(WAIT_IDLE)
+        page.wait_for_timeout(2500)  # let symbol labels fade in
         page.screenshot(path=OUT / f"m4_stop{i}.png")
         print("stop", i, flush=True); print( page.evaluate("[map.getCenter().toArray().map(v => +v.toFixed(2)), +map.getZoom().toFixed(2)]"))
 
@@ -69,6 +70,11 @@ with sync_playwright() as p:
     phone.click("#panel-open")
     phone.wait_for_timeout(800)
     phone.screenshot(path=OUT / "m4_phone.png")
+    phone.locator("#bookmarks button").nth(4).click()  # Hajar; closes the panel on phones
+    phone.wait_for_timeout(500)
+    phone.evaluate(WAIT_IDLE)
+    phone.wait_for_timeout(2500)
+    phone.screenshot(path=OUT / "m4_phone_stop5.png")
     phone.close()
     browser.close()
 

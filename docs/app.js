@@ -37,6 +37,7 @@ const style = {
     geology: { type: 'geojson', data: 'data/geology.geojson', attribution: GEO_ATTR },
     roads: { type: 'geojson', data: 'data/roads.geojson', attribution: OSM_ATTR },
     cities: { type: 'geojson', data: 'data/cities.geojson', attribution: NE_ATTR },
+    tour: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
   },
   layers: [
     { id: 'background', type: 'background', paint: { 'background-color': '#d7dde2' } },
@@ -59,6 +60,15 @@ const style = {
         'line-color': 'rgba(40, 40, 40, 0.55)',
         'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.3, 12, 1],
       },
+    },
+    // Tour: outline of the polygons a stop is about (filter set per stop).
+    {
+      id: 'focus-glow', type: 'line', source: 'geology', layout: { visibility: 'none' },
+      paint: { 'line-color': '#ffffff', 'line-width': 4.5, 'line-blur': 1.5, 'line-opacity': 0.9 },
+    },
+    {
+      id: 'focus-line', type: 'line', source: 'geology', layout: { visibility: 'none' },
+      paint: { 'line-color': '#1d232a', 'line-width': 1.6 },
     },
     {
       id: 'roads-primary', type: 'line', source: 'roads', minzoom: 6,
@@ -92,6 +102,25 @@ const style = {
     },
     // City dots. Visibility by scalerank tier; capitals drawn as squares (larger, inverted).
     ...cityLayers(),
+    // Tour annotations: escarpment lines for the active stop (flags and area labels are DOM markers).
+    {
+      id: 'tour-line-casing', type: 'line', source: 'tour', filter: ['==', ['geometry-type'], 'LineString'],
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-opacity': 0.85 },
+    },
+    {
+      id: 'tour-line', type: 'line', source: 'tour', filter: ['==', ['geometry-type'], 'LineString'],
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#b3122e', 'line-width': 3, 'line-dasharray': [2, 1.2] },
+    },
+    {
+      id: 'tour-line-label', type: 'symbol', source: 'tour', filter: ['==', ['geometry-type'], 'LineString'],
+      layout: {
+        'symbol-placement': 'line', 'text-field': ['get', 'name'], 'text-font': FONT_BOLD,
+        'text-size': 13, 'text-offset': [0, -1.1], 'text-letter-spacing': 0.05, 'symbol-spacing': 320,
+      },
+      paint: { 'text-color': '#b3122e', 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
+    },
   ],
 };
 
@@ -291,48 +320,86 @@ const STOPS = [
   {
     title: 'Hijaz–Asir escarpment and the Arabian Shield',
     camera: { center: [42.6, 18.8], zoom: 8, pitch: 62, bearing: 65 },
+    marks: {
+      flags: [['Jabal Sawda', '~3,000 m', 42.369, 18.266]],
+      areas: [['Arabian Shield', 43.0, 19.35], ['Tihamah', 41.3, 19.0]],
+      lines: [['Asir escarpment', [[42.71, 18.0], [42.31, 18.25], [42.21, 18.5], [42.21, 18.75], [42.06, 19.0], [42.04, 19.25], [41.86, 19.5], [41.85, 19.75], [41.38, 20.0], [41.19, 20.25]]]],
+    },
     caption: 'The Arabian Shield is Neoproterozoic crystalline basement (island-arc volcanics, metasediments and granites accreted c. 870–550 Ma), exposed where the Red Sea rift flank was uplifted. ' +
       'The Asir highlands reach nearly 3,000 m and fall in a steep west-facing escarpment to the Tihamah coastal plain, while the Shield surface slopes gently east beneath the sedimentary cover.',
   },
   {
     title: 'Harrat Rahat and Harrat Khaybar',
     camera: { center: [39.9, 24.4], zoom: 7, pitch: 55, bearing: 0 },
+    marks: {
+      areas: [['Harrat Rahat', 40.1, 23.7], ['Harrat Khaybar', 40.1, 25.6]],
+      focus: ['==', ['slice', ['get', 'level2_label'], 0, 7], 'Harrats'],
+    },
     caption: 'Harrat Rahat and Harrat Khaybar are Cenozoic alkali-basalt lava fields erupted through the Shield along north–south vent alignments; the youngest Rahat flow, south-east of Madinah, erupted in AD 1256. ' +
       'They form broad dark lava plateaux at about 1,000–2,000 m, studded with scoria cones and domes and standing above the eroded basement around them.',
   },
   {
     title: 'Tuwaiq escarpment',
     camera: { center: [46.4, 24.3], zoom: 8, pitch: 62, bearing: 90 },
+    marks: {
+      areas: [['Arabian Shield', 45.05, 23.75], ['Jurassic outcrop', 46.75, 23.6]],
+      lines: [['Tuwaiq escarpment', [[45.14, 20.0], [45.18, 20.25], [45.32, 20.5], [45.34, 20.75], [45.44, 21.0], [45.52, 21.25], [45.59, 21.5], [45.68, 21.75], [45.9, 22.25], [46.01, 22.5], [46.1, 22.75], [46.26, 23.0], [46.33, 23.25], [46.41, 23.5], [46.46, 23.75], [46.38, 24.0], [46.35, 24.25], [46.42, 24.5], [46.1, 24.75], [45.96, 25.0], [46.05, 25.25]]]],
+      focus: ['in', ['get', 'GLG'], ['literal', ['J', 'JTr']]],
+    },
     caption: 'The Tuwaiq escarpment is held up by resistant Middle–Upper Jurassic limestones (Tuwaiq Mountain and Jubaila formations) that dip gently east off the Shield. ' +
       'It is the largest of the central Arabian cuestas: a west-facing cliff several hundred metres high that arcs for about 1,000 km past Riyadh.',
   },
   {
     title: 'Rub\' al Khali',
     camera: { center: [51.0, 21.0], zoom: 6.5, pitch: 50, bearing: 0 },
+    marks: {
+      areas: [['Rub\' al Khali', 50.5, 20.4]],
+    },
     caption: 'The Rub\' al Khali is the largest continuous sand sea on Earth: Quaternary eolian sand with interdune sabkhas over a thick Cenozoic basin fill. ' +
       'Its relief is made of dunes, not bedrock, with linear and star mega-dunes up to about 250 m high on a floor that falls from about 800 m in the south-west to near sea level in the north-east.',
   },
   {
     title: 'Hajar Mountains',
     camera: { center: [57.5, 23.1], zoom: 8, pitch: 60, bearing: 180 },
+    marks: {
+      flags: [['Jabal Shams', '~3,000 m', 57.277, 23.216]],
+      areas: [['Jabal Akhdar window', 57.65, 23.12], ['Saih Hatat window', 58.35, 23.35],
+        ['Semail ophiolite', 57.95, 23.5], ['Batinah plain', 57.2, 24.0]],
+      focus: ['all', ['in', ['get', 'level1_class'], ['literal', ['Paleozoic', 'Triassic', 'Jurassic']]],
+        ['within', { type: 'Polygon', coordinates: [[[56.5, 22.4], [59.5, 22.4], [59.5, 24.2], [56.5, 24.2], [56.5, 22.4]]] }]],
+    },
     caption: 'The Hajar Mountains expose the Semail ophiolite and Hawasina deep-water sediments thrust onto the Arabian margin in the Late Cretaceous (both kept within the Cretaceous class here), with the underlying Paleozoic–Mesozoic shelf succession exposed in the Jabal Akhdar and Saih Hatat windows. ' +
       'Neogene uplift raised the Jabal Akhdar dome to about 3,000 m, and the range rises abruptly above the Batinah gravel plain and the interior foreland.',
   },
   {
     title: 'Yemen highlands and traps',
     camera: { center: [44.2, 15.0], zoom: 7.5, pitch: 60, bearing: 90 },
+    marks: {
+      flags: [['Jabal an-Nabi Shu\'ayb', '~3,660 m', 43.973, 15.279, 'left', 46]],
+      areas: [['Yemen traps', 44.6, 14.4], ['Tihamah', 43.1, 14.9]],
+      focus: ['==', ['slice', ['get', 'level2_label'], 0, 11], 'Yemen traps'],
+    },
     caption: 'The Yemen highlands are capped by the Oligocene–Miocene Yemen traps, flood basalts and silicic volcanics erupted c. 31–29 Ma over Jurassic–Cretaceous sediments and Precambrian basement. ' +
       'The traps build a plateau at 2,000–3,000 m, cut by deep wadis and topped by Jabal an-Nabi Shu\'ayb (c. 3,660 m, the highest point of the peninsula), which drops steeply west to the Tihamah.',
   },
   {
     title: 'Dhofar',
     camera: { center: [54.0, 17.5], zoom: 8.2, pitch: 58, bearing: 0 },
+    marks: {
+      flags: [['Jabal Samhan', '', 54.849, 17.178]],
+      areas: [['Jabal Qara', 53.75, 17.12], ['Dhofar plateau', 54.0, 17.85]],
+    },
     caption: 'Dhofar is a plateau of Paleocene–Eocene shelf limestones uplifted on the northern shoulder of the Gulf of Aden rift. ' +
       'The Qara and Samhan mountains rise in a south-facing escarpment up to about 2,000 m above the Salalah plain and slope gently north into the interior.',
   },
   {
     title: 'UAE coastal sabkhas and Musandam',
     camera: { center: [55.4, 25.1], zoom: 7.5, pitch: 55, bearing: 40 },
+    marks: {
+      flags: [['Jebel Harim', '~2,090 m', 56.234, 25.973]],
+      areas: [['Abu Dhabi coastal sabkha', 53.9, 24.05], ['Musandam', 56.3, 26.2]],
+      focus: ['==', ['get', 'level2_label'], 'Sabkha'],
+    },
     caption: 'The Abu Dhabi coastal sabkhas are Holocene supratidal evaporite flats along the Gulf, while the Musandam peninsula exposes Mesozoic shelf carbonates folded and uplifted with the Oman mountains. ' +
       'The sabkhas are almost flat surfaces within a few metres of sea level; Musandam rises to about 2,000 m and drops straight into the sea along drowned valleys (khawrs).',
   },
@@ -350,6 +417,54 @@ function showCaption(i) {
   caption.hidden = false;
   document.querySelectorAll('#bookmarks button').forEach((b, j) => b.classList.toggle('active', j === i));
 }
+// Flags are DOM markers: they stand upright on the terrain whatever the pitch.
+let flagMarkers = [];
+function makeFlag(name, note, side, pole) {
+  const el = document.createElement('div');
+  el.className = side === 'left' ? 'flag flag-left' : 'flag';
+  el.innerHTML = `<div class="flag-cloth">${esc(name)}${note ? `<small>${esc(note)}</small>` : ''}</div><div class="flag-pole"${pole ? ` style="height:${pole}px"` : ''}></div>`;
+  return el;
+}
+function clearMarks() {
+  flagMarkers.forEach((m) => m.remove());
+  flagMarkers = [];
+  map.getSource('tour')?.setData({ type: 'FeatureCollection', features: [] });
+  ['focus-glow', 'focus-line'].forEach((l) => map.getLayer(l) && map.setLayoutProperty(l, 'visibility', 'none'));
+}
+function showMarks(i) {
+  clearMarks();
+  const mk = STOPS[i].marks || {};
+  // Flag: [name, note, lon, lat, side, pole px]; side 'left' puts the cloth left of the pole and a taller pole lifts it (to keep labels clear).
+  for (const [name, note, lon, lat, side, pole] of mk.flags || []) {
+    const left = side === 'left';
+    flagMarkers.push(new maplibregl.Marker({
+      opacityWhenCovered: '1',
+      element: makeFlag(name, note, side, pole), anchor: left ? 'bottom-right' : 'bottom-left', offset: [left ? 1 : -1, 0],
+    })
+      .setLngLat([lon, lat]).addTo(map));
+  }
+  // Area labels are DOM markers too, so terrain occlusion never hides them mid-tour.
+  for (const [name, lon, lat] of mk.areas || []) {
+    const el = document.createElement('div');
+    el.className = 'area-label';
+    el.textContent = name;
+    flagMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center', opacityWhenCovered: '1' })
+      .setLngLat([lon, lat]).addTo(map));
+  }
+  const features = [
+    ...(mk.lines || []).map(([name, coords]) => ({
+      type: 'Feature', properties: { name }, geometry: { type: 'LineString', coordinates: coords },
+    })),
+  ];
+  map.getSource('tour').setData({ type: 'FeatureCollection', features });
+  if (mk.focus) {
+    for (const l of ['focus-glow', 'focus-line']) {
+      map.setFilter(l, mk.focus);
+      map.setLayoutProperty(l, 'visibility', 'visible');
+    }
+  }
+}
+
 function hideCaption() {
   caption.hidden = true;
   document.querySelectorAll('#bookmarks button').forEach((b) => b.classList.remove('active'));
@@ -358,6 +473,7 @@ caption.querySelector('.caption-close').onclick = hideCaption;
 
 function goTo(i, duration) {
   showCaption(i);
+  showMarks(i);
   if (isPhone()) document.body.classList.remove('panel-visible');
   // Only pass duration when set: an explicit undefined overrides MapLibre's default and yields NaN frames.
   map.flyTo({ ...STOPS[i].camera, ...(duration ? { duration } : {}), essential: true });
@@ -390,6 +506,7 @@ function startTour() {
 function goHome() {
   stopTour();
   hideCaption();
+  clearMarks();
   const cam = map.cameraForBounds(PENINSULA, { padding: isPhone() ? 10 : 30 });
   map.flyTo({ ...cam, pitch: 45, bearing: 0, essential: true });
 }

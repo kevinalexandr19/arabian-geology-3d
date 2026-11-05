@@ -171,8 +171,35 @@ body { display: flex; }
 @media (max-width: 700px) {
   .bookmarks { grid-template-columns: 1fr 1fr; }
   .caption {
-    top: 56px; left: 10px; right: 10px; max-width: none;
+    top: 56px; left: 10px; right: 52px; max-width: none;  /* keep the zoom buttons clear */
     font-size: 12px; max-height: 40%; overflow-y: auto;
   }
   .caption h3 { font-size: 13px; }
+}
+
+/* ---- Tour flags (DOM markers) ---- */
+.flag { display: flex; flex-direction: column; align-items: flex-start; pointer-events: none; }
+.flag-cloth {
+  background: #b3122e; color: #fff; font-size: 11px; font-weight: 600; line-height: 1.2;
+  padding: 3px 7px 3px 6px; border-radius: 0 3px 3px 0; white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,.35);
+}
+.flag-cloth small { display: block; font-weight: 400; font-size: 10px; opacity: .9; }
+.flag-pole {
+  width: 2px; height: 26px; background: #2b2b2b;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.6);
+  position: relative;
+}
+.flag-pole::after {
+  content: ""; position: absolute; left: -3px; bottom: -3px;
+  width: 8px; height: 8px; border-radius: 50%; background: #b3122e; border: 1.5px solid #fff;
+}
+.flag-left { align-items: flex-end; }
+.flag-left .flag-cloth { border-radius: 3px 0 0 3px; text-align: right; }
+.flag-left .flag-pole::after { left: -4px; }
+.area-label {
+  pointer-events: none; white-space: nowrap; text-align: center;
+  font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: #2a1640;
+  text-shadow: 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px rgba(255,255,255,.9);
 }
