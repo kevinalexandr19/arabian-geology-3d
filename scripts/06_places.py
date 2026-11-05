@@ -12,7 +12,11 @@
    and thinned to a vertex every ~5 km.
    Fields: cls, plates ("AR-AF"), name (plate names), v_mm (mean relative velocity, mm/yr).
 3. Geoheritage sites and geoparks: curated in scripts/geoheritage.csv (coordinates approximate, ~1 km;
-   see the `verify` column). Each site also gets the Level 1 class of the polygon it falls in.
+   see the `verify` column). Each site also gets the Level 1 class of the polygon it falls in. `unesco_year`
+   is the UNESCO Global Geopark designation year (UNESCO IGGP pages give the year only).
+   Photos: scripts/geosite_photos.csv lists one Wikimedia Commons file per site with author and licence
+   (CC BY / CC BY-SA / public domain). Each is fetched once (Special:FilePath, 800 px), resized to 720 px
+   and saved as docs/img/geosites/<id>.jpg; the credit is shown under the photo in the viewer.
 
 Outputs: docs/data/volcanoes.geojson, docs/data/plates.geojson, docs/data/geoheritage.geojson
 Downloads are cached in data/interim/places/.
@@ -29,6 +33,16 @@ ROOT = Path(__file__).resolve().parents[1]
 CACHE = ROOT / "data" / "interim" / "places"
 OUT = ROOT / "docs" / "data"
 SITES = ROOT / "scripts" / "geoheritage.csv"
+PHOTOS = ROOT / "scripts" / "geosite_photos.csv"
+IMG = ROOT / "docs" / "img" / "geosites"
+UA = "arabia3d-geology-map/0.1 (https://github.com/kevinalexandr19/arabian-geology-3d)"
+LICENCE_URL = {
+    "CC BY 2.0": "https://creativecommons.org/licenses/by/2.0/",
+    "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
+    "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "Public domain": "",
+}
 
 GVP_WFS = ("https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows?service=WFS&version=1.0.0"
            "&request=GetFeature&typeName=GVP-VOTW:Smithsonian_VOTW_Holocene_Volcanoes"
@@ -138,7 +152,44 @@ def plates():
     return feats
 
 
+def photos():
+    """Commons photo per site -> docs/img/geosites/<id>.jpg (720 px wide, EXIF stripped) + credit fields."""
+    from io import BytesIO
+    from urllib.parse import quote
+
+    from PIL import Image
+
+    IMG.mkdir(parents=True, exist_ok=True)
+    cache = CACHE / "photos"
+    cache.mkdir(parents=True, exist_ok=True)
+    out = {}
+    with PHOTOS.open(newline="", encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            if r["licence"] not in LICENCE_URL:
+                raise SystemExit(f"{r['id']}: licence {r['licence']!r} not in the allowed list")
+            name = r["commons_file"].replace(" ", "_")
+            src = cache / f"{r['id']}.src.jpg"
+            if not src.exists():
+                url = f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(name)}?width=800"
+                resp = requests.get(url, headers={"User-Agent": UA}, timeout=120)
+                resp.raise_for_status()
+                src.write_bytes(resp.content)
+            dst = IMG / f"{r['id']}.jpg"
+            im = Image.open(BytesIO(src.read_bytes())).convert("RGB")
+            if im.width > 720:
+                im = im.resize((720, round(im.height * 720 / im.width)), Image.LANCZOS)
+            im.save(dst, "JPEG", quality=80, optimize=True, progressive=True)
+            out[r["id"]] = {
+                "photo": f"img/geosites/{r['id']}.jpg", "photo_w": im.width, "photo_h": im.height,
+                "photo_caption": r["caption"], "photo_author": r["author"], "photo_licence": r["licence"],
+                "photo_licence_url": LICENCE_URL[r["licence"]],
+                "photo_page": "https://commons.wikimedia.org/wiki/File:" + quote(name),
+            }
+    return out
+
+
 def sites():
+    pics = photos()
     geo = json.loads((OUT / "geology.geojson").read_text())["features"]
     polys = [shape(f["geometry"]) for f in geo]
     tree = STRtree(polys)
@@ -154,7 +205,9 @@ def sites():
                 "geometry": {"type": "Point", "coordinates": [lon, lat]},
                 "properties": {"id": r["id"], "name": r["name"], "kind": r["kind"], "description": r["description"],
                                "zoom": float(r["zoom"]), "pitch": float(r["pitch"]), "bearing": float(r["bearing"]),
-                               "level1_class": l1},
+                               "level1_class": l1,
+                               "unesco_year": int(r["unesco_year"]) if r.get("unesco_year") else None,
+                               **pics.get(r["id"], {})},
             })
     return feats
 
@@ -178,4 +231,5 @@ if __name__ == "__main__":
     write("geoheritage.geojson", s)
     for f in s:
         p = f["properties"]
-        print(f"  {p['name']:<40} {p['kind']:<8} on: {p['level1_class'] or '(no geology polygon)'}")
+        print(f"  {p['name']:<52} {p['kind']:<8} on: {p['level1_class'] or '(no geology polygon)':<38}"
+              f" photo: {p.get('photo_licence', '-')}")

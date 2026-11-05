@@ -14,7 +14,7 @@ Arabia 3D is an interactive 3D map of the generalized bedrock geology of the Ara
 - **Guided tour** of ten stops (the Arabian Shield, the Hijaz–Asir escarpment, Harrat Rahat and Khaybar, the Arabian Platform, the Tuwaiq escarpment, the Rub' al Khali, the Hajar Mountains, the Yemen highlands, Dhofar, the UAE sabkhas and Musandam). Each stop has a camera preset, a two-sentence caption, flags on key summits, area labels, outlines of the featured units and, where relevant, a traced escarpment. The two overview stops (Shield, Platform) fade every other class. **◀ Prev / Next ▶** in the caption step through the stops by hand.
 - **Elevation profile tool.** The **Profile** button (top right) opens a window at the bottom of the map: click two points and get the terrain profile in true metres, filled with the Level 1 colour of the geology underneath, with the vertical exaggeration of the chart and the share of each class. Hover (or drag a finger) along the profile to see distance, elevation and unit, with a matching dot on the map.
 - **Stratigraphic column window.** A generalized column of the Arabian Platform (Saq Sandstone to the Hofuf Formation) in the Level 1 colours, with lithology patterns, approximate thicknesses and the escarpment-forming units (Khuff, Tuwaiq Mountain, Jubaila, Aruma, Umm er Radhuma).
-- **Explore: geoheritage sites, geoparks and Holocene volcanoes.** Two lists in the side panel (19 curated sites, 17 GVP volcanoes); a click flies to the place and opens a card with a short description, or the last eruption, rock type and a link to the Smithsonian record. The same points are on the map.
+- **Explore: geoheritage sites, geoparks and Holocene volcanoes.** Two lists in the side panel (19 curated sites, 17 GVP volcanoes); a click flies to the place and opens a card with a photo (14 sites, from Wikimedia Commons, credited) and a short description, or the last eruption, rock type and a link to the Smithsonian record. The two UNESCO Global Geoparks (Salma and North Riyadh, both designated in 2025) are marked with their designation year. The same points are on the map.
 - **Sea-floor depth and plate boundaries.** The sea is shaded by depth from the bathymetry in the terrain tiles, so the Red Sea axial trough and the Gulf of Aden ridge stand out. Plate boundaries (Bird 2003) are drawn as spreading, transform or convergent; click one for its relative velocity.
 - **Polygon popups:** click any polygon for its ID, class, finer age label, source age code, age range, lithology note and citation.
 - **Cursor readout:** latitude, longitude and true elevation in metres (independent of the exaggeration), bottom left. On a phone, tap the map.
@@ -101,7 +101,7 @@ Run the scripts in order from the repository root:
 | 3 | `python scripts/03_overlays.py` | `docs/data/cities.geojson`, `docs/data/roads.geojson` |
 | 4 | `python scripts/04_elevation_stats.py` | `docs/data/elev_stats.json` (elevation statistics window) |
 | 5 | `python scripts/05_units.py` | `docs/data/units.json` (legend classes, popup ages and lithology notes) |
-| 6 | `python scripts/06_places.py` | `docs/data/volcanoes.geojson` (GVP), `plates.geojson` (PB2002), `geoheritage.geojson` (from `scripts/geoheritage.csv`) |
+| 6 | `python scripts/06_places.py` | `docs/data/volcanoes.geojson` (GVP), `plates.geojson` (PB2002), `geoheritage.geojson` (from `scripts/geoheritage.csv`), photos in `docs/img/geosites/` (from `scripts/geosite_photos.csv`) |
 
 Checks and figures (the Playwright scripts need the site served on port 8000, as above):
 
@@ -119,10 +119,11 @@ When you publish changes, update the "Last updated" date in `docs/index.html` by
 
 ```
 docs/          the published site: index.html, app.js, style.css, favicons, preview.png, .nojekyll
+docs/img/      geosites/*.jpg: credited Commons photos for the geoheritage cards
 docs/data/     web layers: geology.geojson, cities.geojson, roads.geojson, units.json, elev_stats.json,
                volcanoes.geojson, plates.geojson, geoheritage.geojson
 scripts/       01_download.py … 06_places.py, contacts.py, geology_classes.csv, polygon_overrides.csv, cities.csv,
-               geoheritage.csv
+               geoheritage.csv, geosite_photos.csv
 data/raw/      geo2bg shapefile and filtered OSM road extracts in osm/ (committed); Natural Earth zips (gitignored)
 data/interim/  clipped and intermediate layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location
@@ -140,7 +141,8 @@ The **code** in this repository (scripts, viewer, notebooks) is released under t
 - **Holocene volcanoes:** Global Volcanism Program, *Volcanoes of the World* (v. 5), Smithsonian Institution, https://doi.org/10.5479/si.GVP.VOTW5, read from the GVP web service. Free to use with citation. The short notes in the volcano cards are written for this map.
 - **Plate boundaries:** Bird, P., 2003, An updated digital model of plate boundaries, *Geochemistry, Geophysics, Geosystems* 4(3), 1027, https://doi.org/10.1029/2001GC000252; GeoJSON by Hugo Ahlenius, Nordpil ([fraxen/tectonicplates](https://github.com/fraxen/tectonicplates)), ODC-BY 1.0.
 - **Bathymetry** in the sea-floor shading comes from the same AWS Terrain Tiles (ETOPO1 and GEBCO-derived sources).
-- **Geoheritage sites:** curated for this map in `scripts/geoheritage.csv` (approximate coordinates and own descriptions). **Stratigraphic column:** generalized after Powers et al. (1966, USGS Professional Paper 560-D), Le Nindre et al. (1990) and Sharland et al. (2001).
+- **Geoheritage sites:** curated for this map in `scripts/geoheritage.csv` (approximate coordinates and own descriptions). UNESCO Global Geopark names and designation years from the [UNESCO list of geoparks](https://www.unesco.org/en/iggp/geoparks).
+- **Geosite photos:** Wikimedia Commons, one per site, listed with author and licence in `scripts/geosite_photos.csv` (CC BY 2.0/4.0, CC BY-SA 3.0/4.0 or public domain). They are resized to 720 px (`docs/img/geosites/`) and credited under each photo in the viewer; the CC BY-SA photos remain under CC BY-SA. **Stratigraphic column:** generalized after Powers et al. (1966, USGS Professional Paper 560-D), Le Nindre et al. (1990) and Sharland et al. (2001).
 - **Cities and clip mask:** [Natural Earth](https://www.naturalearthdata.com/) 1:10m, public domain.
 - **Viewer library:** [MapLibre GL JS](https://maplibre.org/) 5.6.0, BSD-3-Clause. Label glyphs from `demotiles.maplibre.org`.
 

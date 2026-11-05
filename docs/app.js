@@ -864,7 +864,18 @@ const KIND_LABEL = { site: 'Geoheritage site', volc: 'Holocene volcano' };
 const yearText = (y) => (y == null ? 'Holocene, date unknown' : y < 0 ? `${fmt(-y)} BCE` : y < 1500 ? `AD ${y}` : `${y}`);
 
 function placeBody(kind, p) {
-  if (kind === 'site') return `<p>${esc(p.description)}</p>`;
+  if (kind === 'site') {
+    // Photo (Wikimedia Commons, credited with author and licence as the licences require).
+    const lic = p.photo_licence_url
+      ? `<a href="${esc(p.photo_licence_url)}" target="_blank" rel="noopener">${esc(p.photo_licence)}</a>`
+      : esc(p.photo_licence);
+    const fig = p.photo
+      ? `<figure class="cap-photo"><a href="${esc(p.photo_page)}" target="_blank" rel="noopener">` +
+        `<img src="${esc(p.photo)}" width="${esc(p.photo_w)}" height="${esc(p.photo_h)}" alt="${esc(p.photo_caption)}" loading="lazy"></a>` +
+        `<figcaption>${esc(p.photo_caption)}. Photo: <a href="${esc(p.photo_page)}" target="_blank" rel="noopener">${esc(p.photo_author)}</a>, ${lic}, via Wikimedia Commons (resized).</figcaption></figure>`
+      : '';
+    return fig + `<p>${esc(p.description)}</p>`;
+  }
   const facts = [p.type, p.rock, p.elev_m != null ? `summit ${fmt(p.elev_m)} m` : ''].filter(Boolean).map(esc).join(' · ');
   return `<p class="cap-facts"><b>Last eruption: ${esc(yearText(p.last_eruption))}</b><br>${facts}</p>` +
     (p.note ? `<p>${esc(p.note)}</p>` : '') +
@@ -877,7 +888,9 @@ function showPlace(kind, p, coords) {
   clearMarks();
   current = -1;
   caption.classList.add('place');
-  caption.querySelector('.cap-kicker').textContent = kind === 'site' ? (p.kind === 'Geopark' ? 'Geopark' : 'Geoheritage site') : KIND_LABEL.volc;
+  caption.querySelector('.cap-kicker').textContent = kind === 'site'
+    ? (p.kind === 'Geopark' ? `UNESCO Global Geopark${p.unesco_year ? ` · designated ${p.unesco_year}` : ''}` : 'Geoheritage site')
+    : KIND_LABEL.volc;
   caption.querySelector('h3').textContent = p.name;
   caption.querySelector('.cap-body').innerHTML = placeBody(kind, p);
   caption.hidden = false;
@@ -899,7 +912,7 @@ function buildPlaceList(id, kind, feats) {
     b.type = 'button';
     b.dataset.kind = kind;
     b.dataset.name = p.name;
-    const tag = kind === 'site' ? (p.kind === 'Geopark' ? 'Geopark' : '') : yearText(p.last_eruption).replace('Holocene, date unknown', 'date unknown');
+    const tag = kind === 'site' ? (p.kind === 'Geopark' ? `UNESCO ${p.unesco_year || ''}`.trim() : '') : yearText(p.last_eruption).replace('Holocene, date unknown', 'date unknown');
     b.innerHTML = `<span>${esc(p.name)}</span>${tag ? `<small>${esc(tag)}</small>` : ''}`;
     b.onclick = () => showPlace(kind, p, f.geometry.coordinates);
     box.appendChild(b);

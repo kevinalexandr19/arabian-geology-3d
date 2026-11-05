@@ -517,3 +517,19 @@ body.profiling .readout, body.profiling .intro { display: none; }
 }
 .strat-vol { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 0; font-size: 12px; line-height: 1.45; }
 .strat-vol i { flex: none; width: 18px; height: 12px; margin-top: 2px; border: 1px solid rgba(0,0,0,.35); border-radius: 2px; }
+
+/* ---- Photos in geoheritage cards ---- */
+.cap-photo { margin: 4px 0 8px; }
+.cap-photo img {
+  display: block; width: 100%; height: auto; max-height: 240px; object-fit: cover;
+  border-radius: 6px; background: #e8ecef;
+}
+.cap-photo figcaption { margin-top: 3px; font-size: 10.5px; line-height: 1.35; color: var(--muted); }
+.cap-photo figcaption a { color: var(--muted); text-decoration: underline; }
+@media (max-width: 700px) {
+  .cap-photo img { max-height: 130px; }
+}
+@media (max-width: 700px) {
+  .caption.place { max-height: 50%; }
+  .cap-photo img { max-height: 115px; }
+}
