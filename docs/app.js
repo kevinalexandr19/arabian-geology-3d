@@ -26,9 +26,9 @@ const demSource = () => ({
 });
 
 const isPhone = () => window.matchMedia('(max-width: 700px)').matches;
-// Home view: whole peninsula. Phones get a flatter camera and room above for the intro card.
+// Home view: whole peninsula. Phones get a flatter camera and room below for the intro card.
 const HOME_PITCH = () => (isPhone() ? 20 : 45);
-const HOME_PADDING = () => (isPhone() ? { top: 190, bottom: 40, left: 10, right: 10 } : 30);
+const HOME_PADDING = () => (isPhone() ? { top: 60, bottom: 170, left: 10, right: 10 } : 30);
 
 const style = {
   version: 8,
