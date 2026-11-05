@@ -35,7 +35,9 @@ STATE_JS = """() => ({
 def watch(page, key):
     page.on("console", lambda m: m.type == "error" and errors[key].append(m.text))
     page.on("pageerror", lambda e: errors[key].append(str(e)))
-    page.on("requestfailed", lambda r: errors[key].append(f"request failed: {r.url} {r.failure}"))
+    # ERR_ABORTED = MapLibre cancelling tiles it no longer needs while the camera moves; not an error.
+    page.on("requestfailed", lambda r: "ERR_ABORTED" not in (r.failure or "")
+            and errors[key].append(f"request failed: {r.url} {r.failure}"))
 
 
 def idle(page):
@@ -59,11 +61,12 @@ def run_tour(page, prefix, n_shots):
             if len(seen) <= n_shots:
                 page.wait_for_function("!map.isMoving()", timeout=60_000, polling=250)
                 page.wait_for_timeout(800)
-                page.screenshot(path=OUT / f"{prefix}_tour{len(seen)}.png")
+                cap = caption(page) or cap  # name the file after the stop actually on screen
+                page.screenshot(path=OUT / f"{prefix}_stop{cap.split('.')[0]}.png")
         if page.evaluate("document.getElementById('tour-stop').disabled") and len(seen) > 1:
             break
         page.wait_for_timeout(1000)
-    return seen
+    return [c.split(".")[0] for c in seen]
 
 
 with sync_playwright() as p:
@@ -94,8 +97,16 @@ with sync_playwright() as p:
     page.locator("details.about").screenshot(path=OUT / "m5_desktop_about.png")
     page.evaluate("document.querySelector('details.about').open = false")
 
-    seen = run_tour(page, "m5_desktop", 8)
-    print(f"desktop tour: {len(seen)} stops ->", seen)
+    seen = run_tour(page, "m5_desktop", 3)
+    print("desktop tour, stops seen while polling:", seen,
+          "| finished:", page.evaluate("document.getElementById('tour-stop').disabled"))
+    # Software GL makes screenshots slower than a tour stop, so shoot every stop via its bookmark too.
+    page.evaluate("document.querySelector('details.tour').open = true")
+    for i in range(8):
+        page.locator("#bookmarks button").nth(i).click()
+        page.wait_for_timeout(500)
+        idle(page)
+        page.screenshot(path=OUT / f"m5_desktop_stop{i + 1}.png")
     page.click("#cap-home") if page.is_visible("#cap-home") else page.click("#tour-home")
     page.close()
 
@@ -119,7 +130,7 @@ with sync_playwright() as p:
     phone.click("#panel-close")
     phone.wait_for_timeout(400)
     seen_p = run_tour(phone, "m5_phone", 2)
-    print(f"phone tour: {len(seen_p)} stops ->", seen_p)
+    print("phone tour, stops seen:", seen_p)
     phone.close()
     browser.close()
 
