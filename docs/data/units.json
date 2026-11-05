@@ -1,0 +1,250 @@
+{
+ "classes": [
+  {
+   "name": "Precambrian basement (Arabian Shield)",
+   "colour": "#E8456B",
+   "codes": [
+    "pC",
+    "PzpC"
+   ]
+  },
+  {
+   "name": "Paleozoic",
+   "colour": "#9DBF95",
+   "codes": [
+    "Cm",
+    "OCm",
+    "DSO",
+    "D",
+    "P",
+    "Pz",
+    "MzPz"
+   ]
+  },
+  {
+   "name": "Triassic",
+   "colour": "#8B3A9A",
+   "codes": [
+    "TrP",
+    "Tr"
+   ]
+  },
+  {
+   "name": "Jurassic",
+   "colour": "#2BA6C9",
+   "codes": [
+    "JTr",
+    "J"
+   ]
+  },
+  {
+   "name": "Cretaceous",
+   "colour": "#6DBE45",
+   "codes": [
+    "KJ",
+    "K",
+    "TK"
+   ]
+  },
+  {
+   "name": "Paleogene-Neogene sedimentary",
+   "colour": "#EE8E4A",
+   "codes": [
+    "T"
+   ]
+  },
+  {
+   "name": "Cenozoic volcanics",
+   "colour": "#D9B400",
+   "codes": [
+    "TKv",
+    "QTv",
+    "Qv",
+    "TKi",
+    "Czi"
+   ]
+  },
+  {
+   "name": "Neogene-Quaternary surficial deposits",
+   "colour": "#F5EFAA",
+   "codes": [
+    "Qe",
+    "Qf",
+    "Q",
+    "Qsk",
+    "QT"
+   ]
+  }
+ ],
+ "units": {
+  "pC": {
+   "description": "preCambrian undifferentiated",
+   "level1_class": "Precambrian basement (Arabian Shield)",
+   "age": "Precambrian (mainly Neoproterozoic, ~870–540 Ma)",
+   "lithology": "Arc volcanic and volcaniclastic rocks, gneiss, ophiolite belts and granitoid plutons of the Arabian Shield"
+  },
+  "PzpC": {
+   "description": "Paleozoic-preCambrian",
+   "level1_class": "Precambrian basement (Arabian Shield)",
+   "age": "Late Precambrian – early Paleozoic",
+   "lithology": "Late Neoproterozoic to early Paleozoic sedimentary and volcanic rocks and post-orogenic granites, undivided"
+  },
+  "Cm": {
+   "description": "Cambrian",
+   "level1_class": "Paleozoic",
+   "age": "Cambrian",
+   "lithology": "Sandstone, minor conglomerate and siltstone"
+  },
+  "OCm": {
+   "description": "Ordovician-Cambrian",
+   "level1_class": "Paleozoic",
+   "age": "Cambrian – Ordovician",
+   "lithology": "Sandstone and shale (Saq, Qasim formations)"
+  },
+  "DSO": {
+   "description": "Devonian-Silurian-Ordovician",
+   "level1_class": "Paleozoic",
+   "age": "Ordovician – Devonian",
+   "lithology": "Sandstone, shale and glacial deposits (Tabuk Formation and equivalents)"
+  },
+  "D": {
+   "description": "Devonian",
+   "level1_class": "Paleozoic",
+   "age": "Devonian",
+   "lithology": "Sandstone and shale (Jauf, Jubah formations)"
+  },
+  "P": {
+   "description": "Permian",
+   "level1_class": "Paleozoic",
+   "age": "Permian",
+   "lithology": "Shallow-marine limestone and dolomite with clastics (Khuff Formation and equivalents)"
+  },
+  "Pz": {
+   "description": "Paleozoic",
+   "level1_class": "Paleozoic",
+   "age": "Paleozoic",
+   "lithology": "Sandstone, shale and minor carbonate, undivided"
+  },
+  "MzPz": {
+   "description": "Mesozoic-Paleozoic",
+   "level1_class": "Paleozoic",
+   "age": "Paleozoic – Mesozoic",
+   "lithology": "Sedimentary rocks, undivided"
+  },
+  "TrP": {
+   "description": "Triassic-Permian",
+   "level1_class": "Triassic",
+   "age": "Permian – Triassic",
+   "lithology": "Limestone, dolomite and shale (Khuff to Sudair formations)"
+  },
+  "Tr": {
+   "description": "Triassic",
+   "level1_class": "Triassic",
+   "age": "Triassic",
+   "lithology": "Shale, sandstone and limestone (Sudair, Jilh, Minjur formations)"
+  },
+  "JTr": {
+   "description": "Jurassic-Triassic",
+   "level1_class": "Jurassic",
+   "age": "Triassic – Jurassic",
+   "lithology": "Sandstone, shale and limestone, undivided"
+  },
+  "J": {
+   "description": "Jurassic",
+   "level1_class": "Jurassic",
+   "age": "Jurassic",
+   "lithology": "Shelf limestone, shale and anhydrite (Marrat, Dhruma, Tuwaiq Mountain, Hanifa, Jubaila, Arab formations)"
+  },
+  "KJ": {
+   "description": "Cretaceous-Jurassic",
+   "level1_class": "Cretaceous",
+   "age": "Jurassic – Cretaceous",
+   "lithology": "Limestone and sandstone, undivided"
+  },
+  "K": {
+   "description": "Cretaceous",
+   "level1_class": "Cretaceous",
+   "age": "Cretaceous",
+   "lithology": "Sandstone (Biyadh, Wasia) and limestone (Aruma); in Oman and the UAE also the Semail ophiolite and Hawasina deep-water sediments"
+  },
+  "TK": {
+   "description": "Tertiary-Cretaceous",
+   "level1_class": "Cretaceous",
+   "age": "Cretaceous – Paleogene",
+   "lithology": "Limestone, marl and shale, undivided"
+  },
+  "T": {
+   "description": "Tertiary",
+   "level1_class": "Paleogene-Neogene sedimentary",
+   "age": "Paleogene – Neogene (Paleocene–Pliocene)",
+   "lithology": "Limestone, dolomite, marl, sandstone and evaporites (Umm er Radhuma, Rus, Dammam, Hadrukh, Dam, Hofuf formations)"
+  },
+  "TKv": {
+   "description": "Tertiary-Cretaceous volcanics",
+   "level1_class": "Cenozoic volcanics",
+   "age": "Oligocene – Miocene (source code: Tertiary–Cretaceous)",
+   "lithology": "Yemen Volcanic Group: flood basalts and rhyolitic ignimbrites (Yemen traps)"
+  },
+  "QTv": {
+   "description": "Quaternary-Tertiary volcanics",
+   "level1_class": "Cenozoic volcanics",
+   "age": "Oligocene – Quaternary",
+   "lithology": "Alkali olivine basalt lava fields with scoria cones (harrats)"
+  },
+  "Qv": {
+   "description": "Quaternary volcanics",
+   "level1_class": "Cenozoic volcanics",
+   "age": "Quaternary",
+   "lithology": "Basalt lava flows and scoria cones"
+  },
+  "TKi": {
+   "description": "Tertiary-Cretaceous intrusives",
+   "level1_class": "Cenozoic volcanics",
+   "age": "Cenozoic (source code: Tertiary–Cretaceous)",
+   "lithology": "Granite, gabbro and dyke swarms related to Red Sea rifting"
+  },
+  "Czi": {
+   "description": "Cenozoic intrusives",
+   "level1_class": "Cenozoic volcanics",
+   "age": "Cenozoic",
+   "lithology": "Granite, gabbro and dyke swarms related to Red Sea rifting"
+  },
+  "Qe": {
+   "description": "Quaternary(eolian)",
+   "level1_class": "Neogene-Quaternary surficial deposits",
+   "age": "Quaternary",
+   "lithology": "Eolian dune sand (sand seas)"
+  },
+  "Qf": {
+   "description": "Quaternary(fluvial)",
+   "level1_class": "Neogene-Quaternary surficial deposits",
+   "age": "Quaternary",
+   "lithology": "Alluvial gravel, sand and silt of wadis and fans"
+  },
+  "Q": {
+   "description": "Quaternary",
+   "level1_class": "Neogene-Quaternary surficial deposits",
+   "age": "Quaternary",
+   "lithology": "Surficial deposits, undivided: alluvium, eolian sand, gravel plains and coastal deposits"
+  },
+  "Qsk": {
+   "description": "Quaternary(sahbka)",
+   "level1_class": "Neogene-Quaternary surficial deposits",
+   "age": "Quaternary",
+   "lithology": "Sabkha: evaporitic silt and sand with salt crusts"
+  },
+  "QT": {
+   "description": "Quaternary-Tertiary",
+   "level1_class": "Neogene-Quaternary surficial deposits",
+   "age": "Neogene – Quaternary",
+   "lithology": "Gravel plains, conglomerate and silt"
+  }
+ },
+ "lithology_note": "Generalized regional summary compiled for this map; geo2bg itself has only the age code.",
+ "source": {
+  "citation": "Pollastro, R.M., Karshbaum, A.S., and Viger, R.J., 1999, Maps showing the geology, oil and gas fields and geologic provinces of the Arabian Peninsula: USGS Open-File Report 97-470B",
+  "short": "USGS OFR 97-470B (geo2bg)",
+  "doi": "10.3133/ofr97470B",
+  "url": "https://doi.org/10.3133/ofr97470B"
+ }
+}

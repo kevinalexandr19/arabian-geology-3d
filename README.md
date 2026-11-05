@@ -10,7 +10,7 @@ A generalized geological map of the Arabian Peninsula, draped over 3D terrain in
 |---|---|
 | M1 — data acquisition, clipping, classification, polygon IDs | done |
 | M2 — simplified GeoJSON for the web | done |
-| M3 — MapLibre 3D viewer | to do |
+| M3 — MapLibre 3D viewer | done |
 | M4 — tour bookmarks and per-class elevation stats | to do |
 | M5 — publish on GitHub Pages | to do |
 
@@ -81,19 +81,35 @@ python scripts/03_overlays.py
 
 The OSM data are Geofabrik extracts (`gcc-states`, `yemen`, 2026-11-03) filtered to the three road classes and committed to `data/raw/osm/` (8.5 MB). Overpass and Geofabrik are not reachable from the cloud build environment. To refresh, download https://download.geofabrik.de/asia/gcc-states-latest.osm.pbf and https://download.geofabrik.de/asia/yemen-latest.osm.pbf, then run `python scripts/01_download.py --osm-extract <download dir> <YYMMDD>` and update `OSM_FILES` in `01_download.py`.
 
+`05_units.py` writes `docs/data/units.json` from `scripts/geology_classes.csv`: the legend classes (order, colours, codes) and, per `GLG` code, the age range and a short generalized lithology note shown in the popups. geo2bg has no lithology attribute, so these notes are a regional summary kept in the script; edit them there and rerun.
+
+```bash
+python scripts/05_units.py
+```
+
 `notebooks/m2_preview.py` renders `notebooks/m2_preview.png`.
 
 ## Repository layout
 
 ```
-scripts/      01_download.py, 02_geology.py, 03_overlays.py, geology_classes.csv, cities.csv, polygon_overrides.csv
+scripts/      01_download.py, 02_geology.py, 03_overlays.py, 05_units.py, geology_classes.csv, cities.csv, polygon_overrides.csv
 data/raw/     geo2bg shapefile and OSM road extracts in osm/ (committed); Natural Earth zips (gitignored)
 data/interim/ clipped layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location
-docs/data/    web layers: geology.geojson, cities.geojson, roads.geojson
-docs/         web viewer (from M3)
-notebooks/    m2_preview.py / .png
+docs/data/    web layers: geology.geojson, cities.geojson, roads.geojson, units.json
+docs/         web viewer: index.html, app.js, style.css
+notebooks/    m2_preview.py / .png, m3_*.png viewer screenshots
 ```
+
+## Viewer
+
+`docs/` is the whole site: `index.html`, `app.js`, `style.css` and `data/`. It uses MapLibre GL JS 5.6.0 from unpkg, with no build step and no basemap (plain background, so no third-party borders). Terrain and hillshade come from the AWS Terrarium tiles; label glyphs (Noto Sans) from `demotiles.maplibre.org`. To view it locally:
+
+```bash
+python -m http.server -d docs
+```
+
+Then open http://localhost:8000. The map loads ~8.5 MB of GeoJSON uncompressed (geology 7.0 MB, roads 1.5 MB), ~2.2 MB gzipped as GitHub Pages serves it. Screenshots of the M3 check are in `notebooks/m3_*.png`.
 
 ## Sources and licences
 
