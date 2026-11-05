@@ -203,3 +203,12 @@ body { display: flex; }
   color: #2a1640;
   text-shadow: 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px rgba(255,255,255,.9);
 }
+
+/* ---- About ---- */
+.about { margin-top: 4px; padding-top: 2px; border-top: 1px solid var(--line); font-size: 12px; }
+.about p { margin: 4px 0; }
+.about .author { font-weight: 600; font-size: 13px; color: var(--ink); }
+.about .links { display: flex; gap: 6px; }
+.about a { color: var(--accent); text-decoration: none; }
+.about a:hover { text-decoration: underline; }
+.about .made { color: var(--muted); }
