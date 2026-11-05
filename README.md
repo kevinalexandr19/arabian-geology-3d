@@ -10,8 +10,8 @@ Arabia 3D is an interactive 3D map of the generalized bedrock geology of the Ara
 
 - **3D terrain** with hillshade and a vertical-exaggeration slider (0–5×).
 - **Geology in eight classes** (Precambrian basement to Neogene-Quaternary surficial deposits), with adjustable opacity. Each class can be switched on or off in the legend.
-- **Elevation statistics in the legend.** Each class has a small box plot of the terrain beneath it (min–max line, p10–p90 box, median tick), so the geology–relief correlation is visible as numbers. Tap or click a bar for the values.
-- **Guided tour** of eight stops (Hijaz–Asir escarpment, Harrat Rahat and Khaybar, the Tuwaiq escarpment, the Rub' al Khali, the Hajar Mountains, the Yemen highlands, Dhofar, the UAE sabkhas and Musandam). Each stop has a camera preset, a two-sentence caption, flags on key summits, area labels, outlines of the featured units and, where relevant, a traced escarpment.
+- **Elevation statistics window.** **Elevation statistics** in the side panel opens a window with box plots of the terrain beneath each class and selected features (harrats, Yemen traps, eolian sand, sabkha), a table of values and short observations on the geology–relief correlation.
+- **Guided tour** of ten stops (the Arabian Shield, the Hijaz–Asir escarpment, Harrat Rahat and Khaybar, the Arabian Platform, the Tuwaiq escarpment, the Rub' al Khali, the Hajar Mountains, the Yemen highlands, Dhofar, the UAE sabkhas and Musandam). Each stop has a camera preset, a two-sentence caption, flags on key summits, area labels, outlines of the featured units and, where relevant, a traced escarpment. The two overview stops (Shield, Platform) fade every other class. **◀ Prev / Next ▶** in the caption step through the stops by hand.
 - **Polygon popups:** click any polygon for its ID, class, finer age label, source age code, age range, lithology note and citation.
 - **Cursor readout:** latitude, longitude and true elevation in metres (independent of the exaggeration), bottom left. On a phone, tap the map.
 - **Terrain-adjusted contacts.** At the Hajar, Musandam, Asir, Yemen and Dhofar mountain fronts, the 1963 bedrock/alluvium contacts have been moved to the foot of the slope in the modern terrain, so the colours don't spill onto the plain in 3D. Adjusted polygons say so in their popup.
@@ -21,10 +21,11 @@ Arabia 3D is an interactive 3D map of the generalized bedrock geology of the Ara
 ## How to use it
 
 - **Move:** drag to pan, scroll or pinch to zoom. **Tilt and rotate:** right-drag on desktop, two-finger drag on a phone.
-- **Tour:** press **Take the tour** on the intro card, or open the **Tour** section of the side panel and pick a stop. Any drag or zoom stops the tour; **Home** returns to the whole peninsula.
+- **Tour:** press **Take the tour** on the intro card, or open the **Tour** section of the side panel and pick a stop; **◀ Prev / Next ▶** in the caption move one stop at a time. Any drag or zoom stops the automatic tour; **Home** returns to the whole peninsula.
 - **Legend:** switch classes on and off, or use **All on / All off**. On a phone, the **Legend** button opens the panel.
 - **Display:** the vertical exaggeration and geology opacity sliders. Lower the opacity to read the hillshade through the colours.
-- **About:** author, links, data credits and the date of the last update.
+- **Elevation statistics:** opens a window with the per-class elevation box plots and observations.
+- **About the project:** opens a window with the author, links, data credits and the date of the last update.
 
 The map is a generalized 1:2,000,000-scale compilation for teaching and outreach. It is not for site-specific use.
 
@@ -90,7 +91,7 @@ Run the scripts in order from the repository root:
 | 1 | `python scripts/01_download.py` | Natural Earth layers, peninsula clip, pids, `data/geology_polygons.csv`, `data/interim/*` |
 | 2 | `python scripts/02_geology.py` | coverage clean + simplify + contact adjustment (`scripts/contacts.py`) → `docs/data/geology.geojson` |
 | 3 | `python scripts/03_overlays.py` | `docs/data/cities.geojson`, `docs/data/roads.geojson` |
-| 4 | `python scripts/04_elevation_stats.py` | `docs/data/elev_stats.json` (legend box plots) |
+| 4 | `python scripts/04_elevation_stats.py` | `docs/data/elev_stats.json` (elevation statistics window) |
 | 5 | `python scripts/05_units.py` | `docs/data/units.json` (legend classes, popup ages and lithology notes) |
 
 Checks and figures (the Playwright scripts need the site served on port 8000, as above):
@@ -167,13 +168,13 @@ The OSM data are Geofabrik extracts (`gcc-states`, `yemen`, 2026-11-03) filtered
 
 `05_units.py` writes `docs/data/units.json` from `scripts/geology_classes.csv`: the legend classes (order, colours, codes) and, per `GLG` code, the age range and a short generalized lithology note shown in the popups. geo2bg has no lithology attribute, so these notes are a regional summary kept in the script.
 
-`04_elevation_stats.py` downloads the 90 AWS Terrarium tiles at zoom 7 that cover the geology (cached in `data/interim/terrarium/`), decodes elevation as R×256 + G + B/256 − 32768 and mosaics them on their native EPSG:3857 grid (~1.22 km/px). It rasterizes `docs/data/geology.geojson` onto the same grid and computes min, p10, median, p90, max, pixel count and pixels below 0 m, per Level 1 class and per Level 2 label. Each pixel counts once. Negative values (coastal pixels on bathymetry) are kept. Web-Mercator pixel area shrinks northwards (cos lat); this is ignored. The legend draws the result as box plots on a shared 0–3,700 m scale. The Sabkha sanity check (median near 0 m) fails because the inland sabkhas (Umm as Samim, Rub' al Khali interdune flats, Al Jafr) lift the median to ~56 m; coastal sabkhas sit at 0–10 m.
+`04_elevation_stats.py` downloads the 90 AWS Terrarium tiles at zoom 7 that cover the geology (cached in `data/interim/terrarium/`), decodes elevation as R×256 + G + B/256 − 32768 and mosaics them on their native EPSG:3857 grid (~1.22 km/px). It rasterizes `docs/data/geology.geojson` onto the same grid and computes min, p10, median, p90, max, pixel count and pixels below 0 m, per Level 1 class and per Level 2 label. Each pixel counts once. Negative values (coastal pixels on bathymetry) are kept. Web-Mercator pixel area shrinks northwards (cos lat); this is ignored. The **Elevation statistics** window draws the result as box plots on a shared 0–3,700 m scale, with observations whose numbers are read from the JSON. The Sabkha sanity check (median near 0 m) fails because the inland sabkhas (Umm as Samim, Rub' al Khali interdune flats, Al Jafr) lift the median to ~56 m; coastal sabkhas sit at 0–10 m.
 
 ### Viewer
 
 `docs/` is the whole site, with no build step: `index.html`, `app.js`, `style.css` and `data/`. It uses MapLibre GL JS 5.6.0 from unpkg and no basemap (plain background, so no third-party borders). Terrain and hillshade come from the AWS Terrarium tiles; label glyphs (Noto Sans) from `demotiles.maplibre.org`. The page loads ~8.5 MB of GeoJSON uncompressed, ~2.2 MB gzipped. `docs/.nojekyll` tells GitHub Pages to serve the files as is, without a Jekyll build.
 
-- **Tour stops** are the `STOPS` array in `docs/app.js`: camera, caption and `marks`. Flags sit on the z7 DEM maxima near each summit (heights are the commonly quoted values). Flags and area labels are DOM markers, so terrain never hides them. The dashed escarpment traces for Asir and Tuwaiq were derived from the z7 Terrarium mosaic (steepest eastward rise over ~5–7 km every 0.25° of latitude) and are approximate at the ~1–5 km level. The tour waits ~4.5 s after each 3.5 s flight.
+- **Tour stops** are the `STOPS` array in `docs/app.js`: a `camera` preset (or `bounds` fitted to the screen, for the overview stops), caption and `marks` (`marks.dim` fades every class not listed). Flags sit on the z7 DEM maxima near each summit (heights are the commonly quoted values). Flags and area labels are DOM markers, so terrain never hides them. The dashed escarpment traces for Asir and Tuwaiq were derived from the z7 Terrarium mosaic (steepest eastward rise over ~5–7 km every 0.25° of latitude) and are approximate at the ~1–5 km level. The tour waits ~4.5 s after each 3.5 s flight.
 - **Cursor readout:** elevation is decoded from the Terrarium tile under the cursor (z7–z12, depending on zoom), so it is in true metres whatever the exaggeration.
 - **Icon:** `docs/favicon.svg` is the peninsula outline filled with concentric bands in the Level 1 colours; `favicon-32.png` and `apple-touch-icon.png` are rendered from it.
 - **Link preview:** `docs/preview.png` (1200×630) is the `og:image` card shown when the link is shared. The meta tags in `docs/index.html` use absolute GitHub Pages URLs.

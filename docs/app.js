@@ -215,28 +215,9 @@ function applyClassFilter() {
   });
 }
 
-// Elevation bar on a shared 0..ELEV_MAX m scale; negative values clip to 0.
-const ELEV_MAX = 3700;
 const fmt = (v) => v.toLocaleString('en-US').replace('-', '−');
 
-function statsText(st) {
-  return `min ${fmt(st.min)} · p10 ${fmt(st.p10)} · <b>median ${fmt(st.median)}</b> · p90 ${fmt(st.p90)} · max ${fmt(st.max)} m`;
-}
-
-function elevBar(st, colour) {
-  if (!st) return '';
-  const x = (v) => `${(Math.min(Math.max(v, 0), ELEV_MAX) / ELEV_MAX * 100).toFixed(2)}%`;
-  const w = (a, b) => `${((Math.min(Math.max(b, 0), ELEV_MAX) - Math.min(Math.max(a, 0), ELEV_MAX)) / ELEV_MAX * 100).toFixed(2)}%`;
-  const tip =
-    `Elevation (m): min ${fmt(st.min)} · p10 ${fmt(st.p10)} · median ${fmt(st.median)} · ` +
-    `p90 ${fmt(st.p90)} · max ${fmt(st.max)}\n${fmt(st.n_px)} px at ~1.2 km, ${fmt(st.n_neg)} below 0 m`;
-  return `<span class="ebar" title="${tip}" role="button" tabindex="0" aria-label="Show elevation statistics">` +
-    `<span class="whisk" style="left:${x(st.min)};width:${w(st.min, st.max)};background:${colour}"></span>` +
-    `<span class="box" style="left:${x(st.p10)};width:${w(st.p10, st.p90)};background:${colour}"></span>` +
-    `<span class="med" style="left:${x(st.median)}"></span></span>`;
-}
-
-function buildLegend(classes, elev) {
+function buildLegend(classes) {
   const ul = document.getElementById('legend');
   for (const c of classes) {
     enabled.add(c.name);
@@ -245,21 +226,7 @@ function buildLegend(classes, elev) {
     li.innerHTML =
       `<label><input type="checkbox" checked>` +
       `<span class="swatch" style="background:${c.colour}"></span>` +
-      `<span class="text"><span class="name">${c.name}</span><br><span class="codes">${c.codes.join(', ')}</span>` +
-      `${elevBar(elev[c.name], c.colour)}</span></label>` +
-      (elev[c.name] ? `<div class="estats" hidden>${statsText(elev[c.name])}</div>` : '');
-    // Bars sit inside the <label>: stop the click from toggling the checkbox, show the numbers instead.
-    const bar = li.querySelector('.ebar');
-    if (bar) {
-      const toggle = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const box = li.querySelector('.estats');
-        box.hidden = !box.hidden;
-      };
-      bar.addEventListener('click', toggle);
-      bar.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') toggle(e); });
-    }
+      `<span class="text"><span class="name">${c.name}</span><br><span class="codes">${c.codes.join(', ')}</span></span></label>`;
     li.querySelector('input').addEventListener('change', (e) => {
       if (e.target.checked) enabled.add(c.name); else enabled.delete(c.name);
       applyClassFilter();
@@ -273,10 +240,105 @@ function buildLegend(classes, elev) {
 const getJSON = (url) => fetch(url).then((r) => r.json());
 const unitsReady = Promise.all([
   getJSON('data/units.json'),
-  getJSON('data/elev_stats.json').catch(() => ({ level1: {} })),
-]).then(([j, e]) => { units = j.units; source = j.source; buildLegend(j.classes, e.level1); });
+  getJSON('data/elev_stats.json').catch(() => null),
+]).then(([j, e]) => { units = j.units; source = j.source; buildLegend(j.classes); if (e) buildStats(j.classes, e); });
 
 Promise.all([unitsReady, new Promise((res) => map.once('load', res))]).then(applyClassFilter);
+
+// ---- Elevation statistics window ----
+// Box plots on a shared 0..ELEV_MAX m axis; values below 0 (coastal pixels on bathymetry) clip to 0.
+const ELEV_MAX = 3700;
+const SHIELD = 'Precambrian basement (Arabian Shield)';
+const L2_FEATURES = [  // [L2 label in elev_stats.json, short name, parent L1 class]
+  ['Yemen traps (Oligocene-Miocene)', 'Yemen traps', 'Cenozoic volcanics'],
+  ['Harrats (Oligocene-Quaternary)', 'Harrats (Oligocene–Quaternary)', 'Cenozoic volcanics'],
+  ['Alluvium and gravel', 'Alluvium and gravel', 'Neogene-Quaternary surficial deposits'],
+  ['Eolian sand', 'Eolian sand', 'Neogene-Quaternary surficial deposits'],
+  ['Neogene-Quaternary gravels', 'Neogene-Quaternary gravels', 'Neogene-Quaternary surficial deposits'],
+  ['Sabkha', 'Sabkha', 'Neogene-Quaternary surficial deposits'],
+];
+
+function boxPlot(st, colour) {
+  const c = (v) => Math.min(Math.max(v, 0), ELEV_MAX) / ELEV_MAX * 100;
+  const tip = `min ${fmt(st.min)} · p10 ${fmt(st.p10)} · median ${fmt(st.median)} · p90 ${fmt(st.p90)} · max ${fmt(st.max)} m`;
+  return `<div class="strack" title="${tip}">` +
+    `<span class="whisk" style="left:${c(st.min)}%;width:${c(st.max) - c(st.min)}%"></span>` +
+    `<span class="box" style="left:${c(st.p10)}%;width:${c(st.p90) - c(st.p10)}%;background:${colour}"></span>` +
+    `<span class="med" style="left:${c(st.median)}%"></span></div>`;
+}
+
+function chart(rows) {
+  const ticks = [0, 1000, 2000, 3000].map((t) =>
+    `<span style="left:${t / ELEV_MAX * 100}%">${fmt(t)}${t === 3000 ? ' m' : ''}</span>`).join('');
+  return rows.map(([name, st, colour]) =>
+    `<div class="srow"><span class="slabel"><span class="sw" style="background:${colour}"></span>${esc(name)}</span>` +
+    `${boxPlot(st, colour)}<span class="smed">${fmt(st.median)}</span></div>`).join('') +
+    `<div class="srow saxis"><span></span><div class="sticks">${ticks}</div><span class="smed">median</span></div>`;
+}
+
+function buildStats(classes, e) {
+  const L1 = e.level1, L2 = e.level2 || {};
+  const colour = Object.fromEntries(classes.map((c) => [c.name, c.colour]));
+  const short = (n) => (n === SHIELD ? 'Precambrian basement' : n);
+  const rows1 = classes.filter((c) => L1[c.name]).map((c) => [short(c.name), L1[c.name], c.colour])
+    .sort((a, b) => b[1].median - a[1].median);
+  document.getElementById('stats-chart').innerHTML = chart(rows1);
+  const rows2 = L2_FEATURES.filter(([k]) => L2[k]).map(([k, name, parent]) => [name, L2[k], colour[parent]])
+    .sort((a, b) => b[1].median - a[1].median);
+  document.getElementById('stats-chart-l2').innerHTML = chart(rows2);
+
+  // Observations: wording fixed, numbers read from elev_stats.json.
+  const m = (n) => `${fmt(L1[n].median)} m`;
+  const r = (n) => `${fmt(L1[n].p10)}–${fmt(L1[n].p90)} m`;
+  const notes = [];
+  const V = 'Cenozoic volcanics', traps = L2['Yemen traps (Oligocene-Miocene)'];
+  notes.push(`<b>The highest ground is volcanic or basement.</b> Cenozoic volcanics (median ${m(V)}) and the Precambrian basement (median ${m(SHIELD)}) top the ranking. Both sit on the shoulder of the Red Sea rift, uplifted since the Oligocene` +
+    (traps ? `; the Yemen traps alone have a median of ${fmt(traps.median)} m and reach ${fmt(traps.max)} m near Jabal an-Nabi Shu'ayb.` : '.'));
+  notes.push(`<b>The Shield is a tilted block.</b> Its 10th–90th percentile range spans ${r(SHIELD)}, one of the widest of any class: about 3,000 m along the Hijaz–Asir escarpment, falling gently east to a few hundred metres where the basement passes beneath the sedimentary cover.`);
+  const chain = ['Paleozoic', 'Cretaceous', 'Paleogene-Neogene sedimentary', 'Neogene-Quaternary surficial deposits'].filter((n) => L1[n]);
+  notes.push(`<b>Across the Arabian Platform, younger means lower.</b> Medians fall from ${chain.map((n) => `${short(n)} (${m(n)})`).join(' to ')}. The cover dips gently east and north-east off the Shield, so successively younger units crop out closer to the Gulf, where the land surface reaches sea level.`);
+  if (L1.Jurassic && L1.Triassic && L1.Jurassic.median > L1.Triassic.median) {
+    notes.push(`<b>The Jurassic breaks the trend.</b> Its median (${m('Jurassic')}) is above the Triassic (${m('Triassic')}) and its 90th percentile reaches ${fmt(L1.Jurassic.p90)} m: resistant Tuwaiq limestones hold up the highest cuesta of central Arabia, and Jurassic strata also crop out in the Yemen highlands and the Hajar windows. The Triassic outcrop is small (a narrow cuesta belt), so its numbers are less robust.`);
+  }
+  if (L1.Cretaceous) {
+    notes.push(`<b>Cretaceous: low median, high maximum.</b> Most Cretaceous outcrop is low cuesta country in central and eastern Arabia (median ${m('Cretaceous')}), but the class also contains the Semail ophiolite and Hawasina nappes of the Hajar Mountains, which reach ${fmt(L1.Cretaceous.max)} m.`);
+  }
+  const sab = L2.Sabkha, sand = L2['Eolian sand'];
+  if (sab && sand) {
+    notes.push(`<b>Surficial deposits fill the lows.</b> Sabkhas have a median of ${fmt(sab.median)} m (10th percentile ${fmt(sab.p10)} m): coastal flats at sea level plus inland sabkhas in closed depressions. Eolian sand (median ${fmt(sand.median)} m) mantles the low eastern half of the platform, from the Rub' al Khali to the Dahna and Nafud.`);
+  }
+  document.getElementById('stats-notes').innerHTML = notes.map((n) => `<li>${n}</li>`).join('');
+
+  const head = '<tr><th>Class</th><th>min</th><th>p10</th><th>median</th><th>p90</th><th>max</th><th>pixels</th></tr>';
+  const body = classes.filter((c) => L1[c.name]).map((c) => {
+    const st = L1[c.name];
+    return `<tr><td><span class="sw" style="background:${c.colour}"></span>${esc(short(c.name))}</td>` +
+      [st.min, st.p10, st.median, st.p90, st.max, st.n_px].map((v) => `<td>${fmt(v)}</td>`).join('') + '</tr>';
+  }).join('');
+  document.getElementById('stats-table').innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+}
+
+// ---- Windows (elevation statistics, about): open from the panel, close on ×, backdrop or Esc ----
+let lastOpener = null;
+function openWin(id, opener) {
+  closeWins();
+  const w = document.getElementById(id);
+  w.hidden = false;
+  lastOpener = opener || null;
+  w.querySelector('.win-close').focus();
+  if (isPhone()) document.body.classList.remove('panel-visible');
+}
+function closeWins() {
+  let was = false;
+  document.querySelectorAll('.win-backdrop').forEach((w) => { if (!w.hidden) was = true; w.hidden = true; });
+  if (was && lastOpener && !isPhone()) lastOpener.focus();
+}
+document.querySelectorAll('[data-open]').forEach((b) => { b.onclick = () => openWin(b.dataset.open, b); });
+document.querySelectorAll('.win-backdrop').forEach((w) => {
+  w.addEventListener('click', (e) => { if (e.target === w) closeWins(); });
+  w.querySelector('.win-close').onclick = closeWins;
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeWins(); });
 
 // ---- Sliders ----
 const exag = document.getElementById('exag');
@@ -286,10 +348,17 @@ exag.addEventListener('input', () => {
   map.setTerrain({ source: 'dem-terrain', exaggeration: v });
 });
 const opacity = document.getElementById('opacity');
-opacity.addEventListener('input', () => {
+let dimKeep = null;   // tour overview stops: L1 classes kept at full opacity, the rest faded
+function setFillOpacity() {
   const v = parseFloat(opacity.value);
-  document.getElementById('opacity-val').textContent = v.toFixed(2);
-  map.setPaintProperty('geology-fill', 'fill-opacity', v);
+  if (!map.getLayer('geology-fill')) return;
+  map.setPaintProperty('geology-fill', 'fill-opacity', dimKeep
+    ? ['case', ['in', ['get', 'level1_class'], ['literal', dimKeep]], v, v * 0.15]
+    : v);
+}
+opacity.addEventListener('input', () => {
+  document.getElementById('opacity-val').textContent = parseFloat(opacity.value).toFixed(2);
+  setFillOpacity();
 });
 
 // ---- Popups ----
@@ -340,9 +409,23 @@ map.on('mousemove', (e) => {
 
 // ---- Bookmarks and tour ----
 // Captions: sentence 1 = the geology, sentence 2 = how it shows in the relief. Edit here.
+const TUWAIQ = [[45.14, 20.0], [45.18, 20.25], [45.32, 20.5], [45.34, 20.75], [45.44, 21.0], [45.52, 21.25], [45.59, 21.5], [45.68, 21.75], [45.9, 22.25], [46.01, 22.5], [46.1, 22.75], [46.26, 23.0], [46.33, 23.25], [46.41, 23.5], [46.46, 23.75], [46.38, 24.0], [46.35, 24.25], [46.42, 24.5], [46.1, 24.75], [45.96, 25.0], [46.05, 25.25]];
+const PLATFORM = ['Paleozoic', 'Triassic', 'Jurassic', 'Cretaceous', 'Paleogene-Neogene sedimentary'];
+// A stop has either `camera` (fixed preset) or `bounds` + pitch/bearing (fitted to the screen, for overviews).
+// marks.dim: L1 classes kept at full opacity; all others are faded while the stop is shown.
 const STOPS = [
   {
-    title: 'Hijaz–Asir escarpment and the Arabian Shield',
+    title: 'The Arabian Shield',
+    bounds: [[35.0, 13.4], [46.4, 29.6]], pitch: 35, bearing: -15,
+    marks: {
+      areas: [['Arabian Shield', 42.4, 23.6], ['Red Sea', 37.7, 21.2], ['Arabian Platform', 46.6, 27.4]],
+      dim: ['Precambrian basement (Arabian Shield)'],
+    },
+    caption: 'The Arabian Shield is the exposed Neoproterozoic basement of the Arabian Plate: island arcs, ophiolite belts and granites accreted during the East African Orogeny and stabilized by about 550 Ma, now cropping out over some 500,000 km² along the Red Sea. ' +
+      'It is a block tilted to the east, highest on the uplifted rift shoulder of the Hijaz and Asir (2,000–3,000 m) and descending eastward to a few hundred metres, where it passes beneath the sedimentary cover.',
+  },
+  {
+    title: 'Hijaz–Asir escarpment',
     camera: { center: [42.6, 18.8], zoom: 8, pitch: 62, bearing: 65 },
     marks: {
       flags: [['Jabal Sawda', '~3,000 m', 42.369, 18.266]],
@@ -363,11 +446,22 @@ const STOPS = [
       'They form broad dark lava plateaux at about 1,000–2,000 m, studded with scoria cones and domes and standing above the eroded basement around them.',
   },
   {
+    title: 'The Arabian Platform',
+    bounds: [[40.5, 17.0], [55.0, 31.0]], pitch: 45, bearing: 15,
+    marks: {
+      areas: [['Arabian Platform', 50.4, 23.2], ['Arabian Shield', 42.2, 22.2], ['Arabian Gulf', 51.3, 27.6]],
+      lines: [['Tuwaiq escarpment', TUWAIQ]],
+      dim: PLATFORM,
+    },
+    caption: 'The Arabian Platform is the Phanerozoic sedimentary cover that laps onto the Shield: Paleozoic to Neogene sandstones, shales and carbonates thickening to about 10 km toward the Gulf, host to the giant oil and gas fields of the region. ' +
+      'The layers dip gently east and north-east, so successively younger units crop out eastward in a belt of west-facing cuestas while the land surface falls from about 1,000 m to sea level at the Gulf.',
+  },
+  {
     title: 'Tuwaiq escarpment',
     camera: { center: [46.4, 24.3], zoom: 8, pitch: 62, bearing: 90 },
     marks: {
       areas: [['Arabian Shield', 45.05, 23.75], ['Jurassic outcrop', 46.75, 23.6]],
-      lines: [['Tuwaiq escarpment', [[45.14, 20.0], [45.18, 20.25], [45.32, 20.5], [45.34, 20.75], [45.44, 21.0], [45.52, 21.25], [45.59, 21.5], [45.68, 21.75], [45.9, 22.25], [46.01, 22.5], [46.1, 22.75], [46.26, 23.0], [46.33, 23.25], [46.41, 23.5], [46.46, 23.75], [46.38, 24.0], [46.35, 24.25], [46.42, 24.5], [46.1, 24.75], [45.96, 25.0], [46.05, 25.25]]]],
+      lines: [['Tuwaiq escarpment', TUWAIQ]],
       focus: ['in', ['get', 'GLG'], ['literal', ['J', 'JTr']]],
     },
     caption: 'The Tuwaiq escarpment is held up by resistant Middle–Upper Jurassic limestones (Tuwaiq Mountain and Jubaila formations) that dip gently east off the Shield. ' +
@@ -433,11 +527,16 @@ const FLY_MS = 3500;       // flight duration in the tour (~8 s per stop in tota
 
 const caption = document.getElementById('caption');
 let tour = null;           // { i, timer } while the tour runs
+let current = -1;          // stop on screen, -1 when none
 
 function showCaption(i) {
   const st = STOPS[i];
+  current = i;
   caption.querySelector('h3').textContent = `${i + 1}. ${st.title}`;
   caption.querySelector('p').textContent = st.caption;
+  document.getElementById('cap-count').textContent = `${i + 1} / ${STOPS.length}`;
+  document.getElementById('cap-prev').disabled = i === 0;
+  document.getElementById('cap-next').disabled = i === STOPS.length - 1;
   caption.hidden = false;
   document.querySelectorAll('#bookmarks button').forEach((b, j) => b.classList.toggle('active', j === i));
 }
@@ -454,6 +553,8 @@ function clearMarks() {
   flagMarkers = [];
   map.getSource('tour')?.setData({ type: 'FeatureCollection', features: [] });
   ['focus-glow', 'focus-line'].forEach((l) => map.getLayer(l) && map.setLayoutProperty(l, 'visibility', 'none'));
+  dimKeep = null;
+  setFillOpacity();
 }
 function showMarks(i) {
   clearMarks();
@@ -481,6 +582,7 @@ function showMarks(i) {
     })),
   ];
   map.getSource('tour').setData({ type: 'FeatureCollection', features });
+  if (mk.dim) { dimKeep = mk.dim; setFillOpacity(); }
   if (mk.focus) {
     for (const l of ['focus-glow', 'focus-line']) {
       map.setFilter(l, mk.focus);
@@ -491,9 +593,18 @@ function showMarks(i) {
 
 function hideCaption() {
   caption.hidden = true;
+  current = -1;
   document.querySelectorAll('#bookmarks button').forEach((b) => b.classList.remove('active'));
 }
 caption.querySelector('.caption-close').onclick = hideCaption;
+
+// Overview stops are fitted to the visible map area (leaving room for the caption).
+function stopCamera(st) {
+  if (st.camera) return st.camera;
+  const padding = isPhone() ? { top: 220, bottom: 30, left: 10, right: 10 } : { top: 150, bottom: 40, left: 40, right: 60 };
+  const cam = map.cameraForBounds(st.bounds, { padding, bearing: st.bearing || 0 });
+  return { ...cam, pitch: st.pitch || 0, bearing: st.bearing || 0 };
+}
 
 function goTo(i, duration) {
   hideIntro();
@@ -501,7 +612,7 @@ function goTo(i, duration) {
   showMarks(i);
   if (isPhone()) document.body.classList.remove('panel-visible');
   // Only pass duration when set: an explicit undefined overrides MapLibre's default and yields NaN frames.
-  map.flyTo({ ...STOPS[i].camera, ...(duration ? { duration } : {}), essential: true });
+  map.flyTo({ ...stopCamera(STOPS[i]), ...(duration ? { duration } : {}), essential: true });
 }
 
 function stopTour() {
@@ -552,6 +663,10 @@ document.getElementById('tour-play').onclick = startTour;
 document.getElementById('tour-stop').onclick = stopTour;
 document.getElementById('tour-home').onclick = goHome;
 document.getElementById('cap-stop').onclick = stopTour;
+// Prev / Next step through the stops by hand (and stop the automatic tour).
+const step = (d) => { const i = current + d; if (i < 0 || i >= STOPS.length) return; stopTour(); goTo(i); };
+document.getElementById('cap-prev').onclick = () => step(-1);
+document.getElementById('cap-next').onclick = () => step(1);
 document.getElementById('cap-home').onclick = goHome;
 // Any user drag, zoom, rotate or tilt stops the tour (programmatic flyTo has no originalEvent).
 map.on('movestart', (e) => { if (e.originalEvent) stopTour(); });

@@ -85,24 +85,23 @@ with sync_playwright() as p:
     page.screenshot(path=OUT / "m5_desktop.png")
 
     # About links + favicon/og:image from the live DOM.
-    page.evaluate("document.querySelector('details.about').open = true")
-    links = page.eval_on_selector_all("details.about a", "as => as.map((a) => [a.textContent.trim(), a.href])")
+    page.click('[data-open="about-win"]')
+    links = page.eval_on_selector_all("#about-win a", "as => as.map((a) => [a.textContent.trim(), a.href])")
     meta = page.evaluate("""() => ({
       og_image: document.querySelector('meta[property="og:image"]').content,
       og_url: document.querySelector('meta[property="og:url"]').content,
       icons: [...document.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]')].map((l) => l.href),
       last_updated: document.querySelector('.made time').textContent,
     })""")
-    page.locator("details.about").scroll_into_view_if_needed()
-    page.locator("details.about").screenshot(path=OUT / "m5_desktop_about.png")
-    page.evaluate("document.querySelector('details.about').open = false")
+    page.locator("#about-win .win").screenshot(path=OUT / "m5_desktop_about.png")
+    page.click("#about-win .win-close")
 
     seen = run_tour(page, "m5_desktop", 3)
     print("desktop tour, stops seen while polling:", seen,
           "| finished:", page.evaluate("document.getElementById('tour-stop').disabled"))
     # Software GL makes screenshots slower than a tour stop, so shoot every stop via its bookmark too.
     page.evaluate("document.querySelector('details.tour').open = true")
-    for i in range(8):
+    for i in range(page.locator("#bookmarks button").count()):
         page.locator("#bookmarks button").nth(i).click()
         page.wait_for_timeout(500)
         idle(page)
@@ -122,17 +121,15 @@ with sync_playwright() as p:
     phone.click("#panel-open")
     phone.wait_for_timeout(600)
     phone.screenshot(path=OUT / "m5_phone_panel.png")
-    phone.evaluate("document.querySelector('details.about').open = true")
-    phone.locator("details.about").scroll_into_view_if_needed()
+    phone.click('[data-open="about-win"]')
     phone.wait_for_timeout(300)
     phone.screenshot(path=OUT / "m5_phone_about.png")
-    phone.evaluate("document.querySelector('details.about').open = false")
-    phone.click("#panel-close")
+    phone.click("#about-win .win-close")  # opening a window already hid the panel
     phone.wait_for_timeout(400)
     seen_p = run_tour(phone, "m5_phone", 0)
     print("phone tour, stops seen:", seen_p,
           "| finished:", phone.evaluate("document.getElementById('tour-stop').disabled"))
-    for i in (0, 2, 4):  # Asir, Tuwaiq, Hajar via bookmarks, waiting for tiles
+    for i in (1, 4, 6):  # Asir, Tuwaiq, Hajar via bookmarks, waiting for tiles
         phone.click("#panel-open")
         phone.evaluate("document.querySelector('details.tour').open = true")
         phone.locator("#bookmarks button").nth(i).click()
