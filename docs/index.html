@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arabia 3D — Geology × Topography</title>
+  <meta name="description" content="Generalized geology of the Arabian Peninsula draped over 3D terrain.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside id="panel" class="panel">
+    <header class="panel-head">
+      <h1>Arabia 3D</h1>
+      <p class="subtitle">Geology × topography of the Arabian Peninsula</p>
+      <button id="panel-close" class="panel-close" aria-label="Hide panel">×</button>
+    </header>
+
+    <section>
+      <h2>Geology (Level 1)</h2>
+      <ul id="legend" class="legend"></ul>
+      <div class="legend-actions">
+        <button type="button" id="all-on">All on</button>
+        <button type="button" id="all-off">All off</button>
+      </div>
+    </section>
+
+    <section class="controls">
+      <label for="exag">Vertical exaggeration <output id="exag-val">1.5×</output></label>
+      <input id="exag" type="range" min="0" max="5" step="0.1" value="1.5">
+      <label for="opacity">Geology opacity <output id="opacity-val">0.75</output></label>
+      <input id="opacity" type="range" min="0" max="1" step="0.05" value="0.75">
+    </section>
+
+    <section class="key">
+      <h2>Overlays</h2>
+      <p><span class="item"><span class="sw-road motorway"></span>Motorway</span><span class="item"><span class="sw-road trunk"></span>Trunk</span><span class="item"><span class="sw-road primary"></span>Primary (zoom ≥ 6)</span></p>
+      <p><span class="item"><span class="sw-city capital"></span>Capital</span><span class="item"><span class="sw-city"></span>City</span></p>
+      <p class="hint">Click a polygon for unit details. Right-drag (or two-finger drag) to tilt and rotate.</p>
+    </section>
+  </aside>
+
+  <button id="panel-open" class="panel-open" aria-label="Show legend">Legend</button>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
