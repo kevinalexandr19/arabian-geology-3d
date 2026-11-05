@@ -41,6 +41,9 @@
     <button type="button" class="launch" data-open="stats-win">
       <span>Elevation statistics</span><span class="launch-ico" aria-hidden="true">↗</span>
     </button>
+    <button type="button" class="launch" data-open="strat-win">
+      <span>Stratigraphic column</span><span class="launch-ico" aria-hidden="true">↗</span>
+    </button>
 
     <details class="sec tour">
       <summary>Tour</summary>
@@ -51,6 +54,15 @@
         <button type="button" id="tour-home">⌂ Home</button>
       </div>
       <p class="hint">Use ◀ Prev / Next ▶ in the caption to step through the stops. Each stop shows flags on key summits, labels, outlines or highlights of the featured units and, where relevant, the escarpment trace (dashed red, derived from the z7 DEM).</p>
+    </details>
+
+    <details class="sec explore">
+      <summary>Explore</summary>
+      <h3 class="sub"><span class="sw-pt site"></span>Geoheritage sites and geoparks</h3>
+      <div id="sites" class="placelist"></div>
+      <h3 class="sub"><span class="sw-pt volc"></span>Holocene volcanoes</h3>
+      <div id="volcs" class="placelist"></div>
+      <p class="hint">Click a name (or a point on the map) to fly there. Volcano data: Smithsonian Global Volcanism Program.</p>
     </details>
 
     <details class="sec controls">
@@ -65,7 +77,15 @@
       <summary>Overlays</summary>
       <p><span class="item"><span class="sw-road motorway"></span>Motorway</span><span class="item"><span class="sw-road trunk"></span>Trunk</span><span class="item"><span class="sw-road primary"></span>Primary (zoom ≥ 6)</span></p>
       <p><span class="item"><span class="sw-city capital"></span>Capital</span><span class="item"><span class="sw-city"></span>City</span></p>
-      <p class="hint">Click a polygon for unit details. Right-drag (or two-finger drag) to tilt and rotate.</p>
+      <div class="toggles">
+        <label><input type="checkbox" data-layer="sites" checked><span class="sw-pt site"></span>Geoheritage sites</label>
+        <label><input type="checkbox" data-layer="volcs" checked><span class="sw-pt volc"></span>Holocene volcanoes</label>
+        <label><input type="checkbox" data-layer="plates" checked><span class="sw-plate"></span>Plate boundaries</label>
+        <label><input type="checkbox" data-layer="sea" checked><span class="sw-sea"></span>Sea-floor depth</label>
+      </div>
+      <p class="plate-key"><span class="item"><span class="sw-pl spreading"></span>Spreading / rift</span><span class="item"><span class="sw-pl transform"></span>Transform</span><span class="item"><span class="sw-pl convergent"></span>Convergent</span></p>
+      <div class="depth-key"><span class="depth-bar"></span><span class="depth-lab"><span>0</span><span>1,000</span><span>3,000</span><span>5,000 m</span></span></div>
+      <p class="hint">Click a polygon for unit details, or a plate boundary for its relative velocity. Right-drag (or two-finger drag) to tilt and rotate.</p>
     </details>
 
     <button type="button" class="launch" data-open="about-win">
@@ -84,18 +104,47 @@
 
   <div id="caption" class="caption" hidden>
     <button type="button" class="caption-close" aria-label="Hide caption">×</button>
+    <p class="cap-kicker"></p>
     <h3></h3>
-    <p></p>
+    <div class="cap-body"></div>
     <div class="caption-actions">
-      <button type="button" id="cap-prev" aria-label="Previous stop">◀<span class="w"> Prev</span></button>
-      <span id="cap-count" class="cap-count"></span>
-      <button type="button" id="cap-next" aria-label="Next stop"><span class="w">Next </span>▶</button>
-      <span class="cap-gap"></span>
+      <button type="button" id="cap-prev" class="tour-only" aria-label="Previous stop">◀<span class="w"> Prev</span></button>
+      <span id="cap-count" class="cap-count tour-only"></span>
+      <button type="button" id="cap-next" class="tour-only" aria-label="Next stop"><span class="w">Next </span>▶</button>
+      <span class="cap-gap tour-only"></span>
       <button type="button" id="cap-stop" hidden>■ Stop</button>
       <button type="button" id="cap-home">⌂ Home</button>
     </div>
   </div>
 
+
+  <!-- Stratigraphic column window -->
+  <div id="strat-win" class="win-backdrop" hidden>
+    <section class="win win-strat" role="dialog" aria-modal="true" aria-labelledby="strat-title">
+      <button type="button" class="win-close" aria-label="Close">×</button>
+      <header class="win-head">
+        <p class="win-kicker">Arabian Platform</p>
+        <h2 id="strat-title">Generalized stratigraphic column</h2>
+        <p class="win-sub">Outcrop succession of central and northern Arabia, coloured by the map's Level 1 classes. Column width shows resistance to erosion: wide, resistant units hold up the cuesta escarpments (▲). Bar heights follow approximate outcrop thickness (minimum height for thin units).</p>
+      </header>
+      <div id="strat-col" class="strat"></div>
+      <p class="win-foot">Generalized after Powers et al. (1966, USGS Professional Paper 560-D), Le Nindre et al. (1990) and Sharland et al. (2001). Thicknesses are approximate type-area outcrop values; subsurface thicknesses toward the Gulf are much greater. Ages are simplified to the period or epoch.</p>
+    </section>
+  </div>
+
+  <!-- Elevation profile window (non-modal: the map stays usable) -->
+  <section id="profile" class="profile" hidden aria-label="Elevation profile">
+    <header class="prof-head">
+      <h2>Elevation profile</h2>
+      <span id="prof-info" class="prof-info"></span>
+      <span class="prof-gap"></span>
+      <button type="button" id="prof-new" class="prof-btn" hidden>↺ New line</button>
+      <button type="button" id="prof-close" class="prof-x" aria-label="Close profile">×</button>
+    </header>
+    <p id="prof-hint" class="prof-hint">Click the start point on the map.</p>
+    <div id="prof-chart" class="prof-chart"></div>
+    <div id="prof-legend" class="prof-legend"></div>
+  </section>
 
   <!-- Elevation statistics window -->
   <div id="stats-win" class="win-backdrop" hidden>
@@ -149,6 +198,9 @@
           <li><span class="cred-k">Geology</span><span><a href="https://doi.org/10.3133/ofr97470B" target="_blank" rel="noopener">USGS Open-File Report 97-470-B</a> (geo2bg; Pollastro, Karshbaum &amp; Viger, after the USGS–ARAMCO 1963 map). Public domain.</span></li>
           <li><span class="cred-k">Terrain</span><span><a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles</a> (Mapzen; SRTM, GMTED2010, ETOPO1).</span></li>
           <li><span class="cred-k">Roads</span><span>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL.</span></li>
+          <li><span class="cred-k">Volcanoes</span><span><a href="https://volcano.si.edu/" target="_blank" rel="noopener">Smithsonian Global Volcanism Program</a>, Volcanoes of the World (doi:10.5479/si.GVP.VOTW5).</span></li>
+          <li><span class="cred-k">Plates</span><span>Bird (2003), <a href="https://doi.org/10.1029/2001GC000252" target="_blank" rel="noopener">PB2002 plate boundary model</a>; GeoJSON by H. Ahlenius / Nordpil (ODC-BY 1.0).</span></li>
+          <li><span class="cred-k">Stratigraphy</span><span>Generalized after Powers et al. (1966, USGS PP 560-D), Le Nindre et al. (1990) and Sharland et al. (2001).</span></li>
           <li><span class="cred-k">Cities</span><span><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>. Public domain.</span></li>
           <li><span class="cred-k">Map library</span><span><a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre GL JS</a> (BSD-3).</span></li>
         </ul>

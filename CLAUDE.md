@@ -26,8 +26,8 @@ Owner: geoscientist (petrology/geochemistry, Python). Communicate in English. Ke
 
 ## Repository layout
 ```
-scripts/        01_download.py, 02_geology.py, 03_overlays.py, 04_elevation_stats.py,
-                geology_classes.csv, polygon_overrides.csv
+scripts/        01_download.py, 02_geology.py, 03_overlays.py, 04_elevation_stats.py, 05_units.py,
+                06_places.py, geology_classes.csv, polygon_overrides.csv, cities.csv, geoheritage.csv
 data/raw/       sources (geo2bg and filtered OSM roads in osm/ committed; Natural Earth zips gitignored)
 data/interim/   clipped layers (gitignored)
 data/geology_polygons.csv   per-polygon table: pid + labels (committed)
@@ -76,6 +76,12 @@ Simplify the geometry so that `docs/data/geology.geojson` is **under 8 MB**. Use
 - **Bookmarks / tour:** camera presets (10 since 2026-11-05, incl. overview stops for the whole Arabian Shield and the Arabian Platform; ◀ Prev / Next ▶ in the caption) with flyTo, pitch and bearing, each with a two-sentence caption. Suggested stops: the Hijaz–Asir escarpment and the Shield; Harrat Rahat / Harrat Khaybar; the Tuwaiq escarpment; the Rub' al Khali; the Hajar Mountains; the Yemen highlands and traps; Dhofar; the UAE coastal sabkhas and Musandam.
 - **Elevation stats per class:** precompute the min, median and max elevation per L1 class (optionally also per L2 label), from Terrarium tiles sampled at a low zoom (z6–7). Show them in a separate **Elevation statistics** window opened from the side panel (box plots, table, observations), not in the legend (owner decision, 2026-11-05). This makes the correlation quantitative.
 
+- **Explore (added 2026-11-05):** geoheritage sites and geoparks (curated `scripts/geoheritage.csv`) and Holocene volcanoes (Smithsonian GVP), listed in one collapsible "Explore" section; a click flies there and shows a card outside the tour.
+- **Elevation profile tool:** a map button opens a non-modal bottom window; two clicks define the line; profile filled with L1 colours.
+- **Stratigraphic column window:** generalized Arabian Platform column in L1 colours (`STRAT` in `docs/app.js`).
+- **Sea-floor depth shading** (`color-relief` on Terrarium) and **plate boundaries** (Bird 2003, PB2002).
+- **Not wanted (owner decisions, 2026-11-05):** mine or other infrastructure locations (sensitive), mineral occurrences (later, in a separate Arabian Shield repo), faults, earthquakes, drainage, satellite imagery. Aeromagnetic overlay and Arabic UI are deferred.
+
 ## Working rules (credit budget matters)
 - Work **one milestone per session**. When a milestone is done, commit, open a PR or push to main as instructed, write a five-line summary, and **stop**. Do not start the next milestone unprompted.
 - Before writing code for a milestone, take a quick look at the data. Do not over-engineer.
@@ -110,3 +116,5 @@ Write the README (live link, rebuild steps, sources and licences). Configure Git
 - OpenStreetMap (roads) — © OpenStreetMap contributors, ODbL 1.0; credit required in the viewer attribution.
 - AWS Terrain Tiles — open data; credit the underlying sources as the dataset documentation requires.
 - MapLibre GL JS — BSD-3.
+- Smithsonian GVP Volcanoes of the World — free with citation (doi:10.5479/si.GVP.VOTW5).
+- Bird (2003) PB2002 plate boundaries — GeoJSON by Ahlenius/Nordpil, ODC-BY 1.0.
