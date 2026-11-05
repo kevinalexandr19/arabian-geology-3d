@@ -94,7 +94,6 @@ AG00663,663,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel
 AG00667,667,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,108.64,37.8997,30.8176
 AG00668,668,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,266.24,39.0529,30.8658
 AG00669-a,669,Q,Neogene-Quaternary surficial deposits,#F5EFAA,,unit,1124.44,35.5798,28.697
-AG00669-b,669,Q,Neogene-Quaternary surficial deposits,#F5EFAA,,unit,7.99,34.9858,29.5345
 AG00669-c,669,Q,Neogene-Quaternary surficial deposits,#F5EFAA,,unit,4.12,35.5198,29.2553
 AG00670,670,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,21266.89,43.95,29.0141
 AG00673,673,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,45.9,41.6237,31.0024
@@ -115,7 +114,7 @@ AG00716,716,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel
 AG00718,718,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,8.58,38.5272,30.715
 AG00720,720,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,469.8,38.3008,30.5666
 AG00723,723,Czi,Cenozoic volcanics,#D9B400,Cenozoic intrusives,unit,4.84,38.4267,30.6921
-AG00724-a,724,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,4279.76,47.6513,29.768
+AG00724-a,724,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,4257.14,47.6498,29.7634
 AG00724-b,724,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,2572.63,46.0266,28.813
 AG00725,725,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,30.87,40.9002,30.7663
 AG00728,728,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,3.29,39.4899,30.7296
@@ -173,7 +172,6 @@ AG00862,862,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,119.11,40.3774,30.0437
 AG00863,863,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,130.25,37.4501,29.9355
 AG00864,864,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,343.03,38.9817,29.9635
 AG00866,866,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,20.84,37.4872,29.9747
-AG00871,871,K,Cretaceous,#6DBE45,,unit,6.71,34.8129,29.3838
 AG00872,872,DSO,Paleozoic,#9DBF95,Ordovician-Devonian,unit,19.99,37.4604,29.9557
 AG00875,875,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,1439.34,39.3059,29.6851
 AG00884,884,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,188.56,39.6761,29.9179
@@ -181,7 +179,6 @@ AG00886,886,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,333.65,39.8675,29.8834
 AG00889,889,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,36.66,39.402,29.9277
 AG00890,890,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,52.42,39.3854,29.9087
 AG00891,891,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,6.84,41.8965,30.0328
-AG00893,893,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,19.07,34.8553,29.446
 AG00894,894,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,239.57,39.6017,29.8601
 AG00896,896,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,98.51,40.2593,29.899
 AG00898,898,Qe,Neogene-Quaternary surficial deposits,#F5EFAA,Eolian sand,unit,684.31,39.1616,29.7363
@@ -194,7 +191,6 @@ AG00913,913,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel
 AG00916-a,916,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,3592.51,36.431,28.6105
 AG00916-b,916,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,192.24,35.9157,29.1134
 AG00917,917,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,127.53,39.0003,29.7397
-AG00918,918,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,1.56,34.9308,29.5186
 AG00920,920,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,3.77,39.5162,29.8408
 AG00923,923,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,163.23,43.1462,29.8586
 AG00924,924,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,22.79,48.0675,29.9877
@@ -203,8 +199,6 @@ AG00930,930,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel
 AG00932,932,K,Cretaceous,#6DBE45,,unit,118.61,38.1646,29.685
 AG00933,933,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,444.97,48.1362,29.7879
 AG00934-a,934,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,598.59,34.903,29.0852
-AG00934-b,934,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,6.17,34.9749,29.4868
-AG00934-c,934,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,0.46,34.9657,29.4167
 AG00935,935,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,533.62,47.1063,29.7514
 AG00936,936,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,67.05,38.9488,29.693
 AG00938,938,K,Cretaceous,#6DBE45,,unit,12.91,37.9798,29.7013
@@ -229,7 +223,6 @@ AG00975,975,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,147.68,38.3325,29.5673
 AG00976,976,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,3.99,48.0681,29.859
 AG00977,977,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,3.46,38.1392,29.5918
 AG00978,978,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,15.08,35.0913,29.325
-AG00980,980,MzPz,Paleozoic,#9DBF95,Paleozoic-Mesozoic,unit,25.24,34.7717,29.3241
 AG00981,981,Qe,Neogene-Quaternary surficial deposits,#F5EFAA,Eolian sand,unit,17.71,38.8899,29.607
 AG00982,982,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,2.38,48.0523,29.8199
 AG00983,983,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,1150.35,38.2653,29.3081
@@ -241,10 +234,6 @@ AG00988,988,Qe,Neogene-Quaternary surficial deposits,#F5EFAA,Eolian sand,unit,17
 AG00989,989,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,8.13,38.1334,29.5045
 AG00990,990,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,3.11,38.382,29.5188
 AG00991,991,K,Cretaceous,#6DBE45,,unit,43.51,43.0075,29.6759
-AG00992-a,992,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,1.23,34.7311,29.2472
-AG00992-b,992,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,1.01,34.6308,28.8479
-AG00992-c,992,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,0.62,34.6486,28.8765
-AG00992-d,992,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,0.36,34.6433,28.9578
 AG00993,993,K,Cretaceous,#6DBE45,,unit,15.4,38.5604,29.5117
 AG00995,995,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,4.47,35.2925,29.2952
 AG00998,998,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,11.72,38.0773,29.4735
@@ -333,9 +322,7 @@ AG01096,1096,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and grave
 AG01097,1097,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,18.4,47.4285,29.3892
 AG01098,1098,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,43.8,37.8926,29.0869
 AG01099,1099,Qe,Neogene-Quaternary surficial deposits,#F5EFAA,Eolian sand,unit,13.54,42.6463,29.3129
-AG01100,1100,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,96.86,34.6158,28.6869
 AG01101,1101,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,16.02,34.9277,28.9031
-AG01102,1102,Q,Neogene-Quaternary surficial deposits,#F5EFAA,,unit,35.56,34.4531,28.038
 AG01103,1103,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,5.28,38.3581,29.133
 AG01104,1104,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,90.55,44.4286,29.3039
 AG01105,1105,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,24.16,47.7289,29.3597
@@ -487,7 +474,6 @@ AG01263,1263,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and grave
 AG01264,1264,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,4.34,39.7346,28.6953
 AG01265,1265,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,5.18,41.9936,28.7832
 AG01266,1266,DSO,Paleozoic,#9DBF95,Ordovician-Devonian,unit,13.62,36.4064,28.4765
-AG01268,1268,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,8.92,34.4301,28.2442
 AG01269,1269,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,11.55,42.0801,28.7614
 AG01270,1270,Qsk,Neogene-Quaternary surficial deposits,#F5EFAA,Sabkha,unit,31.99,48.2427,28.8166
 AG01271,1271,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,49.06,36.747,28.4855
@@ -580,9 +566,7 @@ AG01364,1364,DSO,Paleozoic,#9DBF95,Ordovician-Devonian,unit,3.52,36.1337,28.1451
 AG01365,1365,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,2.19,34.729,28.0412
 AG01367,1367,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,566.26,35.4657,27.9304
 AG01368,1368,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,23.97,42.3094,28.4461
-AG01369-a,1369,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,7.9,34.5232,27.9798
-AG01369-b,1369,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,2.64,34.5325,28.0129
-AG01369-c,1369,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,1.83,34.5891,27.9597
+AG01369-a,1369,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,45.07,34.527,27.9766
 AG01370,1370,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,51.15,35.5466,28.0763
 AG01371,1371,pC,Precambrian basement (Arabian Shield),#E8456B,,unit,21.04,35.7097,28.0877
 AG01373,1373,OCm,Paleozoic,#9DBF95,Cambrian-Ordovician,unit,9.02,36.0302,28.1161
@@ -611,15 +595,15 @@ AG01398,1398,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and grave
 AG01399,1399,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,3.47,39.5125,28.27
 AG01400,1400,OCm,Paleozoic,#9DBF95,Cambrian-Ordovician,unit,20.79,36.0883,28.0296
 AG01401,1401,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,5.36,42.4412,28.3815
-AG01402,1402,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,0.83,34.6996,27.9609
+AG01402,1402,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,16.3,34.7027,27.9412
 AG01403,1403,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,18.46,42.8011,28.3743
-AG01404,1404,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,2.56,34.6673,27.9471
+AG01404,1404,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,4.61,34.6711,27.9456
 AG01405,1405,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,62.82,42.9512,28.3581
 AG01406,1406,OCm,Paleozoic,#9DBF95,Cambrian-Ordovician,unit,3.46,36.0141,28.0466
 AG01407,1407,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,11.09,38.027,28.1735
 AG01408,1408,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,11.4,45.0316,28.4235
 AG01409,1409,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,12.63,36.9881,28.0952
-AG01410,1410,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,1.13,34.5533,27.9188
+AG01410,1410,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,10.43,34.5713,27.9247
 AG01411,1411,DSO,Paleozoic,#9DBF95,Ordovician-Devonian,unit,713.24,39.0913,28.0507
 AG01412,1412,Qf,Neogene-Quaternary surficial deposits,#F5EFAA,Alluvium and gravel,unit,14.65,35.2155,27.9571
 AG01413,1413,D,Paleozoic,#9DBF95,Ordovician-Devonian,unit,12.39,39.5027,28.2242
@@ -5670,5 +5654,3 @@ AG06774-a,6774,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,55496.15,46.5227,26
 AG06774-b,6774,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,11953.98,45.4243,28.8852
 AG06774-c,6774,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,7.91,46.7481,29.3182
 AG06774-d,6774,T,Paleogene-Neogene sedimentary,#EE8E4A,,unit,0.38,46.9009,29.5372
-AG06778-a,6778,Q,Neogene-Quaternary surficial deposits,#F5EFAA,,unit,6.63,48.026,30.0271
-AG06778-b,6778,Q,Neogene-Quaternary surficial deposits,#F5EFAA,,unit,0.1,47.9523,30.0839

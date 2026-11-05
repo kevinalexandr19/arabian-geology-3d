@@ -3,13 +3,13 @@
  "method": "per-pixel statistics of all pixels whose centre falls inside the polygons",
  "level1": {
   "Precambrian basement (Arabian Shield)": {
-   "min": -1562,
-   "p10": 366,
+   "min": -882,
+   "p10": 367,
    "median": 957,
    "p90": 1618,
    "max": 3321,
-   "n_px": 399848,
-   "n_neg": 244
+   "n_px": 399740,
+   "n_neg": 154
   },
   "Paleozoic": {
    "min": -1458,
@@ -17,8 +17,8 @@
    "median": 925,
    "p90": 1221,
    "max": 2775,
-   "n_px": 127643,
-   "n_neg": 72
+   "n_px": 127621,
+   "n_neg": 56
   },
   "Triassic": {
    "min": -795,
@@ -44,8 +44,8 @@
    "median": 601,
    "p90": 816,
    "max": 3055,
-   "n_px": 145238,
-   "n_neg": 263
+   "n_px": 145232,
+   "n_neg": 259
   },
   "Paleogene-Neogene sedimentary": {
    "min": -837,
@@ -53,7 +53,7 @@
    "median": 395,
    "p90": 939,
    "max": 2987,
-   "n_px": 446483,
+   "n_px": 446505,
    "n_neg": 1155
   },
   "Cenozoic volcanics": {
@@ -71,8 +71,8 @@
    "median": 311,
    "p90": 903,
    "max": 3083,
-   "n_px": 918747,
-   "n_neg": 3464
+   "n_px": 918709,
+   "n_neg": 3445
   }
  },
  "level2": {
@@ -82,8 +82,8 @@
    "median": 501,
    "p90": 970,
    "max": 3083,
-   "n_px": 309441,
-   "n_neg": 2546
+   "n_px": 309445,
+   "n_neg": 2542
   },
   "Cambrian-Ordovician": {
    "min": -9,
@@ -176,13 +176,13 @@
    "n_neg": 0
   },
   "Paleozoic-Mesozoic": {
-   "min": -433,
-   "p10": 584,
-   "median": 633,
-   "p90": 699,
+   "min": 547,
+   "p10": 585,
+   "median": 634,
+   "p90": 700,
    "max": 891,
-   "n_px": 2152,
-   "n_neg": 16
+   "n_px": 2130,
+   "n_neg": 0
   },
   "Paleozoic-Precambrian": {
    "min": -4,
