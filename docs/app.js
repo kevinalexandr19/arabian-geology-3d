@@ -107,11 +107,11 @@ const style = {
     // Tour: outline of the polygons a stop is about (filter set per stop).
     {
       id: 'focus-glow', type: 'line', source: 'geology', layout: { visibility: 'none' },
-      paint: { 'line-color': '#ffffff', 'line-width': 4.5, 'line-blur': 1.5, 'line-opacity': 0.9 },
+      paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-blur': 1.5, 'line-opacity': 0.95 },
     },
     {
       id: 'focus-line', type: 'line', source: 'geology', layout: { visibility: 'none' },
-      paint: { 'line-color': '#1d232a', 'line-width': 1.6 },
+      paint: { 'line-color': '#b3122e', 'line-width': 2.4 },
     },
     {
       id: 'roads-primary', type: 'line', source: 'roads', minzoom: 6,
@@ -597,6 +597,18 @@ const STOPS = [
       'Its relief is made of dunes, not bedrock, with linear and star mega-dunes up to about 250 m high on a floor that falls from about 800 m in the south-west to near sea level in the north-east.',
   },
   {
+    title: 'Highway 10: the straight road',
+    photo: 'hwy10',
+    bounds: [[48.8, 23.5], [51.7, 24.6]], pitch: 45, bearing: 0,
+    marks: {
+      flags: [['Haradh', '', 49.069, 24.1375], ['Al Batha', '', 51.376, 24.1379, 'left']],
+      areas: [['Rub\' al Khali', 50.2, 23.6]],
+      lines: [['Highway 10 · 240 km straight', [[49.0688, 24.1375], [49.2037, 24.1365], [49.2508, 24.1367], [49.6039, 24.1405], [50.2377, 24.1423], [50.2701, 24.1417], [50.9992, 24.1407], [51.3762, 24.1379]]]],
+    },
+    caption: 'Between Haradh and Al Batha, Highway 10 runs about 240 km without a bend or an appreciable gradient, recognized by Guinness World Records as the longest straight road in the world. ' +
+      'It crosses the northern margin of the Rub\' al Khali, where Quaternary eolian sand and gravel plains (about nine-tenths of the straight section on this map) blanket flat-lying Paleogene–Neogene strata, so there is no relief to steer around.',
+  },
+  {
     title: 'Hajar Mountains',
     photo: 'hajar',
     camera: { center: [57.5, 23.1], zoom: 8, pitch: 60, bearing: 180 },
@@ -676,16 +688,18 @@ function makeFlag(name, note, side, pole) {
   el.innerHTML = `<div class="flag-cloth">${esc(name)}${note ? `<small>${esc(note)}</small>` : ''}</div><div class="flag-pole"${pole ? ` style="height:${pole}px"` : ''}></div>`;
   return el;
 }
-function clearMarks() {
+// keepTour: the caller sets the tour source itself right after. Two back-to-back setData calls on the same
+// GeoJSON source can leave the empty one in place (MapLibre 5.6), which hid the escarpment traces.
+function clearMarks(keepTour = false) {
   flagMarkers.forEach((m) => m.remove());
   flagMarkers = [];
-  map.getSource('tour')?.setData({ type: 'FeatureCollection', features: [] });
+  if (!keepTour) map.getSource('tour')?.setData({ type: 'FeatureCollection', features: [] });
   ['focus-glow', 'focus-line'].forEach((l) => map.getLayer(l) && map.setLayoutProperty(l, 'visibility', 'none'));
   dimKeep = null;
   setFillOpacity();
 }
 function showMarks(i) {
-  clearMarks();
+  clearMarks(true);
   const mk = STOPS[i].marks || {};
   // Flag: [name, note, lon, lat, side, pole px]; side 'left' puts the cloth left of the pole and a taller pole lifts it (to keep labels clear).
   for (const [name, note, lon, lat, side, pole] of mk.flags || []) {
@@ -709,7 +723,10 @@ function showMarks(i) {
       type: 'Feature', properties: { name }, geometry: { type: 'LineString', coordinates: coords },
     })),
   ];
-  map.getSource('tour').setData({ type: 'FeatureCollection', features });
+  const fc = { type: 'FeatureCollection', features };
+  map.getSource('tour').setData(fc);
+  // An update made while the camera flies can be dropped (MapLibre 5.6): send it again when the flight ends.
+  if (features.length) map.once('moveend', () => { if (current === i) map.getSource('tour').setData(fc); });
   if (mk.dim) { dimKeep = mk.dim; setFillOpacity(); }
   if (mk.focus) {
     for (const l of ['focus-glow', 'focus-line']) {
@@ -729,7 +746,8 @@ caption.querySelector('.caption-close').onclick = hideCaption;
 // Overview stops are fitted to the visible map area (leaving room for the caption).
 function stopCamera(st) {
   if (st.camera) return st.camera;
-  const padding = isPhone() ? { top: 220, bottom: 30, left: 10, right: 10 } : { top: 150, bottom: 40, left: 40, right: 60 };
+  // Desktop: keep the framed area clear of the caption card (top-left, ~460 px wide).
+  const padding = isPhone() ? { top: 220, bottom: 30, left: 10, right: 10 } : { top: 60, bottom: 40, left: 500, right: 60 };
   const cam = map.cameraForBounds(st.bounds, { padding, bearing: st.bearing || 0 });
   return { ...cam, pitch: st.pitch || 0, bearing: st.bearing || 0 };
 }
@@ -888,11 +906,14 @@ function photoFigure(p) {
     : esc(p.photo_licence);
   return `<figure class="cap-photo"><a href="${esc(p.photo_page)}" target="_blank" rel="noopener">` +
     `<img src="${esc(p.photo)}" width="${esc(p.photo_w)}" height="${esc(p.photo_h)}" alt="${esc(p.photo_caption)}"></a>` +
-    `<figcaption>${esc(p.photo_caption)}. Photo: <a href="${esc(p.photo_page)}" target="_blank" rel="noopener">${esc(p.photo_author)}</a>, ${lic}, via Wikimedia Commons (resized).</figcaption></figure>`;
+    `<figcaption>${esc(p.photo_caption)}. Photo: <a href="${esc(p.photo_page)}" target="_blank" rel="noopener">${esc(p.photo_author)}</a>` +
+    `${p.photo_licence && p.photo_licence !== 'Used with credit' ? `, ${lic}` : ''}${p.photo_via ? `, via ${esc(p.photo_via)}` : ''} (resized).</figcaption></figure>`;
 }
 
 const VOLC_MAPPED = {
-  moved: (p) => `Map point moved ${fmt(p.moved_km)} km from the GVP location onto the mapped lava field (the 1:2,000,000 geology is generalized).`,
+  centred: (p) => `The highlighted polygons are the mapped lava field; the point sits at its centre${p.moved_km >= 1 ? ` (${fmt(p.moved_km)} km from the GVP reference point)` : ''}.`,
+  override: () => 'The highlighted polygon is the mapped lava field; the point marks a chain of maars and cones.',
+  traps: () => 'Lies within the Oligocene–Miocene Yemen traps on the 1:2,000,000 map; the Holocene field is not mapped separately, so the point is the GVP location.',
   island: () => 'Red Sea island: not mapped as volcanic rock in the generalized geology.',
   not_mapped: () => 'This small field is not mapped separately in the 1:2,000,000 geology; the point is the GVP location.',
 };
@@ -900,7 +921,7 @@ const VOLC_MAPPED = {
 function placeBody(kind, p) {
   if (kind === 'site' || kind === 'cap') return photoFigure(p) + `<p>${esc(p.description)}</p>`;
   const facts = [p.type, p.rock, p.elev_m != null ? `summit ${fmt(p.elev_m)} m` : ''].filter(Boolean).map(esc).join(' · ');
-  return `<p class="cap-facts"><b>Last eruption: ${esc(yearText(p.last_eruption))}</b><br>${facts}</p>` +
+  return photoFigure(p) + `<p class="cap-facts"><b>Last eruption: ${esc(yearText(p.last_eruption))}</b><br>${facts}</p>` +
     (p.note ? `<p>${esc(p.note)}</p>` : '') +
     (VOLC_MAPPED[p.mapped] ? `<p class="cap-src">${esc(VOLC_MAPPED[p.mapped](p))}</p>` : '') +
     `<p class="cap-src">Source: <a href="https://volcano.si.edu/volcano.cfm?vn=${esc(p.vnum)}" target="_blank" rel="noopener">Smithsonian GVP, volcano ${esc(p.vnum)}</a></p>`;
@@ -923,6 +944,22 @@ function showPlace(kind, p, coords) {
   document.querySelectorAll('.placelist button').forEach((b) =>
     b.classList.toggle('active', b.dataset.kind === kind && b.dataset.name === p.name));
   if (isPhone()) document.body.classList.remove('panel-visible');
+  // Volcanoes: outline the mapped lava-field polygons and frame them (properties from map clicks arrive as JSON strings).
+  const parse = (v) => (typeof v === 'string' ? JSON.parse(v) : v);
+  const pids = kind === 'volc' ? parse(p.pids) || [] : [];
+  const bbox = kind === 'volc' ? parse(p.bbox) : null;
+  if (pids.length) {
+    for (const l of ['focus-glow', 'focus-line']) {
+      map.setFilter(l, ['in', ['get', 'pid'], ['literal', pids]]);
+      map.setLayoutProperty(l, 'visibility', 'visible');
+    }
+  }
+  if (bbox) {
+    const padding = isPhone() ? { top: 260, bottom: 30, left: 20, right: 20 } : { top: 60, bottom: 60, left: 520, right: 80 };
+    const fit = map.cameraForBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding, maxZoom: 11 });
+    map.flyTo({ ...fit, pitch: 45, bearing: 0, essential: true });
+    return;
+  }
   const cam = kind !== 'volc'
     ? { zoom: +p.zoom, pitch: +p.pitch, bearing: +p.bearing }
     : /field/i.test(p.type) ? { zoom: 8, pitch: 50, bearing: 0 } : { zoom: 10.5, pitch: 50, bearing: 0 };  // lava fields vs. single edifices
