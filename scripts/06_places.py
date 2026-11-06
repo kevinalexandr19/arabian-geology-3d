@@ -47,6 +47,8 @@ LICENCE_URL = {
     "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
     "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
     "Public domain": "",
+    # Owner-supplied photos (not freely licensed): shown with the credit the owner gave (owner decision, 2026-11-06).
+    "Used with credit": "",
 }
 
 GVP_WFS = ("https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows?service=WFS&version=1.0.0"
@@ -103,62 +105,101 @@ def display_name(n):
 
 
 RED_SEA_ISLANDS = {"Tair, Jebel at", "Zubair Group", "Zukur", "Hanish"}  # no or surficial polygon in geo2bg
-SNAP_KM = 5  # GVP points this close to a mapped Cenozoic-volcanics polygon are moved onto it
+SNAP_KM = 5        # a field is matched to a Cenozoic-volcanics polygon up to this far from its GVP point
+CLUSTER_DEG = 0.02  # volcanics polygons within ~2 km of the field's polygon are highlighted with it
+# Owner-chosen map points (lon, lat), used instead of the polygon centre.
+POINT_OVERRIDES = {"Kishb, Harrat": (41.3340, 23.1415)}  # crater chain in Harrat Kishb (owner, 2026-11-06)
 
 
 def volcanoes():
-    """GVP Holocene volcanoes. Where the GVP point falls just outside the mapped (1:2M) lava field, the map
-    point is moved onto the nearest Cenozoic volcanics polygon (<= SNAP_KM) so the dot sits on the field;
-    the GVP coordinates are kept in gvp_lon/gvp_lat and the card says so. `mapped` records what lies under
-    the final point: volcanics, moved, island (no or surficial polygon) or not_mapped (field not in geo2bg)."""
-    from shapely.ops import nearest_points
+    """GVP Holocene volcanoes, placed on the generalized (1:2M) lava fields so they are easy to spot.
+
+    Each land field is matched to the Cenozoic-volcanics polygon that contains its GVP point (or the nearest
+    one within SNAP_KM). The map point is the pole of inaccessibility (most central interior point) of that
+    polygon; where several fields share one polygon (Khaybar and Ithnayn), the polygon is first split
+    between them by a Voronoi partition of their GVP points. Exceptions: POINT_OVERRIDES; fields inside a
+    Yemen-traps polygon (Oligocene, not the Holocene field) keep their GVP point; Red Sea islands and fields
+    not mapped at 1:2M keep their GVP point. `pids` lists the polygons the viewer highlights, `bbox` frames
+    them. The GVP coordinates stay in gvp_lon/gvp_lat. `mapped`: centred, override, traps, island, not_mapped.
+    """
+    from shapely import voronoi_polygons
+    from shapely.geometry import MultiPoint
+    from shapely.ops import polylabel, unary_union
 
     gj = get(GVP_WFS, "gvp_votw.json")
     geo = json.loads((OUT / "geology.geojson").read_text())["features"]
-    polys = [shape(f["geometry"]) for f in geo]
-    tree = STRtree(polys)
     vidx = [i for i, f in enumerate(geo) if f["properties"]["level1_class"] == "Cenozoic volcanics"]
-    vtree = STRtree([polys[i] for i in vidx])
+    vpolys = [shape(geo[i]["geometry"]) for i in vidx]
+    vtree = STRtree(vpolys)
+    vprops = [geo[i]["properties"] for i in vidx]
+
+    rows = [f for f in gj["features"] if f["properties"]["Country"] in COUNTRIES]
+    match = {}  # GVP name -> index into vpolys
+    for f in rows:
+        name = f["properties"]["Volcano_Name"]
+        pt = Point(f["geometry"]["coordinates"][:2])
+        k = vtree.nearest(pt)
+        if name not in RED_SEA_ISLANDS and vpolys[k].distance(pt) * 111.2 <= SNAP_KM:
+            match[name] = k
+
     feats = []
-    for f in gj["features"]:
+    for f in rows:
         p = f["properties"]
-        if p["Country"] not in COUNTRIES:
-            continue
+        name = p["Volcano_Name"]
         lon, lat = f["geometry"]["coordinates"][:2]
-        pt = Point(lon, lat)
-        under = [i for i in tree.query(pt) if polys[i].contains(pt)]
-        cls = geo[under[0]]["properties"]["level1_class"] if under else None
-        j = vidx[vtree.nearest(pt)]
-        dist_km = polys[j].distance(pt) * 111.2  # degrees -> km (upper bound; fine for a 5 km test)
-        mx, my, moved = lon, lat, 0.0
-        if cls == "Cenozoic volcanics":
-            mapped = "volcanics"
-        elif p["Volcano_Name"] in RED_SEA_ISLANDS:
+        mx, my, pids, bbox = lon, lat, [], None
+        if name in RED_SEA_ISLANDS:
             mapped = "island"
-        elif dist_km <= SNAP_KM:
-            # nearest point on the polygon, pulled ~300 m inside so it renders on the fill
-            inner = polys[j].buffer(-0.003)
-            target = inner if not inner.is_empty else polys[j]
-            q = nearest_points(target, pt)[0]
-            mx, my, mapped = q.x, q.y, "moved"
-            moved = round(Point(mx, my).distance(pt) * 111.2, 1)
-        else:
+        elif name not in match:
             mapped = "not_mapped"
+        else:
+            k = match[name]
+            poly = vpolys[k]
+            label = vprops[k].get("level2_label") or ""
+            # the field's polygon plus nearby volcanics (same harrat split by the generalization)
+            group = [k] + [m for m in vtree.query(poly.buffer(CLUSTER_DEG))
+                           if m != k and vpolys[m].distance(poly) < CLUSTER_DEG
+                           and not (vprops[m].get("level2_label") or "").startswith("Yemen traps")]
+            if label.startswith("Yemen traps"):
+                mapped, group = "traps", []
+            else:
+                sharers = [g for g, kk in match.items() if kk == k]
+                part = poly
+                if len(sharers) > 1:  # split the shared polygon between the fields
+                    pts = {g: Point(next(r for r in rows if r["properties"]["Volcano_Name"] == g)["geometry"]["coordinates"][:2])
+                           for g in sharers}
+                    cells = voronoi_polygons(MultiPoint(list(pts.values())), extend_to=poly.envelope.buffer(1))
+                    for cell in cells.geoms:
+                        if cell.contains(pts[name]):
+                            part = poly.intersection(cell)
+                    group = [k]
+                if part.geom_type == "MultiPolygon":
+                    part = max(part.geoms, key=lambda g: g.area)
+                if name in POINT_OVERRIDES:
+                    mx, my = POINT_OVERRIDES[name]
+                    mapped = "override"
+                else:
+                    c = polylabel(part, tolerance=0.002)
+                    mx, my, mapped = c.x, c.y, "centred"
+            pids = [vprops[m]["pid"] for m in group]
+            if group:
+                bbox = [round(v, 3) for v in unary_union([vpolys[m] for m in group]).bounds]
+        moved = round(Point(mx, my).distance(Point(lon, lat)) * 111.2, 1)
         feats.append({
             "type": "Feature",
             "geometry": {"type": "Point", "coordinates": [round(mx, 4), round(my, 4)]},
             "properties": {
-                "vnum": p["Volcano_Number"], "name": display_name(p["Volcano_Name"]),
+                "vnum": p["Volcano_Number"], "name": display_name(name),
                 "type": p["Primary_Volcano_Type"], "landform": p["Volcanic_Landform"],
                 "rock": p["Major_Rock_Type"], "elev_m": p["Elevation"],
                 "last_eruption": p["Last_Eruption_Year"], "evidence": p["Evidence_Category"],
-                "note": VOLCANO_NOTES.get(p["Volcano_Name"], ""),
+                "note": VOLCANO_NOTES.get(name, ""),
                 "mapped": mapped, "moved_km": moved, "gvp_lon": round(lon, 4), "gvp_lat": round(lat, 4),
-                "under": cls or "",
+                "pids": pids, "bbox": bbox,
             },
         })
     # North to south, as listed in the panel.
-    feats.sort(key=lambda f: -f["geometry"]["coordinates"][1])
+    feats.sort(key=lambda f: -f["properties"]["gvp_lat"])
     return feats
 
 
@@ -194,7 +235,10 @@ def plates():
 
 
 def photos():
-    """Commons photo per id -> docs/img/photos/<id>.jpg (720 px wide, EXIF stripped) + credit fields."""
+    """Photo per id -> docs/img/photos/<id>.jpg (720 px wide, EXIF stripped) + credit fields.
+
+    Source: a Wikimedia Commons file (`commons_file`), or an owner-supplied image (`local_file`, with the
+    credit link in `source_url`). photo_via is "Wikimedia Commons" for Commons files, empty otherwise."""
     from io import BytesIO
     from urllib.parse import quote
 
@@ -210,7 +254,9 @@ def photos():
                 raise SystemExit(f"{r['id']}: licence {r['licence']!r} not in the allowed list")
             name = r["commons_file"].replace(" ", "_")
             src = cache / f"{r['id']}.src.jpg"
-            if not src.exists():
+            if r.get("local_file"):  # owner-supplied image committed in data/raw/photos_owner/
+                src = ROOT / r["local_file"]
+            elif not src.exists():
                 url = f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(name)}?width=800"
                 resp = requests.get(url, headers={"User-Agent": UA}, timeout=120)
                 resp.raise_for_status()
@@ -224,7 +270,8 @@ def photos():
                 "photo": f"img/photos/{r['id']}.jpg", "photo_w": im.width, "photo_h": im.height,
                 "photo_caption": r["caption"], "photo_author": r["author"], "photo_licence": r["licence"],
                 "photo_licence_url": LICENCE_URL[r["licence"]],
-                "photo_page": "https://commons.wikimedia.org/wiki/File:" + quote(name),
+                "photo_page": r.get("source_url") or "https://commons.wikimedia.org/wiki/File:" + quote(name),
+                "photo_via": "" if r.get("local_file") else "Wikimedia Commons",
             }
     return out
 
@@ -280,15 +327,18 @@ def write(name, feats):
 
 
 if __name__ == "__main__":
+    pics = photos()
     v = volcanoes()
+    for f in v:  # volcano photos: photos.csv id volc_<slug>, e.g. volc_rahat
+        slug = f["properties"]["name"].split()[-1].lower().replace("'", "")
+        f["properties"].update(pics.get(f"volc_{slug}", {}))
     write("volcanoes.geojson", v)
     for f in v:
         p = f["properties"]
         print(f"  {p['name']:<30} last eruption {str(p['last_eruption']):<6} {p['mapped']:<10}"
-              f" {p['moved_km'] or '':<5} under GVP point: {p['under'] or '-'}")
+              f" moved {p['moved_km']:5.1f} km  polygons {len(p['pids']):2d}")
     pl = plates()
     write("plates.geojson", pl)
-    pics = photos()
     s = sites(pics)
     write("geoheritage.geojson", s)
     c = capitals(pics)
