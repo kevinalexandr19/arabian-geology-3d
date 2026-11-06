@@ -8,6 +8,9 @@ const TERRAIN_ATTR =
 const GEO_ATTR = '<a href="https://doi.org/10.3133/ofr97470B">USGS OFR 97-470B (geo2bg)</a>';
 const NE_ATTR = '<a href="https://www.naturalearthdata.com/">Natural Earth</a>';
 const OSM_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> (ODbL)';
+const GVP_ATTR = 'Volcanoes: <a href="https://volcano.si.edu/">Smithsonian Global Volcanism Program</a>';
+const PB_ATTR = 'Plate boundaries: <a href="https://doi.org/10.1029/2001GC000252">Bird (2003)</a>, ' +
+  '<a href="https://github.com/fraxen/tectonicplates">Ahlenius/Nordpil</a> (ODC-BY)';
 
 const DEFAULT_EXAG = 1.5;
 const DEFAULT_OPACITY = 0.75;
@@ -26,9 +29,9 @@ const demSource = () => ({
 });
 
 const isPhone = () => window.matchMedia('(max-width: 700px)').matches;
-// Home view: whole peninsula. Phones get a flatter camera and room above for the intro card.
+// Home view: whole peninsula. Phones get a flatter camera and room below for the intro card.
 const HOME_PITCH = () => (isPhone() ? 20 : 45);
-const HOME_PADDING = () => (isPhone() ? { top: 190, bottom: 40, left: 10, right: 10 } : 30);
+const HOME_PADDING = () => (isPhone() ? { top: 60, bottom: 170, left: 10, right: 10 } : 30);
 
 const style = {
   version: 8,
@@ -37,13 +40,27 @@ const style = {
     // Two sources on the same tiles: MapLibre recommends separate sources for terrain and hillshade.
     'dem-terrain': demSource(),
     'dem-hillshade': demSource(),
+    'dem-relief': demSource(),
     geology: { type: 'geojson', data: 'data/geology.geojson', attribution: GEO_ATTR },
     roads: { type: 'geojson', data: 'data/roads.geojson', attribution: OSM_ATTR },
     cities: { type: 'geojson', data: 'data/cities.geojson', attribution: NE_ATTR },
     tour: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
+    plates: { type: 'geojson', data: 'data/plates.geojson', attribution: PB_ATTR },
+    volcanoes: { type: 'geojson', data: 'data/volcanoes.geojson', attribution: GVP_ATTR },
+    sites: { type: 'geojson', data: 'data/geoheritage.geojson' },
+    profile: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
   },
   layers: [
     { id: 'background', type: 'background', paint: { 'background-color': '#d7dde2' } },
+    // Sea floor coloured by depth from the same Terrarium tiles (bathymetry: ETOPO1/GEBCO); land stays transparent.
+    {
+      id: 'sea-depth', type: 'color-relief', source: 'dem-relief',
+      paint: {
+        'color-relief-color': ['interpolate', ['linear'], ['elevation'],
+          -6000, '#12355b', -4500, '#1a4a7a', -3000, '#25629a', -2000, '#3779b3', -1200, '#5293c7',
+          -600, '#73acd8', -200, '#98c5e5', -60, '#b9d8ee', -10, '#d2e6f3', -0.5, '#dcebf4', 0, 'rgba(220,235,244,0)'],
+      },
+    },
     {
       id: 'geology-fill', type: 'fill', source: 'geology',
       paint: { 'fill-color': ['get', 'level1_colour'], 'fill-opacity': DEFAULT_OPACITY },
@@ -62,6 +79,29 @@ const style = {
       paint: {
         'line-color': 'rgba(40, 40, 40, 0.55)',
         'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.3, 12, 1],
+      },
+    },
+    // Plate boundaries (Bird 2003): drawn over the sea shading, under roads and labels.
+    {
+      id: 'plates-casing', type: 'line', source: 'plates',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': 'rgba(255,255,255,0.75)', 'line-width': ['interpolate', ['linear'], ['zoom'], 3, 3, 8, 6] },
+    },
+    {
+      id: 'plates', type: 'line', source: 'plates', filter: ['!=', ['get', 'cls'], 'convergent'],
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: {
+        'line-color': ['match', ['get', 'cls'], 'spreading', '#c0262d', '#1d232a'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 3, 1.6, 8, 3.2],
+      },
+    },
+    {
+      id: 'plates-conv', type: 'line', source: 'plates', filter: ['==', ['get', 'cls'], 'convergent'],
+      layout: { 'line-join': 'round' },
+      paint: {
+        'line-color': '#6b2d8c',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 3, 1.6, 8, 3.2],
+        'line-dasharray': [3, 1.5],
       },
     },
     // Tour: outline of the polygons a stop is about (filter set per stop).
@@ -105,6 +145,52 @@ const style = {
     },
     // City dots. Visibility by scalerank tier; capitals drawn as squares (larger, inverted).
     ...cityLayers(),
+    // Elevation profile line.
+    {
+      id: 'profile-casing', type: 'line', source: 'profile',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#ffffff', 'line-width': 6 },
+    },
+    {
+      id: 'profile-line', type: 'line', source: 'profile',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#0b5cad', 'line-width': 3 },
+    },
+    // Explore points: volcanoes (triangle-like dark-orange dots) and geoheritage sites (teal).
+    {
+      id: 'volcs', type: 'circle', source: 'volcanoes',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 4.5, 9, 7],
+        'circle-color': '#c2410c', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.8,
+        'circle-pitch-alignment': 'viewport',
+      },
+    },
+    {
+      id: 'sites', type: 'circle', source: 'sites',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 4.5, 9, 7],
+        'circle-color': ['case', ['==', ['get', 'kind'], 'Geopark'], '#0e7490', '#0f766e'],
+        'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.8,
+        'circle-pitch-alignment': 'viewport',
+      },
+    },
+    {
+      id: 'volcs-label', type: 'symbol', source: 'volcanoes', minzoom: 5.5,
+      layout: {
+        'text-field': ['get', 'name'], 'text-font': FONT_BOLD, 'text-size': 11.5,
+        'text-variable-anchor': ['top', 'bottom', 'right', 'left'], 'text-radial-offset': 0.9, 'text-padding': 2,
+      },
+      paint: { 'text-color': '#9a3412', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.6 },
+    },
+    {
+      id: 'sites-label', type: 'symbol', source: 'sites', minzoom: 6,
+      layout: {
+        'text-field': ['get', 'name'], 'text-font': FONT_BOLD, 'text-size': 11.5,
+        'text-variable-anchor': ['top', 'bottom', 'right', 'left'], 'text-radial-offset': 0.9, 'text-padding': 2,
+        'text-max-width': 12,
+      },
+      paint: { 'text-color': '#115e59', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.6 },
+    },
     // Tour annotations: escarpment lines for the active stop (flags and area labels are DOM markers).
     {
       id: 'tour-line-casing', type: 'line', source: 'tour', filter: ['==', ['geometry-type'], 'LineString'],
@@ -197,6 +283,17 @@ map.on('load', () => {
   map.setTerrain({ source: 'dem-terrain', exaggeration: DEFAULT_EXAG });
   // The compact attribution opens expanded; start it collapsed (the (i) button opens it).
   document.querySelector('.maplibregl-ctrl-attrib.maplibregl-compact-show')?.classList.remove('maplibregl-compact-show');
+});
+// Sources that load later add their attribution and re-open the compact box: keep it closed until the user opens it.
+let attribTouched = false;
+map.on('sourcedata', () => {
+  const a = document.querySelector('.maplibregl-ctrl-attrib');
+  if (!a) return;
+  if (!a.dataset.watch) {
+    a.dataset.watch = '1';
+    a.querySelector('.maplibregl-ctrl-attrib-button')?.addEventListener('click', () => { attribTouched = true; });
+  }
+  if (!attribTouched) a.classList.remove('maplibregl-compact-show');
 });
 
 // ---- Legend and class toggles ----
@@ -370,7 +467,16 @@ function roadText(p) {
   return `${parts.join(' · ') || '<i>unnamed</i>'} <span style="color:#5d6873">(${esc(p.class)})</span>`;
 }
 
+const PLACE_LAYERS = ['volcs', 'sites'];
+const visibleLayers = (ls) => ls.filter((l) => map.getLayer(l) && map.getLayoutProperty(l, 'visibility') !== 'none');
+
 map.on('click', (e) => {
+  if (prof.on) return;   // the profile tool takes map clicks
+  const box6 = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+  const place = map.queryRenderedFeatures(box6, { layers: visibleLayers(PLACE_LAYERS) })[0];
+  if (place) { showPlace(place.layer.id === 'volcs' ? 'volc' : 'site', place.properties, place.geometry.coordinates); return; }
+  const plate = map.queryRenderedFeatures(box6, { layers: visibleLayers(['plates', 'plates-conv']) })[0];
+  if (plate) { plateTip(plate.properties, e.lngLat); return; }
   const geo = map.queryRenderedFeatures(e.point, { layers: ['geology-fill'] })[0];
   if (!geo) return;
   const p = geo.properties;
@@ -403,8 +509,11 @@ map.on('mousemove', (e) => {
   const road = map.queryRenderedFeatures(box, { layers })[0];
   if (road) roadTip.setLngLat(e.lngLat).setHTML(roadText(road.properties)).addTo(map);
   else roadTip.remove();
-  const geo = map.queryRenderedFeatures(e.point, { layers: ['geology-fill'] }).length;
-  map.getCanvas().style.cursor = geo ? 'pointer' : '';
+  if (prof.on) { map.getCanvas().style.cursor = 'crosshair'; return; }
+  const box6 = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+  const hot = map.queryRenderedFeatures(box6, { layers: visibleLayers([...PLACE_LAYERS, 'plates', 'plates-conv']) }).length ||
+    map.queryRenderedFeatures(e.point, { layers: ['geology-fill'] }).length;
+  map.getCanvas().style.cursor = hot ? 'pointer' : '';
 });
 
 // ---- Bookmarks and tour ----
@@ -532,8 +641,11 @@ let current = -1;          // stop on screen, -1 when none
 function showCaption(i) {
   const st = STOPS[i];
   current = i;
+  caption.classList.remove('place');
+  caption.querySelector('.cap-kicker').textContent = 'Tour';
   caption.querySelector('h3').textContent = `${i + 1}. ${st.title}`;
-  caption.querySelector('p').textContent = st.caption;
+  caption.querySelector('.cap-body').textContent = st.caption;
+  document.querySelectorAll('.placelist button').forEach((b) => b.classList.remove('active'));
   document.getElementById('cap-count').textContent = `${i + 1} / ${STOPS.length}`;
   document.getElementById('cap-prev').disabled = i === 0;
   document.getElementById('cap-next').disabled = i === STOPS.length - 1;
@@ -594,7 +706,7 @@ function showMarks(i) {
 function hideCaption() {
   caption.hidden = true;
   current = -1;
-  document.querySelectorAll('#bookmarks button').forEach((b) => b.classList.remove('active'));
+  document.querySelectorAll('#bookmarks button, .placelist button').forEach((b) => b.classList.remove('active'));
 }
 caption.querySelector('.caption-close').onclick = hideCaption;
 
@@ -691,7 +803,7 @@ map.on('error', (e) => {
 // exaggeration slider; MapLibre's queryTerrainElevation includes the exaggeration and uses coarse tiles).
 const readout = document.getElementById('readout');
 const tileCache = new Map();   // "z/x/y" -> Promise<ImageData|null>
-const TILE_CACHE_MAX = 48;
+const TILE_CACHE_MAX = 160;   // the profile tool can touch a few dozen tiles per line
 
 function getTile(z, x, y) {
   const key = `${z}/${x}/${y}`;
@@ -712,8 +824,8 @@ function getTile(z, x, y) {
   return p;
 }
 
-async function elevationAt(lng, lat) {
-  const z = Math.max(7, Math.min(12, Math.floor(map.getZoom()) + 2));
+async function elevationAt(lng, lat, zoom) {
+  const z = zoom ?? Math.max(7, Math.min(12, Math.floor(map.getZoom()) + 2));
   const n = 2 ** z;
   const fx = (lng + 180) / 360 * n;
   const fy = (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * n;
@@ -745,6 +857,413 @@ map.on('mousemove', (e) => {
 });
 map.on('click', (e) => updateReadout(e.lngLat));   // phones: tap shows the readout
 map.getCanvasContainer().addEventListener('mouseleave', () => { if (!isPhone()) readout.hidden = true; });
+
+// ---- Explore: geoheritage sites and Holocene volcanoes ----
+// Lists in the panel; a click flies to the place and shows a card (like a tour stop, but outside the tour).
+const KIND_LABEL = { site: 'Geoheritage site', volc: 'Holocene volcano' };
+const yearText = (y) => (y == null ? 'Holocene, date unknown' : y < 0 ? `${fmt(-y)} BCE` : y < 1500 ? `AD ${y}` : `${y}`);
+
+function placeBody(kind, p) {
+  if (kind === 'site') {
+    // Photo (Wikimedia Commons, credited with author and licence as the licences require).
+    const lic = p.photo_licence_url
+      ? `<a href="${esc(p.photo_licence_url)}" target="_blank" rel="noopener">${esc(p.photo_licence)}</a>`
+      : esc(p.photo_licence);
+    const fig = p.photo
+      ? `<figure class="cap-photo"><a href="${esc(p.photo_page)}" target="_blank" rel="noopener">` +
+        `<img src="${esc(p.photo)}" width="${esc(p.photo_w)}" height="${esc(p.photo_h)}" alt="${esc(p.photo_caption)}" loading="lazy"></a>` +
+        `<figcaption>${esc(p.photo_caption)}. Photo: <a href="${esc(p.photo_page)}" target="_blank" rel="noopener">${esc(p.photo_author)}</a>, ${lic}, via Wikimedia Commons (resized).</figcaption></figure>`
+      : '';
+    return fig + `<p>${esc(p.description)}</p>`;
+  }
+  const facts = [p.type, p.rock, p.elev_m != null ? `summit ${fmt(p.elev_m)} m` : ''].filter(Boolean).map(esc).join(' · ');
+  return `<p class="cap-facts"><b>Last eruption: ${esc(yearText(p.last_eruption))}</b><br>${facts}</p>` +
+    (p.note ? `<p>${esc(p.note)}</p>` : '') +
+    `<p class="cap-src">Source: <a href="https://volcano.si.edu/volcano.cfm?vn=${esc(p.vnum)}" target="_blank" rel="noopener">Smithsonian GVP, volcano ${esc(p.vnum)}</a></p>`;
+}
+
+function showPlace(kind, p, coords) {
+  stopTour();
+  hideIntro();
+  clearMarks();
+  current = -1;
+  caption.classList.add('place');
+  caption.querySelector('.cap-kicker').textContent = kind === 'site'
+    ? (p.kind === 'Geopark' ? `UNESCO Global Geopark${p.unesco_year ? ` · designated ${p.unesco_year}` : ''}` : 'Geoheritage site')
+    : KIND_LABEL.volc;
+  caption.querySelector('h3').textContent = p.name;
+  caption.querySelector('.cap-body').innerHTML = placeBody(kind, p);
+  caption.hidden = false;
+  document.querySelectorAll('#bookmarks button').forEach((b) => b.classList.remove('active'));
+  document.querySelectorAll('.placelist button').forEach((b) =>
+    b.classList.toggle('active', b.dataset.kind === kind && b.dataset.name === p.name));
+  if (isPhone()) document.body.classList.remove('panel-visible');
+  const cam = kind === 'site'
+    ? { zoom: +p.zoom, pitch: +p.pitch, bearing: +p.bearing }
+    : /field/i.test(p.type) ? { zoom: 8, pitch: 50, bearing: 0 } : { zoom: 10.5, pitch: 50, bearing: 0 };  // lava fields vs. single edifices
+  map.flyTo({ center: coords, ...cam, essential: true });
+}
+
+function buildPlaceList(id, kind, feats) {
+  const box = document.getElementById(id);
+  for (const f of feats) {
+    const p = f.properties;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.kind = kind;
+    b.dataset.name = p.name;
+    const tag = kind === 'site' ? (p.kind === 'Geopark' ? `UNESCO ${p.unesco_year || ''}`.trim() : '') : yearText(p.last_eruption).replace('Holocene, date unknown', 'date unknown');
+    b.innerHTML = `<span>${esc(p.name)}</span>${tag ? `<small>${esc(tag)}</small>` : ''}`;
+    b.onclick = () => showPlace(kind, p, f.geometry.coordinates);
+    box.appendChild(b);
+  }
+}
+getJSON('data/geoheritage.geojson').then((g) => buildPlaceList('sites', 'site', g.features)).catch(() => {});
+getJSON('data/volcanoes.geojson').then((g) => buildPlaceList('volcs', 'volc', g.features)).catch(() => {});
+
+// ---- Plate boundaries: click for plates and relative velocity ----
+const PLATE_CLS = { spreading: 'Spreading ridge / rift', transform: 'Transform', convergent: 'Convergent (collision or subduction)' };
+function plateTip(p, lngLat) {
+  new maplibregl.Popup({ maxWidth: '260px' }).setLngLat(lngLat).setHTML(
+    `<div class="pop"><h3>${esc(p.name)}</h3><table>` +
+    `<tr><th>Type</th><td>${esc(PLATE_CLS[p.cls] || p.cls)}</td></tr>` +
+    `<tr><th>Rate</th><td>${esc(p.v_mm)} mm/yr (relative, model)</td></tr></table>` +
+    `<div class="src">Bird (2003) PB2002 plate model.</div></div>`).addTo(map);
+}
+
+// ---- Overlay toggles ----
+const OVERLAY_LAYERS = {
+  sites: ['sites', 'sites-label'], volcs: ['volcs', 'volcs-label'],
+  plates: ['plates', 'plates-conv', 'plates-casing'], sea: ['sea-depth'],
+};
+document.querySelectorAll('.toggles input[data-layer]').forEach((cb) => {
+  cb.addEventListener('change', () => {
+    for (const l of OVERLAY_LAYERS[cb.dataset.layer]) {
+      if (map.getLayer(l)) map.setLayoutProperty(l, 'visibility', cb.checked ? 'visible' : 'none');
+    }
+  });
+});
+
+// ---- Elevation profile tool ----
+// A map button opens a non-modal window at the bottom; click two points to draw a line. The profile is sampled
+// from the Terrarium tiles (true metres) and filled with the Level 1 colour of the polygon under each sample.
+const prof = { on: false, pts: [], markers: [], hover: null, data: null };
+const profEl = document.getElementById('profile');
+const PROF_N = 400;
+const SEA_COLOUR = '#9cc7e6';
+const NODATA_COLOUR = '#c9ced4';
+
+class ProfileControl {
+  onAdd() {
+    const d = document.createElement('div');
+    d.className = 'maplibregl-ctrl maplibregl-ctrl-group profile-ctrl';
+    d.innerHTML = '<button type="button" title="Elevation profile" aria-label="Elevation profile">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M2 19 L8 9 L12 14 L16 6 L22 19 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>' +
+      '<span>Profile</span></button>';
+    d.querySelector('button').onclick = () => (prof.on ? closeProfile() : openProfile());
+    this.el = d;
+    return d;
+  }
+  onRemove() { this.el.remove(); }
+}
+map.addControl(new ProfileControl(), 'top-right');
+
+const haversineKm = (a, b) => {
+  const r = Math.PI / 180, dLat = (b[1] - a[1]) * r, dLon = (b[0] - a[0]) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * r) * Math.cos(b[1] * r) * Math.sin(dLon / 2) ** 2;
+  return 12742 * Math.asin(Math.sqrt(h));
+};
+
+// Point-in-polygon lookup on the geology GeoJSON (fetched once; the browser has it cached already).
+let geoIndex = null;
+function loadGeoIndex() {
+  if (!geoIndex) {
+    geoIndex = getJSON('data/geology.geojson').then((g) => g.features.map((f) => {
+      const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+      let x0 = 180, y0 = 90, x1 = -180, y1 = -90;
+      for (const pl of polys) for (const [x, y] of pl[0]) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+      return { p: f.properties, polys, bb: [x0, y0, x1, y1] };
+    }));
+  }
+  return geoIndex;
+}
+function inRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i], [xj, yj] = ring[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function geologyAt(idx, x, y) {
+  for (const f of idx) {
+    const b = f.bb;
+    if (x < b[0] || x > b[2] || y < b[1] || y > b[3]) continue;
+    for (const pl of f.polys) {
+      if (inRing(x, y, pl[0]) && !pl.slice(1).some((h) => inRing(x, y, h))) return f.p;
+    }
+  }
+  return null;
+}
+
+function setHint(t) {
+  const h = document.getElementById('prof-hint');
+  h.textContent = t;
+  h.hidden = !t;
+}
+function openProfile() {
+  closeWins();
+  stopTour();
+  hideIntro();
+  prof.on = true;
+  profEl.hidden = false;
+  document.body.classList.add('profiling');
+  document.querySelector('.profile-ctrl button').classList.add('on');
+  if (isPhone()) document.body.classList.remove('panel-visible');
+  resetProfile();
+}
+function resetProfile() {
+  prof.pts = [];
+  prof.data = null;
+  prof.markers.forEach((m) => m.remove());
+  prof.markers = [];
+  prof.hover?.remove();
+  prof.hover = null;
+  map.getSource('profile')?.setData({ type: 'FeatureCollection', features: [] });
+  document.getElementById('prof-chart').innerHTML = '';
+  document.getElementById('prof-legend').innerHTML = '';
+  document.getElementById('prof-info').textContent = '';
+  document.getElementById('prof-new').hidden = true;
+  setHint('Click the start point on the map.');
+}
+function closeProfile() {
+  resetProfile();
+  prof.on = false;
+  profEl.hidden = true;
+  document.body.classList.remove('profiling');
+  document.querySelector('.profile-ctrl button')?.classList.remove('on');
+  map.getCanvas().style.cursor = '';
+}
+document.getElementById('prof-close').onclick = closeProfile;
+document.getElementById('prof-new').onclick = resetProfile;
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && prof.on) closeProfile(); });
+
+function endMarker(label) {
+  const el = document.createElement('div');
+  el.className = 'prof-pin';
+  el.textContent = label;
+  return el;
+}
+map.on('click', (e) => {
+  if (!prof.on) return;
+  if (prof.pts.length === 2) resetProfile();
+  const p = [e.lngLat.lng, e.lngLat.lat];
+  prof.pts.push(p);
+  prof.markers.push(new maplibregl.Marker({ element: endMarker(prof.pts.length === 1 ? 'A' : 'B'), opacityWhenCovered: '1' })
+    .setLngLat(p).addTo(map));
+  if (prof.pts.length === 1) { setHint('Now click the end point.'); return; }
+  map.getSource('profile').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: prof.pts } });
+  runProfile();
+});
+
+async function runProfile() {
+  const [a, b] = prof.pts;
+  const L = haversineKm(a, b);
+  if (L < 0.5) { resetProfile(); setHint('Line too short. Click the start point on the map.'); return; }
+  const z = L < 25 ? 12 : L < 60 ? 11 : L < 150 ? 10 : L < 350 ? 9 : L < 800 ? 8 : 7;
+  setHint(`Sampling ${PROF_N} points…`);
+  document.getElementById('prof-new').hidden = false;
+  const pts = Array.from({ length: PROF_N }, (_, i) => {
+    const t = i / (PROF_N - 1);
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, t * L];
+  });
+  const [idx, hs] = await Promise.all([loadGeoIndex(), Promise.all(pts.map(([x, y]) => elevationAt(x, y, z)))]);
+  if (prof.pts.length !== 2 || prof.pts[1] !== b) return;   // a new line was started meanwhile
+  prof.data = pts.map(([x, y, d], i) => {
+    const g = geologyAt(idx, x, y);
+    const h = hs[i] ?? 0;
+    return { x, y, d, h, cls: g ? g.level1_class : h < 0 ? 'Sea' : '', col: g ? g.level1_colour : h < 0 ? SEA_COLOUR : NODATA_COLOUR, gl: g };
+  });
+  setHint('');
+  drawProfile();
+}
+
+function niceStep(range, n) {
+  const raw = range / n, p = 10 ** Math.floor(Math.log10(raw)), m = raw / p;
+  return (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * p;
+}
+
+function drawProfile() {
+  const D = prof.data;
+  if (!D) return;
+  const box = document.getElementById('prof-chart');
+  const W = Math.max(280, box.clientWidth), H = isPhone() ? 150 : 180;
+  const m = { l: 46, r: 10, t: 10, b: 24 };
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const L = D[D.length - 1].d;
+  let lo = Math.min(...D.map((p) => p.h)), hi = Math.max(...D.map((p) => p.h));
+  const pad = Math.max(20, (hi - lo) * 0.08);
+  lo = lo < 0 ? lo - pad : Math.max(0, lo - pad);
+  hi += pad;
+  const X = (d) => m.l + d / L * pw, Y = (h) => m.t + (hi - h) / (hi - lo) * ph;
+  const ve = (L * 1000 / pw) / ((hi - lo) / ph);
+  // Coloured fill: one polygon per run of samples with the same colour.
+  let fills = '';
+  let start = 0;
+  for (let i = 1; i <= D.length; i++) {
+    if (i === D.length || D[i].col !== D[start].col) {
+      const seg = D.slice(start, Math.min(i + 1, D.length));
+      const top = seg.map((p) => `${X(p.d).toFixed(1)},${Y(p.h).toFixed(1)}`).join(' ');
+      fills += `<polygon fill="${D[start].col}" points="${X(seg[0].d).toFixed(1)},${Y(lo).toFixed(1)} ${top} ${X(seg[seg.length - 1].d).toFixed(1)},${Y(lo).toFixed(1)}"/>`;
+      start = i;
+    }
+  }
+  const line = D.map((p, i) => `${i ? 'L' : 'M'}${X(p.d).toFixed(1)},${Y(p.h).toFixed(1)}`).join('');
+  let grid = '';
+  const ys = niceStep(hi - lo, 4);
+  for (let v = Math.ceil(lo / ys) * ys; v <= hi; v += ys) {
+    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" class="g"/><text x="${m.l - 5}" y="${Y(v) + 3.5}" text-anchor="end">${fmt(Math.round(v))}</text>`;
+  }
+  const xs = niceStep(L, isPhone() ? 4 : 7);
+  for (let v = 0; v <= L + 1e-9; v += xs) {
+    if (X(v) > W - m.r - 24) break;   // keep clear of the "km" unit label
+    grid += `<text x="${X(v)}" y="${H - 6}" text-anchor="middle">${fmt(+v.toFixed(1))}</text>`;
+  }
+  const sea = lo < 0 ? `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(0)}" y2="${Y(0)}" class="sea"/>` : '';
+  box.innerHTML =
+    `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" class="prof-svg" role="img" aria-label="Elevation profile chart">` +
+    `${grid}<g class="fill">${fills}</g>${sea}<path d="${line}" class="ln"/>` +
+    `<text x="${W - m.r}" y="${H - 6}" text-anchor="end" class="unit">km</text>` +
+    `<text x="${m.l - 5}" y="${m.t - 1}" text-anchor="end" class="unit">m</text>` +
+    `<g class="hover" visibility="hidden"><line class="hl" y1="${m.t}" y2="${m.t + ph}"/><circle r="4"/></g>` +
+    `<rect x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" fill="transparent" class="hit"/></svg>`;
+  document.getElementById('prof-info').textContent =
+    `${fmt(+L.toFixed(1))} km · ${fmt(Math.round(Math.min(...D.map((p) => p.h))))} to ${fmt(Math.round(Math.max(...D.map((p) => p.h))))} m · vertical exaggeration ≈ ${ve >= 10 ? fmt(Math.round(ve)) : ve.toFixed(1)}×`;
+  // Legend: classes crossed, in order of first appearance, with their share of the line.
+  const share = new Map();
+  for (const p of D) if (p.cls) share.set(p.cls, { col: p.col, n: (share.get(p.cls)?.n || 0) + 1 });
+  document.getElementById('prof-legend').innerHTML = [...share].map(([c, v]) =>
+    `<span><i style="background:${v.col}"></i>${esc(c)} <b>${Math.round(v.n / D.length * 100)}%</b></span>`).join('');
+  // Hover / touch: crosshair on the chart, dot on the map.
+  const svg = box.querySelector('svg'), hov = svg.querySelector('.hover');
+  const move = (ev) => {
+    const r = svg.getBoundingClientRect();
+    const d = Math.min(L, Math.max(0, (ev.clientX - r.left - m.l) / pw * L));
+    const p = D[Math.round(d / L * (D.length - 1))];
+    hov.setAttribute('visibility', 'visible');
+    hov.querySelector('line').setAttribute('x1', X(p.d)); hov.querySelector('line').setAttribute('x2', X(p.d));
+    hov.querySelector('circle').setAttribute('cx', X(p.d)); hov.querySelector('circle').setAttribute('cy', Y(p.h));
+    setHint(`${fmt(+p.d.toFixed(1))} km · ${fmt(Math.round(p.h))} m · ${p.cls || 'no geology mapped'}${p.gl?.level2_label ? ` (${p.gl.level2_label})` : ''}`);
+    if (!prof.hover) {
+      const el = document.createElement('div');
+      el.className = 'prof-hover';
+      prof.hover = new maplibregl.Marker({ element: el, opacityWhenCovered: '1' });
+    }
+    prof.hover.setLngLat([p.x, p.y]).addTo(map);
+  };
+  const leave = () => { hov.setAttribute('visibility', 'hidden'); prof.hover?.remove(); setHint(''); };
+  svg.addEventListener('pointermove', move);
+  svg.addEventListener('pointerdown', move);
+  svg.addEventListener('pointerleave', leave);
+}
+window.addEventListener('resize', () => { if (prof.on && prof.data) drawProfile(); });
+
+// ---- Stratigraphic column window ----
+// Generalized outcrop succession of central/northern Arabia (top = youngest). th = approx. thickness (m),
+// res = resistance to erosion (1 weak, 2 moderate, 3 escarpment-former), lith = pattern. Edit here.
+const STRAT = [
+  { cls: 'Neogene-Quaternary surficial deposits', period: 'Neogene–Quaternary', units: [
+    { n: 'Eolian sand, sabkha and gravels', age: 'Pliocene–Holocene', lith: 'sand', th: 60, res: 1, note: 'Rub\' al Khali, Nafud and Dahna sand seas; coastal and inland sabkhas; alluvial fans' },
+  ] },
+  { cls: 'Paleogene-Neogene sedimentary', period: 'Paleogene–Neogene', units: [
+    { n: 'Hadrukh, Dam and Hofuf fms', age: 'Miocene–Pliocene', lith: 'sand', th: 270, res: 2, note: 'Continental sandstone and marl with marine limestone (Dam)' },
+    { n: 'Dammam Fm', age: 'Eocene', lith: 'lime', th: 35, res: 2, note: 'Shallow-marine limestone (Qatar, Bahrain, Al-Ahsa)' },
+    { n: 'Rus Fm', age: 'Early Eocene', lith: 'anhy', th: 60, res: 1, note: 'Anhydrite, gypsum and chalky limestone' },
+    { n: 'Umm er Radhuma Fm', age: 'Paleocene–Early Eocene', lith: 'lime', th: 240, res: 3, esc: 'Summan plateau', note: 'Dolomitic limestone; major aquifer' },
+  ] },
+  { cls: 'Cretaceous', period: 'Cretaceous', units: [
+    { n: 'Aruma Fm', age: 'Late Cretaceous (Campanian–Maastrichtian)', lith: 'lime', th: 140, res: 3, esc: 'Aruma escarpment', note: 'Shallow-marine limestone' },
+    { n: 'Wasia Fm', age: 'Mid-Cretaceous (Cenomanian)', lith: 'sand', th: 40, res: 1, note: 'Sandstone and shale; thickens to the Gulf' },
+    { n: 'Biyadh Sandstone', age: 'Early Cretaceous (Aptian–Albian)', lith: 'sand', th: 420, res: 2, note: 'Continental to marginal-marine sandstone' },
+    { n: 'Thamama Group (Sulaiy, Yamama, Buwaib)', age: 'Early Cretaceous (Berriasian–Valanginian)', lith: 'lime', th: 240, res: 2, note: 'Shelf limestones' },
+  ] },
+  { cls: 'Jurassic', period: 'Jurassic', units: [
+    { n: 'Hith Anhydrite', age: 'Late Jurassic (Tithonian)', lith: 'anhy', th: 90, res: 1, note: 'Evaporite seal of the Arab reservoirs' },
+    { n: 'Arab Fm', age: 'Late Jurassic (Kimmeridgian–Tithonian)', lith: 'mixed', th: 125, res: 2, note: 'Limestone–anhydrite cycles' },
+    { n: 'Jubaila Fm', age: 'Late Jurassic (Kimmeridgian)', lith: 'lime', th: 120, res: 3, esc: 'Jubaila escarpment', note: 'Micritic limestone' },
+    { n: 'Hanifa Fm', age: 'Late Jurassic (Oxfordian)', lith: 'lime', th: 115, res: 2, note: 'Limestone and calcareous shale' },
+    { n: 'Tuwaiq Mountain Limestone', age: 'Middle Jurassic (Callovian)', lith: 'lime', th: 200, res: 3, esc: 'Tuwaiq escarpment', note: 'Coral–stromatoporoid limestone' },
+    { n: 'Dhruma Fm', age: 'Middle Jurassic (Bajocian–Bathonian)', lith: 'mixed', th: 375, res: 2, note: 'Limestone and shale' },
+    { n: 'Marrat Fm', age: 'Early Jurassic (Toarcian)', lith: 'mixed', th: 115, res: 2, note: 'Shale, limestone and sandstone' },
+  ] },
+  { cls: 'Triassic', period: 'Triassic', units: [
+    { n: 'Minjur Sandstone', age: 'Late Triassic', lith: 'sand', th: 315, res: 2, note: 'Continental sandstone' },
+    { n: 'Jilh Fm', age: 'Middle–Late Triassic', lith: 'mixed', th: 325, res: 2, note: 'Limestone, sandstone and gypsum' },
+    { n: 'Sudair Shale', age: 'Early Triassic', lith: 'shale', th: 115, res: 1, note: 'Red and green shale' },
+  ] },
+  { cls: 'Paleozoic', period: 'Paleozoic', units: [
+    { n: 'Khuff Fm', age: 'Late Permian', lith: 'lime', th: 170, res: 3, esc: 'Khuff escarpment', note: 'Shelf limestone; major gas reservoir in the subsurface' },
+    { n: 'Unayzah Fm', age: 'Carboniferous–Early Permian', lith: 'sand', th: 100, res: 1, note: 'Glacial and fluvial sandstone; poorly exposed' },
+    { n: 'Tawil and Jauf fms', age: 'Devonian', lith: 'mixed', th: 300, res: 2, note: 'Sandstone with limestone and shale (Jauf)' },
+    { n: 'Qalibah Group (Qusaiba Shale)', age: 'Silurian', lith: 'shale', th: 600, res: 1, note: 'Graptolitic shale; main Paleozoic source rock' },
+    { n: 'Qasim Fm', age: 'Ordovician', lith: 'mixed', th: 500, res: 2, note: 'Sandstone and shale, incl. Late Ordovician glacial deposits (Sarah)' },
+    { n: 'Saq Sandstone', age: 'Cambrian–Ordovician', lith: 'sand', th: 600, res: 3, esc: 'cliffs (AlUla, Tabuk)', note: 'Fluvial to shallow-marine sandstone; major aquifer' },
+  ] },
+  { cls: 'Precambrian basement (Arabian Shield)', period: 'Precambrian', units: [
+    { n: 'Arabian Shield', age: 'Neoproterozoic (c. 870–550 Ma)', lith: 'base', th: 0, res: 3, note: 'Island-arc volcanic and sedimentary rocks, ophiolites, gneiss and granites' },
+  ] },
+];
+
+function stratSVG() {
+  const colour = {};
+  document.querySelectorAll('#legend li').forEach((li) => {
+    colour[li.dataset.cls] = li.querySelector('.swatch').style.background;
+  });
+  const W = 660, perX = 0, perW = 118, colX = perW + 8, colW = 130, txtX = colX + colW + 18;
+  const hOf = (u) => (u.lith === 'base' ? 62 : Math.max(26, Math.round(u.th * 0.11)));
+  const widthOf = (u) => colW * (u.res === 3 ? 1 : u.res === 2 ? 0.8 : 0.6);
+  let y = 8, body = '', per = '';
+  for (const g of STRAT) {
+    const y0 = y;
+    const c = colour[g.cls] || '#ccc';
+    for (const u of g.units) {
+      const h = hOf(u), w = widthOf(u);
+      const top = u.lith === 'base'
+        ? `M${colX},${y + 6} q${w / 8},-8 ${w / 4},0 t${w / 4},0 t${w / 4},0 t${w / 4},0 V${y + h} H${colX} Z`
+        : `M${colX},${y} H${colX + w} V${y + h} H${colX} Z`;
+      body += `<path d="${top}" fill="${c}" stroke="rgba(0,0,0,.45)" stroke-width="1"/>` +
+        `<path d="${top}" fill="url(#p-${u.lith})" stroke="none"/>`;
+      if (u.esc) body += `<text x="${colX + w + 4}" y="${y + 13}" class="esc">▲</text>`;
+      const mid = y + h / 2;
+      body += `<text x="${txtX}" y="${mid - (h >= 34 ? 6 : 1)}" class="un">${esc(u.n)}` +
+        (u.th ? ` <tspan class="th">~${fmt(u.th)} m</tspan>` : '') + `</text>` +
+        `<text x="${txtX}" y="${mid + (h >= 34 ? 8 : 11)}" class="ua">${esc(u.age)}${u.esc ? ` · <tspan class="escn">${esc(u.esc)}</tspan>` : ''}</text>` +
+        (h >= 48 ? `<text x="${txtX}" y="${mid + 21}" class="un2">${esc(u.note)}</text>` : '');
+      body += `<title>${esc(`${u.n} — ${u.age}. ${u.note}`)}</title>`;
+      y += h;
+    }
+    const lines = g.period.includes('–') && y - y0 >= 40 ? g.period.replace('–', '–\n').split('\n') : [g.period];
+    per += `<rect x="${perX}" y="${y0}" width="${perW}" height="${y - y0}" fill="${c}" stroke="rgba(0,0,0,.45)"/>` +
+      `<text x="${perX + perW / 2}" y="${(y0 + y) / 2 + 4 - (lines.length - 1) * 6}" text-anchor="middle" class="per">` +
+      lines.map((t, k) => `<tspan x="${perX + perW / 2}" dy="${k ? 12 : 0}">${esc(t)}</tspan>`).join('') + `</text>`;
+  }
+  const pat = `<defs>
+    <pattern id="p-sand" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="rgba(0,0,0,.45)"/><circle cx="6" cy="6" r=".9" fill="rgba(0,0,0,.45)"/></pattern>
+    <pattern id="p-lime" width="16" height="8" patternUnits="userSpaceOnUse"><path d="M0 0H16M0 8H16M4 0V8" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></pattern>
+    <pattern id="p-shale" width="12" height="5" patternUnits="userSpaceOnUse"><path d="M1 2.5H7" stroke="rgba(0,0,0,.4)" stroke-width=".9"/></pattern>
+    <pattern id="p-anhy" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 8L8 0" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></pattern>
+    <pattern id="p-mixed" width="16" height="10" patternUnits="userSpaceOnUse"><path d="M0 0H16M4 0V5M0 5H16" stroke="rgba(0,0,0,.33)" stroke-width=".8"/><path d="M8 7.5H13" stroke="rgba(0,0,0,.4)" stroke-width=".9"/></pattern>
+    <pattern id="p-base" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M3 3l3 6 3-6" fill="none" stroke="rgba(0,0,0,.4)" stroke-width=".9"/></pattern>
+  </defs>`;
+  return `<svg viewBox="0 0 ${W} ${y + 10}" class="strat-svg" role="img" aria-label="Generalized stratigraphic column of the Arabian Platform">${pat}${per}${body}</svg>` +
+    `<div class="strat-key"><span><i class="k-sand"></i>Sandstone</span><span><i class="k-lime"></i>Limestone / dolomite</span><span><i class="k-shale"></i>Shale</span>` +
+    `<span><i class="k-anhy"></i>Anhydrite / gypsum</span><span><i class="k-mixed"></i>Mixed carbonate–clastic</span><span><i class="k-base"></i>Crystalline basement</span><span>▲ escarpment-former</span></div>` +
+    `<p class="strat-vol"><i style="background:${colour['Cenozoic volcanics'] || '#D9B400'}"></i><span><b>Cenozoic volcanics</b> are not part of the layered platform succession: the Yemen traps (flood basalts and silicic volcanics, c. 31–29 Ma) cap the Yemen highlands, and the harrats (alkali basalt fields, Miocene–Holocene) lie directly on the Shield.</span></p>`;
+}
+document.querySelector('[data-open="strat-win"]').addEventListener('click', () => {
+  const box = document.getElementById('strat-col');
+  if (!box.innerHTML) box.innerHTML = stratSVG();
+});
 
 // ---- Phone panel toggle ----
 document.getElementById('panel-open').onclick = () => document.body.classList.add('panel-visible');

@@ -12,6 +12,10 @@ Arabia 3D is an interactive 3D map of the generalized bedrock geology of the Ara
 - **Geology in eight classes** (Precambrian basement to Neogene-Quaternary surficial deposits), with adjustable opacity. Each class can be switched on or off in the legend.
 - **Elevation statistics window.** **Elevation statistics** in the side panel opens a window with box plots of the terrain beneath each class and selected features (harrats, Yemen traps, eolian sand, sabkha), a table of values and short observations on the geology–relief correlation.
 - **Guided tour** of ten stops (the Arabian Shield, the Hijaz–Asir escarpment, Harrat Rahat and Khaybar, the Arabian Platform, the Tuwaiq escarpment, the Rub' al Khali, the Hajar Mountains, the Yemen highlands, Dhofar, the UAE sabkhas and Musandam). Each stop has a camera preset, a two-sentence caption, flags on key summits, area labels, outlines of the featured units and, where relevant, a traced escarpment. The two overview stops (Shield, Platform) fade every other class. **◀ Prev / Next ▶** in the caption step through the stops by hand.
+- **Elevation profile tool.** The **Profile** button (top right) opens a window at the bottom of the map: click two points and get the terrain profile in true metres, filled with the Level 1 colour of the geology underneath, with the vertical exaggeration of the chart and the share of each class. Hover (or drag a finger) along the profile to see distance, elevation and unit, with a matching dot on the map.
+- **Stratigraphic column window.** A generalized column of the Arabian Platform (Saq Sandstone to the Hofuf Formation) in the Level 1 colours, with lithology patterns, approximate thicknesses and the escarpment-forming units (Khuff, Tuwaiq Mountain, Jubaila, Aruma, Umm er Radhuma).
+- **Explore: geoheritage sites, geoparks and Holocene volcanoes.** Two lists in the side panel (19 curated sites, 17 GVP volcanoes); a click flies to the place and opens a card with a photo (14 sites, from Wikimedia Commons, credited) and a short description, or the last eruption, rock type and a link to the Smithsonian record. The two UNESCO Global Geoparks (Salma and North Riyadh, both designated in 2025) are marked with their designation year. The same points are on the map.
+- **Sea-floor depth and plate boundaries.** The sea is shaded by depth from the bathymetry in the terrain tiles, so the Red Sea axial trough and the Gulf of Aden ridge stand out. Plate boundaries (Bird 2003) are drawn as spreading, transform or convergent; click one for its relative velocity.
 - **Polygon popups:** click any polygon for its ID, class, finer age label, source age code, age range, lithology note and citation.
 - **Cursor readout:** latitude, longitude and true elevation in metres (independent of the exaggeration), bottom left. On a phone, tap the map.
 - **Terrain-adjusted contacts.** At the Hajar, Musandam, Asir, Yemen and Dhofar mountain fronts, the 1963 bedrock/alluvium contacts have been moved to the foot of the slope in the modern terrain, so the colours don't spill onto the plain in 3D. Adjusted polygons say so in their popup.
@@ -25,6 +29,10 @@ Arabia 3D is an interactive 3D map of the generalized bedrock geology of the Ara
 - **Legend:** switch classes on and off, or use **All on / All off**. On a phone, the **Legend** button opens the panel.
 - **Display:** the vertical exaggeration and geology opacity sliders. Lower the opacity to read the hillshade through the colours.
 - **Elevation statistics:** opens a window with the per-class elevation box plots and observations.
+- **Stratigraphic column:** opens the generalized column of the Arabian Platform.
+- **Explore:** pick a geoheritage site, geopark or volcano to fly there.
+- **Profile:** the button under the zoom controls; click a start and an end point. **↺ New line** starts again, **×** or Esc closes the tool.
+- **Overlays:** switch the sites, volcanoes, plate boundaries and sea-floor shading on or off.
 - **About the project:** opens a window with the author, links, data credits and the date of the last update.
 
 The map is a generalized 1:2,000,000-scale compilation for teaching and outreach. It is not for site-specific use.
@@ -93,6 +101,7 @@ Run the scripts in order from the repository root:
 | 3 | `python scripts/03_overlays.py` | `docs/data/cities.geojson`, `docs/data/roads.geojson` |
 | 4 | `python scripts/04_elevation_stats.py` | `docs/data/elev_stats.json` (elevation statistics window) |
 | 5 | `python scripts/05_units.py` | `docs/data/units.json` (legend classes, popup ages and lithology notes) |
+| 6 | `python scripts/06_places.py` | `docs/data/volcanoes.geojson` (GVP), `plates.geojson` (PB2002), `geoheritage.geojson` (from `scripts/geoheritage.csv`), photos in `docs/img/geosites/` (from `scripts/geosite_photos.csv`) |
 
 Checks and figures (the Playwright scripts need the site served on port 8000, as above):
 
@@ -110,8 +119,11 @@ When you publish changes, update the "Last updated" date in `docs/index.html` by
 
 ```
 docs/          the published site: index.html, app.js, style.css, favicons, preview.png, .nojekyll
-docs/data/     web layers: geology.geojson, cities.geojson, roads.geojson, units.json, elev_stats.json
-scripts/       01_download.py … 05_units.py, contacts.py, geology_classes.csv, polygon_overrides.csv, cities.csv
+docs/img/      geosites/*.jpg: credited Commons photos for the geoheritage cards
+docs/data/     web layers: geology.geojson, cities.geojson, roads.geojson, units.json, elev_stats.json,
+               volcanoes.geojson, plates.geojson, geoheritage.geojson
+scripts/       01_download.py … 06_places.py, contacts.py, geology_classes.csv, polygon_overrides.csv, cities.csv,
+               geoheritage.csv, geosite_photos.csv
 data/raw/      geo2bg shapefile and filtered OSM road extracts in osm/ (committed); Natural Earth zips (gitignored)
 data/interim/  clipped and intermediate layers (gitignored)
 data/geology_polygons.csv   one row per polygon: pid, unit, labels, area, location
@@ -126,6 +138,11 @@ The **code** in this repository (scripts, viewer, notebooks) is released under t
 - **Geology:** Pollastro, R.M., 1998, *Bedrock geology of the Arabian Peninsula and selected adjacent areas (geo2bg)*, digital dataset in Pollastro, R.M., Karshbaum, A.S., and Viger, R.J., 1999, *Map showing geology, oil and gas fields and geologic provinces of the Arabian Peninsula*, USGS Open-File Report 97-470-B, https://doi.org/10.3133/ofr97470B. Public domain. Derived from the USGS–ARAMCO 1:2,000,000 geologic map (1963).
 - **Terrain:** [AWS Open Data Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) (Mapzen, Terrarium encoding), built from SRTM, GMTED2010, ETOPO1 and other sources listed in the [dataset attribution](https://github.com/tilezen/joerd/blob/master/docs/attribution.md).
 - **Roads:** © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), Geofabrik extracts of 2026-11-03. `docs/data/roads.geojson` and `data/raw/osm/*.osm.pbf` are licensed under the [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/1-0/): you may copy, share and adapt them if you credit "© OpenStreetMap contributors" and share any public adapted database under the ODbL.
+- **Holocene volcanoes:** Global Volcanism Program, *Volcanoes of the World* (v. 5), Smithsonian Institution, https://doi.org/10.5479/si.GVP.VOTW5, read from the GVP web service. Free to use with citation. The short notes in the volcano cards are written for this map.
+- **Plate boundaries:** Bird, P., 2003, An updated digital model of plate boundaries, *Geochemistry, Geophysics, Geosystems* 4(3), 1027, https://doi.org/10.1029/2001GC000252; GeoJSON by Hugo Ahlenius, Nordpil ([fraxen/tectonicplates](https://github.com/fraxen/tectonicplates)), ODC-BY 1.0.
+- **Bathymetry** in the sea-floor shading comes from the same AWS Terrain Tiles (ETOPO1 and GEBCO-derived sources).
+- **Geoheritage sites:** curated for this map in `scripts/geoheritage.csv` (approximate coordinates and own descriptions). UNESCO Global Geopark names and designation years from the [UNESCO list of geoparks](https://www.unesco.org/en/iggp/geoparks).
+- **Geosite photos:** Wikimedia Commons, one per site, listed with author and licence in `scripts/geosite_photos.csv` (CC BY 2.0/4.0, CC BY-SA 3.0/4.0 or public domain). They are resized to 720 px (`docs/img/geosites/`) and credited under each photo in the viewer; the CC BY-SA photos remain under CC BY-SA. **Stratigraphic column:** generalized after Powers et al. (1966, USGS Professional Paper 560-D), Le Nindre et al. (1990) and Sharland et al. (2001).
 - **Cities and clip mask:** [Natural Earth](https://www.naturalearthdata.com/) 1:10m, public domain.
 - **Viewer library:** [MapLibre GL JS](https://maplibre.org/) 5.6.0, BSD-3-Clause. Label glyphs from `demotiles.maplibre.org`.
 
@@ -175,6 +192,10 @@ The OSM data are Geofabrik extracts (`gcc-states`, `yemen`, 2026-11-03) filtered
 `docs/` is the whole site, with no build step: `index.html`, `app.js`, `style.css` and `data/`. It uses MapLibre GL JS 5.6.0 from unpkg and no basemap (plain background, so no third-party borders). Terrain and hillshade come from the AWS Terrarium tiles; label glyphs (Noto Sans) from `demotiles.maplibre.org`. The page loads ~8.5 MB of GeoJSON uncompressed, ~2.2 MB gzipped. `docs/.nojekyll` tells GitHub Pages to serve the files as is, without a Jekyll build.
 
 - **Tour stops** are the `STOPS` array in `docs/app.js`: a `camera` preset (or `bounds` fitted to the screen, for the overview stops), caption and `marks` (`marks.dim` fades every class not listed). Flags sit on the z7 DEM maxima near each summit (heights are the commonly quoted values). Flags and area labels are DOM markers, so terrain never hides them. The dashed escarpment traces for Asir and Tuwaiq were derived from the z7 Terrarium mosaic (steepest eastward rise over ~5–7 km every 0.25° of latitude) and are approximate at the ~1–5 km level. The tour waits ~4.5 s after each 3.5 s flight.
+- **Explore cards** reuse the tour caption (`showPlace` in `docs/app.js`). Geoheritage cameras (zoom, pitch, bearing) are columns in `scripts/geoheritage.csv`; volcanic fields open at zoom 8, single edifices at 10.5.
+- **Elevation profile:** 400 samples on a straight lon/lat line, elevations decoded from Terrarium tiles at a zoom that suits the line length (z12 below 25 km down to z7 above 800 km), geology by point-in-polygon on `geology.geojson`. The chart's vertical exaggeration is computed from its own axes.
+- **Sea-floor shading** is a MapLibre `color-relief` layer on a third Terrarium source, transparent above 0 m.
+- **Stratigraphic column:** the `STRAT` array in `docs/app.js` (units, ages, thickness, lithology, resistance 1–3); edit it there.
 - **Cursor readout:** elevation is decoded from the Terrarium tile under the cursor (z7–z12, depending on zoom), so it is in true metres whatever the exaggeration.
 - **Icon:** `docs/favicon.svg` is the peninsula outline filled with concentric bands in the Level 1 colours; `favicon-32.png` and `apple-touch-icon.png` are rendered from it.
 - **Link preview:** `docs/preview.png` (1200×630) is the `og:image` card shown when the link is shared. The meta tags in `docs/index.html` use absolute GitHub Pages URLs.
