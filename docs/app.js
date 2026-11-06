@@ -468,6 +468,7 @@ function roadText(p) {
 }
 
 const PLACE_LAYERS = ['volcs', 'sites'];
+const CITY_LAYERS = ['city-dot-a', 'city-dot-b', 'city-dot-c', 'city-label-a', 'city-label-b', 'city-label-c'];
 const visibleLayers = (ls) => ls.filter((l) => map.getLayer(l) && map.getLayoutProperty(l, 'visibility') !== 'none');
 
 map.on('click', (e) => {
@@ -475,6 +476,9 @@ map.on('click', (e) => {
   const box6 = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
   const place = map.queryRenderedFeatures(box6, { layers: visibleLayers(PLACE_LAYERS) })[0];
   if (place) { showPlace(place.layer.id === 'volcs' ? 'volc' : 'site', place.properties, place.geometry.coordinates); return; }
+  const city = map.queryRenderedFeatures(box6, { layers: visibleLayers(CITY_LAYERS) })
+    .find((f) => f.properties.capital === 1 && capitals.has(f.properties.name));
+  if (city) { const f = capitals.get(city.properties.name); showPlace('cap', f.properties, f.geometry.coordinates); return; }
   const plate = map.queryRenderedFeatures(box6, { layers: visibleLayers(['plates', 'plates-conv']) })[0];
   if (plate) { plateTip(plate.properties, e.lngLat); return; }
   const geo = map.queryRenderedFeatures(e.point, { layers: ['geology-fill'] })[0];
@@ -512,6 +516,7 @@ map.on('mousemove', (e) => {
   if (prof.on) { map.getCanvas().style.cursor = 'crosshair'; return; }
   const box6 = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
   const hot = map.queryRenderedFeatures(box6, { layers: visibleLayers([...PLACE_LAYERS, 'plates', 'plates-conv']) }).length ||
+    map.queryRenderedFeatures(box6, { layers: visibleLayers(CITY_LAYERS) }).some((f) => f.properties.capital === 1) ||
     map.queryRenderedFeatures(e.point, { layers: ['geology-fill'] }).length;
   map.getCanvas().style.cursor = hot ? 'pointer' : '';
 });
@@ -525,6 +530,7 @@ const PLATFORM = ['Paleozoic', 'Triassic', 'Jurassic', 'Cretaceous', 'Paleogene-
 const STOPS = [
   {
     title: 'The Arabian Shield',
+    photo: 'shield',
     bounds: [[35.0, 13.4], [46.4, 29.6]], pitch: 35, bearing: -15,
     marks: {
       areas: [['Arabian Shield', 42.4, 23.6], ['Red Sea', 37.7, 21.2], ['Arabian Platform', 46.6, 27.4]],
@@ -535,6 +541,7 @@ const STOPS = [
   },
   {
     title: 'Hijaz–Asir escarpment',
+    photo: 'asir',
     camera: { center: [42.6, 18.8], zoom: 8, pitch: 62, bearing: 65 },
     marks: {
       flags: [['Jabal Sawda', '~3,000 m', 42.369, 18.266]],
@@ -546,6 +553,7 @@ const STOPS = [
   },
   {
     title: 'Harrat Rahat and Harrat Khaybar',
+    photo: 'harrat',
     camera: { center: [39.9, 24.4], zoom: 7, pitch: 55, bearing: 0 },
     marks: {
       areas: [['Harrat Rahat', 40.1, 23.7], ['Harrat Khaybar', 40.1, 25.6]],
@@ -556,6 +564,7 @@ const STOPS = [
   },
   {
     title: 'The Arabian Platform',
+    photo: 'platform',
     bounds: [[40.5, 17.0], [55.0, 31.0]], pitch: 45, bearing: 15,
     marks: {
       areas: [['Arabian Platform', 50.4, 23.2], ['Arabian Shield', 42.2, 22.2], ['Arabian Gulf', 51.3, 27.6]],
@@ -567,6 +576,7 @@ const STOPS = [
   },
   {
     title: 'Tuwaiq escarpment',
+    photo: 'tuwaiq',
     camera: { center: [46.4, 24.3], zoom: 8, pitch: 62, bearing: 90 },
     marks: {
       areas: [['Arabian Shield', 45.05, 23.75], ['Jurassic outcrop', 46.75, 23.6]],
@@ -578,6 +588,7 @@ const STOPS = [
   },
   {
     title: 'Rub\' al Khali',
+    photo: 'rub',
     camera: { center: [51.0, 21.0], zoom: 6.5, pitch: 50, bearing: 0 },
     marks: {
       areas: [['Rub\' al Khali', 50.5, 20.4]],
@@ -587,6 +598,7 @@ const STOPS = [
   },
   {
     title: 'Hajar Mountains',
+    photo: 'hajar',
     camera: { center: [57.5, 23.1], zoom: 8, pitch: 60, bearing: 180 },
     marks: {
       flags: [['Jabal Shams', '~3,000 m', 57.277, 23.216]],
@@ -600,6 +612,7 @@ const STOPS = [
   },
   {
     title: 'Yemen highlands and traps',
+    photo: 'yemen',
     camera: { center: [44.2, 15.0], zoom: 7.5, pitch: 60, bearing: 90 },
     marks: {
       flags: [['Jabal an-Nabi Shu\'ayb', '~3,660 m', 43.973, 15.279, 'left', 46]],
@@ -611,6 +624,7 @@ const STOPS = [
   },
   {
     title: 'Dhofar',
+    photo: 'dhofar',
     camera: { center: [54.0, 17.5], zoom: 8.2, pitch: 58, bearing: 0 },
     marks: {
       flags: [['Jabal Samhan', '', 54.849, 17.178]],
@@ -621,6 +635,7 @@ const STOPS = [
   },
   {
     title: 'UAE coastal sabkhas and Musandam',
+    photo: 'uae',
     camera: { center: [55.4, 25.1], zoom: 7.5, pitch: 55, bearing: 40 },
     marks: {
       flags: [['Jebel Harim', '~2,090 m', 56.234, 25.973]],
@@ -644,7 +659,8 @@ function showCaption(i) {
   caption.classList.remove('place');
   caption.querySelector('.cap-kicker').textContent = 'Tour';
   caption.querySelector('h3').textContent = `${i + 1}. ${st.title}`;
-  caption.querySelector('.cap-body').textContent = st.caption;
+  caption.dataset.kind = 'tour';
+  caption.querySelector('.cap-body').innerHTML = photoFigure(tourPhotos[`tour_${st.photo}`]) + `<p>${esc(st.caption)}</p>`;
   document.querySelectorAll('.placelist button').forEach((b) => b.classList.remove('active'));
   document.getElementById('cap-count').textContent = `${i + 1} / ${STOPS.length}`;
   document.getElementById('cap-prev').disabled = i === 0;
@@ -750,7 +766,8 @@ function startTour() {
   document.getElementById('tour-play').disabled = true;
   document.getElementById('tour-stop').disabled = false;
   document.getElementById('cap-stop').hidden = false;
-  document.querySelector('details.tour').open = true;  // keep Stop/Home in reach in the panel too
+  document.querySelector('details.explore').open = true;  // keep Stop/Home in reach in the panel too
+  document.querySelector('details.tour').open = true;
   tourStep();
 }
 
@@ -860,25 +877,32 @@ map.getCanvasContainer().addEventListener('mouseleave', () => { if (!isPhone()) 
 
 // ---- Explore: geoheritage sites and Holocene volcanoes ----
 // Lists in the panel; a click flies to the place and shows a card (like a tour stop, but outside the tour).
-const KIND_LABEL = { site: 'Geoheritage site', volc: 'Holocene volcano' };
+const KIND_LABEL = { site: 'Geoheritage site', volc: 'Holocene volcano', cap: 'Capital' };
 const yearText = (y) => (y == null ? 'Holocene, date unknown' : y < 0 ? `${fmt(-y)} BCE` : y < 1500 ? `AD ${y}` : `${y}`);
 
+// Photo (Wikimedia Commons, credited with author and licence as the licences require).
+function photoFigure(p) {
+  if (!p || !p.photo) return '';
+  const lic = p.photo_licence_url
+    ? `<a href="${esc(p.photo_licence_url)}" target="_blank" rel="noopener">${esc(p.photo_licence)}</a>`
+    : esc(p.photo_licence);
+  return `<figure class="cap-photo"><a href="${esc(p.photo_page)}" target="_blank" rel="noopener">` +
+    `<img src="${esc(p.photo)}" width="${esc(p.photo_w)}" height="${esc(p.photo_h)}" alt="${esc(p.photo_caption)}"></a>` +
+    `<figcaption>${esc(p.photo_caption)}. Photo: <a href="${esc(p.photo_page)}" target="_blank" rel="noopener">${esc(p.photo_author)}</a>, ${lic}, via Wikimedia Commons (resized).</figcaption></figure>`;
+}
+
+const VOLC_MAPPED = {
+  moved: (p) => `Map point moved ${fmt(p.moved_km)} km from the GVP location onto the mapped lava field (the 1:2,000,000 geology is generalized).`,
+  island: () => 'Red Sea island: not mapped as volcanic rock in the generalized geology.',
+  not_mapped: () => 'This small field is not mapped separately in the 1:2,000,000 geology; the point is the GVP location.',
+};
+
 function placeBody(kind, p) {
-  if (kind === 'site') {
-    // Photo (Wikimedia Commons, credited with author and licence as the licences require).
-    const lic = p.photo_licence_url
-      ? `<a href="${esc(p.photo_licence_url)}" target="_blank" rel="noopener">${esc(p.photo_licence)}</a>`
-      : esc(p.photo_licence);
-    const fig = p.photo
-      ? `<figure class="cap-photo"><a href="${esc(p.photo_page)}" target="_blank" rel="noopener">` +
-        `<img src="${esc(p.photo)}" width="${esc(p.photo_w)}" height="${esc(p.photo_h)}" alt="${esc(p.photo_caption)}" loading="lazy"></a>` +
-        `<figcaption>${esc(p.photo_caption)}. Photo: <a href="${esc(p.photo_page)}" target="_blank" rel="noopener">${esc(p.photo_author)}</a>, ${lic}, via Wikimedia Commons (resized).</figcaption></figure>`
-      : '';
-    return fig + `<p>${esc(p.description)}</p>`;
-  }
+  if (kind === 'site' || kind === 'cap') return photoFigure(p) + `<p>${esc(p.description)}</p>`;
   const facts = [p.type, p.rock, p.elev_m != null ? `summit ${fmt(p.elev_m)} m` : ''].filter(Boolean).map(esc).join(' · ');
   return `<p class="cap-facts"><b>Last eruption: ${esc(yearText(p.last_eruption))}</b><br>${facts}</p>` +
     (p.note ? `<p>${esc(p.note)}</p>` : '') +
+    (VOLC_MAPPED[p.mapped] ? `<p class="cap-src">${esc(VOLC_MAPPED[p.mapped](p))}</p>` : '') +
     `<p class="cap-src">Source: <a href="https://volcano.si.edu/volcano.cfm?vn=${esc(p.vnum)}" target="_blank" rel="noopener">Smithsonian GVP, volcano ${esc(p.vnum)}</a></p>`;
 }
 
@@ -890,7 +914,8 @@ function showPlace(kind, p, coords) {
   caption.classList.add('place');
   caption.querySelector('.cap-kicker').textContent = kind === 'site'
     ? (p.kind === 'Geopark' ? `UNESCO Global Geopark${p.unesco_year ? ` · designated ${p.unesco_year}` : ''}` : 'Geoheritage site')
-    : KIND_LABEL.volc;
+    : kind === 'cap' ? `Capital · ${p.country}` : KIND_LABEL.volc;
+  caption.dataset.kind = kind;
   caption.querySelector('h3').textContent = p.name;
   caption.querySelector('.cap-body').innerHTML = placeBody(kind, p);
   caption.hidden = false;
@@ -898,7 +923,7 @@ function showPlace(kind, p, coords) {
   document.querySelectorAll('.placelist button').forEach((b) =>
     b.classList.toggle('active', b.dataset.kind === kind && b.dataset.name === p.name));
   if (isPhone()) document.body.classList.remove('panel-visible');
-  const cam = kind === 'site'
+  const cam = kind !== 'volc'
     ? { zoom: +p.zoom, pitch: +p.pitch, bearing: +p.bearing }
     : /field/i.test(p.type) ? { zoom: 8, pitch: 50, bearing: 0 } : { zoom: 10.5, pitch: 50, bearing: 0 };  // lava fields vs. single edifices
   map.flyTo({ center: coords, ...cam, essential: true });
@@ -912,7 +937,7 @@ function buildPlaceList(id, kind, feats) {
     b.type = 'button';
     b.dataset.kind = kind;
     b.dataset.name = p.name;
-    const tag = kind === 'site' ? (p.kind === 'Geopark' ? `UNESCO ${p.unesco_year || ''}`.trim() : '') : yearText(p.last_eruption).replace('Holocene, date unknown', 'date unknown');
+    const tag = kind === 'cap' ? p.country : kind === 'site' ? (p.kind === 'Geopark' ? `UNESCO ${p.unesco_year || ''}`.trim() : '') : yearText(p.last_eruption).replace('Holocene, date unknown', 'date unknown');
     b.innerHTML = `<span>${esc(p.name)}</span>${tag ? `<small>${esc(tag)}</small>` : ''}`;
     b.onclick = () => showPlace(kind, p, f.geometry.coordinates);
     box.appendChild(b);
@@ -920,6 +945,15 @@ function buildPlaceList(id, kind, feats) {
 }
 getJSON('data/geoheritage.geojson').then((g) => buildPlaceList('sites', 'site', g.features)).catch(() => {});
 getJSON('data/volcanoes.geojson').then((g) => buildPlaceList('volcs', 'volc', g.features)).catch(() => {});
+// Capitals: cards open from the list or from the capital squares on the map.
+const capitals = new Map();
+getJSON('data/capitals.geojson').then((g) => {
+  g.features.forEach((f) => capitals.set(f.properties.name, f));
+  buildPlaceList('caps', 'cap', g.features);
+}).catch(() => {});
+// Tour-stop photos (credits in data/photos.json, keyed by STOPS[i].photo).
+let tourPhotos = {};
+getJSON('data/photos.json').then((j) => { tourPhotos = j; if (current >= 0) showCaption(current); }).catch(() => {});
 
 // ---- Plate boundaries: click for plates and relative velocity ----
 const PLATE_CLS = { spreading: 'Spreading ridge / rift', transform: 'Transform', convergent: 'Convergent (collision or subduction)' };

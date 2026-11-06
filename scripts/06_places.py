@@ -14,11 +14,15 @@
 3. Geoheritage sites and geoparks: curated in scripts/geoheritage.csv (coordinates approximate, ~1 km;
    see the `verify` column). Each site also gets the Level 1 class of the polygon it falls in. `unesco_year`
    is the UNESCO Global Geopark designation year (UNESCO IGGP pages give the year only).
-   Photos: scripts/geosite_photos.csv lists one Wikimedia Commons file per site with author and licence
-   (CC BY / CC BY-SA / public domain). Each is fetched once (Special:FilePath, 800 px), resized to 720 px
-   and saved as docs/img/geosites/<id>.jpg; the credit is shown under the photo in the viewer.
+4. Capitals: the seven national capitals, curated in scripts/capitals.csv (description, camera); the
+   coordinates follow the Natural Earth points in docs/data/cities.geojson.
+5. Photos: scripts/photos.csv lists one Wikimedia Commons file per geosite id, capital id (cap_<id>) and
+   tour stop (tour_<key>, matched by `photo` in STOPS in docs/app.js), with author and licence (CC BY /
+   CC BY-SA / public domain only). Each is fetched once (Special:FilePath, 800 px), resized to 720 px and
+   saved as docs/img/photos/<id>.jpg; the credit is shown under the photo in the viewer.
 
-Outputs: docs/data/volcanoes.geojson, docs/data/plates.geojson, docs/data/geoheritage.geojson
+Outputs: docs/data/volcanoes.geojson, plates.geojson, geoheritage.geojson, capitals.geojson,
+docs/data/photos.json (photo credits for the tour stops) and docs/img/photos/*.jpg
 Downloads are cached in data/interim/places/.
 """
 import csv
@@ -33,8 +37,9 @@ ROOT = Path(__file__).resolve().parents[1]
 CACHE = ROOT / "data" / "interim" / "places"
 OUT = ROOT / "docs" / "data"
 SITES = ROOT / "scripts" / "geoheritage.csv"
-PHOTOS = ROOT / "scripts" / "geosite_photos.csv"
-IMG = ROOT / "docs" / "img" / "geosites"
+PHOTOS = ROOT / "scripts" / "photos.csv"
+CAPITALS = ROOT / "scripts" / "capitals.csv"
+IMG = ROOT / "docs" / "img" / "photos"
 UA = "arabia3d-geology-map/0.1 (https://github.com/kevinalexandr19/arabian-geology-3d)"
 LICENCE_URL = {
     "CC BY 2.0": "https://creativecommons.org/licenses/by/2.0/",
@@ -97,23 +102,59 @@ def display_name(n):
     return n
 
 
+RED_SEA_ISLANDS = {"Tair, Jebel at", "Zubair Group", "Zukur", "Hanish"}  # no or surficial polygon in geo2bg
+SNAP_KM = 5  # GVP points this close to a mapped Cenozoic-volcanics polygon are moved onto it
+
+
 def volcanoes():
+    """GVP Holocene volcanoes. Where the GVP point falls just outside the mapped (1:2M) lava field, the map
+    point is moved onto the nearest Cenozoic volcanics polygon (<= SNAP_KM) so the dot sits on the field;
+    the GVP coordinates are kept in gvp_lon/gvp_lat and the card says so. `mapped` records what lies under
+    the final point: volcanics, moved, island (no or surficial polygon) or not_mapped (field not in geo2bg)."""
+    from shapely.ops import nearest_points
+
     gj = get(GVP_WFS, "gvp_votw.json")
+    geo = json.loads((OUT / "geology.geojson").read_text())["features"]
+    polys = [shape(f["geometry"]) for f in geo]
+    tree = STRtree(polys)
+    vidx = [i for i, f in enumerate(geo) if f["properties"]["level1_class"] == "Cenozoic volcanics"]
+    vtree = STRtree([polys[i] for i in vidx])
     feats = []
     for f in gj["features"]:
         p = f["properties"]
         if p["Country"] not in COUNTRIES:
             continue
         lon, lat = f["geometry"]["coordinates"][:2]
+        pt = Point(lon, lat)
+        under = [i for i in tree.query(pt) if polys[i].contains(pt)]
+        cls = geo[under[0]]["properties"]["level1_class"] if under else None
+        j = vidx[vtree.nearest(pt)]
+        dist_km = polys[j].distance(pt) * 111.2  # degrees -> km (upper bound; fine for a 5 km test)
+        mx, my, moved = lon, lat, 0.0
+        if cls == "Cenozoic volcanics":
+            mapped = "volcanics"
+        elif p["Volcano_Name"] in RED_SEA_ISLANDS:
+            mapped = "island"
+        elif dist_km <= SNAP_KM:
+            # nearest point on the polygon, pulled ~300 m inside so it renders on the fill
+            inner = polys[j].buffer(-0.003)
+            target = inner if not inner.is_empty else polys[j]
+            q = nearest_points(target, pt)[0]
+            mx, my, mapped = q.x, q.y, "moved"
+            moved = round(Point(mx, my).distance(pt) * 111.2, 1)
+        else:
+            mapped = "not_mapped"
         feats.append({
             "type": "Feature",
-            "geometry": {"type": "Point", "coordinates": [round(lon, 4), round(lat, 4)]},
+            "geometry": {"type": "Point", "coordinates": [round(mx, 4), round(my, 4)]},
             "properties": {
                 "vnum": p["Volcano_Number"], "name": display_name(p["Volcano_Name"]),
                 "type": p["Primary_Volcano_Type"], "landform": p["Volcanic_Landform"],
                 "rock": p["Major_Rock_Type"], "elev_m": p["Elevation"],
                 "last_eruption": p["Last_Eruption_Year"], "evidence": p["Evidence_Category"],
                 "note": VOLCANO_NOTES.get(p["Volcano_Name"], ""),
+                "mapped": mapped, "moved_km": moved, "gvp_lon": round(lon, 4), "gvp_lat": round(lat, 4),
+                "under": cls or "",
             },
         })
     # North to south, as listed in the panel.
@@ -153,7 +194,7 @@ def plates():
 
 
 def photos():
-    """Commons photo per site -> docs/img/geosites/<id>.jpg (720 px wide, EXIF stripped) + credit fields."""
+    """Commons photo per id -> docs/img/photos/<id>.jpg (720 px wide, EXIF stripped) + credit fields."""
     from io import BytesIO
     from urllib.parse import quote
 
@@ -180,7 +221,7 @@ def photos():
                 im = im.resize((720, round(im.height * 720 / im.width)), Image.LANCZOS)
             im.save(dst, "JPEG", quality=80, optimize=True, progressive=True)
             out[r["id"]] = {
-                "photo": f"img/geosites/{r['id']}.jpg", "photo_w": im.width, "photo_h": im.height,
+                "photo": f"img/photos/{r['id']}.jpg", "photo_w": im.width, "photo_h": im.height,
                 "photo_caption": r["caption"], "photo_author": r["author"], "photo_licence": r["licence"],
                 "photo_licence_url": LICENCE_URL[r["licence"]],
                 "photo_page": "https://commons.wikimedia.org/wiki/File:" + quote(name),
@@ -188,8 +229,7 @@ def photos():
     return out
 
 
-def sites():
-    pics = photos()
+def sites(pics):
     geo = json.loads((OUT / "geology.geojson").read_text())["features"]
     polys = [shape(f["geometry"]) for f in geo]
     tree = STRtree(polys)
@@ -212,6 +252,26 @@ def sites():
     return feats
 
 
+def capitals(pics):
+    cities = {f["properties"]["name"]: f["geometry"]["coordinates"]
+              for f in json.loads((OUT / "cities.geojson").read_text())["features"] if f["properties"].get("capital") == 1}
+    feats = []
+    with CAPITALS.open(newline="", encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            lon, lat = cities.get(r["name"], (float(r["lon"]), float(r["lat"])))
+            feats.append({
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [lon, lat]},
+                "properties": {"id": r["id"], "name": r["name"], "country": r["country"], "description": r["description"],
+                               "zoom": float(r["zoom"]), "pitch": float(r["pitch"]), "bearing": float(r["bearing"]),
+                               **pics.get(f"cap_{r['id']}", {})},
+            })
+    missing = set(cities) - {f["properties"]["name"] for f in feats}
+    if missing:
+        raise SystemExit(f"capitals.csv has no row for: {sorted(missing)}")
+    return feats
+
+
 def write(name, feats):
     path = OUT / name
     path.write_text(json.dumps({"type": "FeatureCollection", "features": feats}, ensure_ascii=False,
@@ -224,11 +284,19 @@ if __name__ == "__main__":
     write("volcanoes.geojson", v)
     for f in v:
         p = f["properties"]
-        print(f"  {p['name']:<28} last eruption {p['last_eruption']}  ({p['type']})")
+        print(f"  {p['name']:<30} last eruption {str(p['last_eruption']):<6} {p['mapped']:<10}"
+              f" {p['moved_km'] or '':<5} under GVP point: {p['under'] or '-'}")
     pl = plates()
     write("plates.geojson", pl)
-    s = sites()
+    pics = photos()
+    s = sites(pics)
     write("geoheritage.geojson", s)
+    c = capitals(pics)
+    write("capitals.geojson", c)
+    tour = {k: v for k, v in pics.items() if k.startswith("tour_")}
+    (OUT / "photos.json").write_text(json.dumps(tour, ensure_ascii=False, indent=1))
+    print(f"photos: {len(pics)} ({len(tour)} tour stops); capitals with photo: "
+          f"{sum('photo' in f['properties'] for f in c)}/{len(c)}")
     for f in s:
         p = f["properties"]
         print(f"  {p['name']:<52} {p['kind']:<8} on: {p['level1_class'] or '(no geology polygon)':<38}"

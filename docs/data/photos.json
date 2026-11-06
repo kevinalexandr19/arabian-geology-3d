@@ -1,0 +1,102 @@
+{
+ "tour_shield": {
+  "photo": "img/photos/tour_shield.jpg",
+  "photo_w": 720,
+  "photo_h": 540,
+  "photo_caption": "Rugged Precambrian basement of the Sarawat mountains on the Shield",
+  "photo_author": "Richard Mortel",
+  "photo_licence": "CC BY 2.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by/2.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Sarawat_Mountains%2C_Asir_Region%2C_Saudi_Arabia_%286%29.jpg"
+ },
+ "tour_asir": {
+  "photo": "img/photos/tour_asir.jpg",
+  "photo_w": 720,
+  "photo_h": 540,
+  "photo_caption": "A road descending the Asir escarpment",
+  "photo_author": "Shijan Kaakkara",
+  "photo_licence": "CC BY-SA 4.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Asir_Mountains-2.jpg"
+ },
+ "tour_harrat": {
+  "photo": "img/photos/tour_harrat.jpg",
+  "photo_w": 720,
+  "photo_h": 800,
+  "photo_caption": "Harrat Khaybar from space: dark basalt flows, cones and the pale Jabal Abyad dome",
+  "photo_author": "NASA Earth Observatory (Lauren Dauphin), Landsat",
+  "photo_licence": "Public domain",
+  "photo_licence_url": "",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:%D8%AD%D8%B1%D8%A9_%D8%AE%D9%8A%D8%A8%D8%B1.jpg"
+ },
+ "tour_platform": {
+  "photo": "img/photos/tour_platform.jpg",
+  "photo_w": 720,
+  "photo_h": 540,
+  "photo_caption": "Flat-lying Jurassic limestones of the platform cover along the Tuwaiq escarpment",
+  "photo_author": "Peter Dowley",
+  "photo_licence": "CC BY 2.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by/2.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Along_the_Ridge_%282993423284%29.jpg"
+ },
+ "tour_tuwaiq": {
+  "photo": "img/photos/tour_tuwaiq.jpg",
+  "photo_w": 720,
+  "photo_h": 440,
+  "photo_caption": "Cliffs of the Tuwaiq escarpment",
+  "photo_author": "saudipics",
+  "photo_licence": "CC BY-SA 4.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Tuwaiq.jpg"
+ },
+ "tour_rub": {
+  "photo": "img/photos/tour_rub.jpg",
+  "photo_w": 720,
+  "photo_h": 540,
+  "photo_caption": "Linear dunes in the Rub' al Khali (near Shisr, Oman)",
+  "photo_author": "Krzysztof Ziarnek, Kenraiz",
+  "photo_licence": "CC BY-SA 4.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Ar-Rub%27_Al-Khali_%28Oman%29_kz03.jpg"
+ },
+ "tour_hajar": {
+  "photo": "img/photos/tour_hajar.jpg",
+  "photo_w": 720,
+  "photo_h": 478,
+  "photo_caption": "Cliffs of shelf carbonates above Wadi Muaydin, Jebel Akhdar",
+  "photo_author": "albinfo",
+  "photo_licence": "CC BY-SA 4.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Jebel_Akhdar_%E2%80%93_rocks_at_sunrise.jpg"
+ },
+ "tour_yemen": {
+  "photo": "img/photos/tour_yemen.jpg",
+  "photo_w": 720,
+  "photo_h": 470,
+  "photo_caption": "The Yemen plateau between Kawkaban and At Tawilah, capped by volcanic rocks",
+  "photo_author": "Bernard Gagnon",
+  "photo_licence": "CC BY-SA 3.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Yemen_landscape_03.jpg"
+ },
+ "tour_dhofar": {
+  "photo": "img/photos/tour_dhofar.jpg",
+  "photo_w": 720,
+  "photo_h": 480,
+  "photo_caption": "View from the Jabal Samhan plateau in Dhofar",
+  "photo_author": "Francesco Bini",
+  "photo_licence": "CC BY-SA 4.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Dhofar%2C_Jabal_Samhan%2C_view_point_10.jpg"
+ },
+ "tour_uae": {
+  "photo": "img/photos/tour_uae.jpg",
+  "photo_w": 720,
+  "photo_h": 540,
+  "photo_caption": "A drowned valley (khawr) in the folded carbonates of Musandam",
+  "photo_author": "Jc8136",
+  "photo_licence": "CC BY-SA 3.0",
+  "photo_licence_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "photo_page": "https://commons.wikimedia.org/wiki/File:Musandam_fjord_view.JPG"
+ }
+}

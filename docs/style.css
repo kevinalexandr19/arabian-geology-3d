@@ -533,3 +533,44 @@ body.profiling .readout, body.profiling .intro { display: none; }
   .caption.place { max-height: 50%; }
   .cap-photo img { max-height: 115px; }
 }
+
+/* ---- Analysis tool buttons (top of the panel) ---- */
+.tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 12px; }
+.tool {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font: inherit; font-size: 11.5px; font-weight: 600; color: var(--ink); line-height: 1.2; text-align: center;
+  padding: 9px 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: #f6f8fa; cursor: pointer;
+}
+.tool:hover { background: #eef4fb; border-color: #c4d6ea; color: var(--accent); }
+.tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tool svg { width: 34px; height: 34px; }
+.tool svg rect { fill: #9fb4c8; }
+.tool svg .ridge { stroke: #E8456B; }
+.tool svg .l1 { fill: #F5EFAA; stroke: rgba(0,0,0,.35); stroke-width: .6; }
+.tool svg .l2 { fill: #EE8E4A; stroke: rgba(0,0,0,.35); stroke-width: .6; }
+.tool svg .l3 { fill: #6DBE45; stroke: rgba(0,0,0,.35); stroke-width: .6; }
+.tool svg .l4 { fill: #2BA6C9; stroke: rgba(0,0,0,.35); stroke-width: .6; }
+.tool svg .l5 { fill: #E8456B; stroke: rgba(0,0,0,.35); stroke-width: .6; }
+
+/* ---- Nested sections inside Explore ---- */
+.subsec { border-top: 1px dashed var(--line); padding: 0 0 4px; }
+.subsec:first-of-type { border-top: 0; }
+.subsec > summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: 7px; padding: 8px 0 6px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink);
+}
+.subsec > summary::-webkit-details-marker { display: none; }
+.subsec > summary::after { content: "▸"; margin-left: auto; font-size: 11px; color: var(--muted); transition: transform .15s; }
+.subsec[open] > summary::after { transform: rotate(90deg); }
+.subsec > summary:hover { color: var(--accent); }
+.subsec .placelist { margin-bottom: 4px; }
+.sw-pt.cap { background: #1d1d1d; border-radius: 1px; }
+.explore > .hint { margin-top: 6px; }
+@media (max-width: 700px) {
+  .caption[data-kind="tour"] { max-height: 50%; }
+}
+@media (max-width: 700px) {
+  /* Tall cards scroll; keep Prev / Next / Home in view at the bottom. */
+  .caption-actions { position: sticky; bottom: -10px; margin: 6px -28px -10px -12px; padding: 6px 28px 8px 12px; background: #fff; border-top: 1px solid var(--line); }
+}
